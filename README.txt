@@ -38,7 +38,8 @@ Implementation
 			- must have < 5000 followers
 			- must have < 2000 following
 			- must have followers-per-post ratio below say 50 (e.g. account with 100 posts has max 5000 followers)
-			- must not have these words in bio: "click, bio, link, webcam, cam, gain, snapchat, followers, kik, followers"
+			- must not have these words in bio: "click, bio, link, webcam, cam, gain, snapchat, follow, followers, kik"
+			- must not have these words in username: "salon, sex, rental, free, follow, follower"
 			- randomly skip this acc with 10% chance (more human like behaviour)
 		- scrape for relevance:
 			- get hashtags from their posts
