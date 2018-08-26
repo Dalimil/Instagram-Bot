@@ -22,7 +22,7 @@ const updateCsrfToken = () => {
     cookie.key === 'csrftoken').value;
 
   headers['X-CSRFToken'] = csrfToken;
-  console.log('Updated x-csrftoken', csrfToken);
+  // console.log('Updated x-csrftoken', csrfToken);
 };
 
 const updateInstagramAjaxToken = (body = '') => {
@@ -39,6 +39,7 @@ const updateInstagramAjaxToken = (body = '') => {
 const Api = {
   // Generic GET request
   getEndpoint: async (url) => {
+    console.info('GET', url);
     const res = await request.get({
       jar: cookieJar,
       url,
@@ -52,6 +53,7 @@ const Api = {
   
   // Generic POST request
   postEndpoint: async (url, data = {}) => {
+    console.info('POST', url);
     const res = await request.post({
       jar: cookieJar,
       url,
@@ -99,24 +101,24 @@ const Api = {
   },
 
   /* GET api methods */
-  getUser: async (username) => {
-    return Api.getEndpoint(Url.getUsernameUrl(username));
+  getUser(username) {
+    return Api.getEndpoint(Url.getUsernameUrl(username))
+      .then(JSON.parse);
   },
 
-  /* getUserDetail: async (userId) => {
-    return Api.getEndpoint(Url.getUserDetailUrl(userId));
-  }, */
-
-  getHashtag: async (hashtag) => {
-    return Api.getEndpoint(Url.getHashtagUrl(hashtag));
+  getHashtag(hashtag) {
+    return Api.getEndpoint(Url.getHashtagUrl(hashtag))
+      .then(JSON.parse);
   },
 
   getLocation: async (locationId) => {
-    return Api.getEndpoint(Url.getLocationUrl(locationId));
+    return Api.getEndpoint(Url.getLocationUrl(locationId))
+      .then(JSON.parse);
   },
 
   getMediaDetail: async (mediaId) => {
-    return Api.getEndpoint(Url.getMediaDetailUrl(mediaId));
+    return Api.getEndpoint(Url.getMediaDetailUrl(mediaId))
+      .then(JSON.parse);
   },
 
   /* POST api methods */
