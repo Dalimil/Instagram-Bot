@@ -7,13 +7,11 @@ const headers = {
   'Accept-Language': 'en-US,en;q=0.9',
   'Accept-Encoding': 'gzip, deflate, br',
   'Connection': 'keep-alive',
-  'Content-Length': '0',
   'Host': 'www.instagram.com',
   'Origin': 'https://www.instagram.com',
   'Referer': 'https://www.instagram.com/',
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
   'X-Instagram-AJAX': '1',
-  'Content-Type': 'application/x-www-form-urlencoded',
   'X-Requested-With': 'XMLHttpRequest',
 };
 const waiting = (ms) => new Promise(resolve => setTimeout(resolve, (ms * 0.7) + (0.3 * ms * Math.random())));
@@ -63,7 +61,7 @@ const Auth = {
       },
       resolveWithFullResponse: true,
     }).catch(err => console.error(err));
-    
+
     updateCsrfToken();
     console.log(login.body);
     const extraCookies = ['ig_vw=1536', 'ig_pr=1.25', 'ig_vh=772', 'ig_or=landscape-primary'];
@@ -79,8 +77,8 @@ const Auth = {
         headers,
         gzip: true,
       });
-      //console.log(body);
-      console.log(body.includes(username.toLowerCase()));
+      // console.log(body);
+      console.log('Authenticated:', body.includes(username.toLowerCase()));
       await waiting(4000);
     } else {
       console.error('Login error. Connection error.')
@@ -89,15 +87,16 @@ const Auth = {
 
   logout: async() => {
     console.log('Logging out...');
-    const logout = await request.post({
+    await request.post({
       jar: cookieJar,
       url: Url.logoutUrl,
       headers,
       form: {
         'csrfmiddlewaretoken': headers['X-CSRFToken'],
       },
-    });
-    console.log(logout);
+      resolveWithFullResponse: true,
+    }).catch(e => {});
+    
     await waiting(4000);
   },
 
