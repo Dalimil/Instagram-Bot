@@ -26,7 +26,8 @@ Requirements
 
 Implementation
 --------------
-- We need to drive a browser instance to do this -> Webdriver.IO
+- We need to drive a browser instance to do this (Webdriver.IO)
+	- OR: come up with an API script-only solution (<- we chose this, thanks to discovery of existing work)
 - Instagram account login
 - BFS Algorithm with time delays between each step
 - Algorithm A
@@ -35,11 +36,11 @@ Implementation
 		- scrape for quality:
 			- must be public
 			- must have > 30 posts
-			- must have < 5000 followers
+			- must have < 3000 followers
 			- must have < 2000 following
-			- must have followers-per-post ratio below say 50 (e.g. account with 100 posts has max 5000 followers)
+			- must have followers-per-post ratio below say 80 (e.g. account with 100 posts has max 5000 followers)
 			- must not have these words in bio: "click, bio, link, webcam, cam, gain, snapchat, follow, followers, kik"
-			- must not have these words in username: "salon, sex, rental, free, follow, follower"
+			- must not have these words in name or username: "salon, sex, rental, free, follow, follower"
 			- randomly skip this acc with 10% chance (more human like behaviour)
 		- scrape for relevance:
 			- get hashtags from their posts
