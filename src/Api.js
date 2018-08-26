@@ -31,86 +31,110 @@ const updateInstagramAjaxToken = (body = '') => {
   if (!!xInstagramAjaxToken && xInstagramAjaxToken.length > 1) {
     headers['X-Instagram-AJAX'] = xInstagramAjaxToken[1];
   }
-  console.log('Updated x-instagram-ajax', headers['X-Instagram-AJAX']);
+  // console.log('Updated x-instagram-ajax', headers['X-Instagram-AJAX']);
 }
 
 // HTTP Error 400 = Instagram ban -> wait 2 hours
 
-const Auth = {
+const Api = {
+  // Generic GET request
+  getEndpoint: async (url) => {
+    const res = await request.get({
+      jar: cookieJar,
+      url,
+      headers,
+      gzip: true,
+    }).catch(err => console.error(err.name, err.message));
+
+    await waiting(4000);
+    return res;
+  },
+  
+  // Generic POST request
+  postEndpoint: async (url, data = {}) => {
+    const res = await request.post({
+      jar: cookieJar,
+      url,
+      headers,
+      form: data,
+      resolveWithFullResponse: true,
+    }).catch(err => console.error(err.name, err.message));
+
+    await waiting(4000);
+    return res;
+  },
+
   // Should be called first
   login: async ({ username, password }) => {
     console.log('Trying to login as', username);
-    const initialRequest = await request.get({
-      jar: cookieJar,
-      url: Url.defaultUrl,
-      headers,
-      gzip: true,
-    }).catch(err => console.error(err));
-
+    const initialRequest = await Api.getEndpoint(Url.defaultUrl);
     updateInstagramAjaxToken(initialRequest);
     updateCsrfToken();
-    await waiting(4000);
 
-    const login = await request.post({
-      jar: cookieJar,
-      url: Url.loginUrl,
-      headers,
-      form: {
-        username,
-        password,
-      },
-      resolveWithFullResponse: true,
-    }).catch(err => console.error(err));
-
+    const login = await Api.postEndpoint(Url.loginUrl, { username, password });
     updateCsrfToken();
+
     console.log(login.body);
     const extraCookies = ['ig_vw=1536', 'ig_pr=1.25', 'ig_vh=772', 'ig_or=landscape-primary'];
     extraCookies.forEach(cookie => {
       cookieJar.setCookie(request.cookie(cookie), Url.defaultUrl);
     });
-    await waiting(4000);
 
     if (login.statusCode === 200) {
-      const body = await request.get({
-        jar: cookieJar,
-        url: Url.defaultUrl,
-        headers,
-        gzip: true,
-      });
+      const body = await Api.getEndpoint(Url.defaultUrl);
       // console.log(body);
       console.log('Authenticated:', body.includes(username.toLowerCase()));
-      await waiting(4000);
     } else {
       console.error('Login error. Connection error.')
     }
   },
 
-  logout: async() => {
-    console.log('Logging out...');
-    await request.post({
-      jar: cookieJar,
-      url: Url.logoutUrl,
-      headers,
-      form: {
-        'csrfmiddlewaretoken': headers['X-CSRFToken'],
-      },
-      resolveWithFullResponse: true,
-    }).catch(e => {});
-    
-    await waiting(4000);
+  logout: async (username) => {
+    console.log('Logging out... 302 expected...');
+    await Api.postEndpoint(Url.logoutUrl, {
+      'csrfmiddlewaretoken': headers['X-CSRFToken'],
+    });
+    const body = await Api.getEndpoint(Url.defaultUrl);
+    console.log('Authenticated:', body.includes(username.toLowerCase()));
   },
 
-  like: async(mediaId) => {
-    //
+  /* GET api methods */
+  getUser: async (username) => {
+    return Api.getEndpoint(Url.getUsernameUrl(username));
   },
 
-  follow: async(username) => {
-    // 
+  /* getUserDetail: async (userId) => {
+    return Api.getEndpoint(Url.getUserDetailUrl(userId));
+  }, */
+
+  getHashtag: async (hashtag) => {
+    return Api.getEndpoint(Url.getHashtagUrl(hashtag));
   },
 
-  unfollow: async(username) => {
-    //
+  getLocation: async (locationId) => {
+    return Api.getEndpoint(Url.getLocationUrl(locationId));
+  },
+
+  getMediaDetail: async (mediaId) => {
+    return Api.getEndpoint(Url.getMediaDetailUrl(mediaId));
+  },
+
+  /* POST api methods */
+  followUser: async (userId) => {
+    return Api.postEndpoint(Url.getFollowUrl(userId));
+  },
+
+  unfollowUser: async (userId) => {
+    return Api.postEndpoint(Url.getUnfollowUrl(userId));
+  },
+
+  likeMedia: async (mediaId) => {
+    return Api.postEndpoint(Url.getLikeUrl(mediaId));
+  },
+
+  unlikeMedia: async (mediaId) => {
+    return Api.postEndpoint(Url.getUnlikeUrl(mediaId));
   },
 };
 
-module.exports = Auth;
+module.exports = Api;
