@@ -1,23 +1,14 @@
 const Url = require('./src/Url');
-const Auth = require('./src/Auth');
+const Api = require('./src/Api');
 const fs = require('fs');
 
 const credentials = JSON.parse(fs.readFileSync('creds.json'));
 
-Auth.login(credentials);
-
-// Auth.logout();
-
-// HTTP Error 400 = Instagram ban -> wait 2 hours
-/*const Http = {
-  // handle cookies etc. here
-  get(url) => {
-    // todo
-  }
-  post(url, data) => {
-    // todo
-  }
-}*/
+(async () => {
+ await Api.login(credentials);
+ console.log('Call APIs now...');
+ // await Api.logout();
+})();
 
 /*
 describe('Hangouts invites', function() {
