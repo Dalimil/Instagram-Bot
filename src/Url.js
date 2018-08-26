@@ -7,21 +7,20 @@ const Url = {
   getHashtagUrl: (hashtag) =>
     `https://www.instagram.com/explore/tags/${hashtag}/?__a=1`,
 
-  getLocationUrl: (location) =>
-    `https://www.instagram.com/explore/locations/${location}/?__a=1`,
+  getLocationUrl: (locationId) =>
+    `https://www.instagram.com/explore/locations/${locationId}/?__a=1`,
 
   getUsernameUrl: (username) =>
     `https://www.instagram.com/${username}/?__a=1`,
 
-  getUserDetailUrl: (username) =>
-   `https://i.instagram.com/api/v1/users/${username}/info/`,
-   // alternatively: https://www.instagram.com/${username}/
+  /* getUserDetailUrl: (userId) =>
+   `https://i.instagram.com/api/v1/users/${userId}/info/`, */
 
-  getFollowUrl: (username) =>
-    `https://www.instagram.com/web/friendships/${username}/follow/`,
+  getFollowUrl: (userId) =>
+    `https://www.instagram.com/web/friendships/${userId}/follow/`,
 
-  getUnfollowUrl: (username) =>
-    `https://www.instagram.com/web/friendships/${username}/unfollow/`,
+  getUnfollowUrl: (userId) =>
+    `https://www.instagram.com/web/friendships/${userId}/unfollow/`,
 
   getLikeUrl: (mediaId) =>
     `https://www.instagram.com/web/likes/${mediaId}/like/`,
