@@ -63,7 +63,7 @@ const Api = {
       resolveWithFullResponse: true,
     }).catch(err => console.error(err.name, err.message));
 
-    await waiting(4000);
+    await waiting(6000);
     return res;
   },
 
