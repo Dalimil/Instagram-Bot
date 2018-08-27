@@ -50,5 +50,6 @@ Implementation
 		- if checks OK:
 			- follow this account and like maximum 1 or 2 of its posts
 			- add to the 'Future Unfollow' list with timestamp
+			- add to the `processed-accounts.json` list
 	- Go through 'Future Unfollow' list and remove people older than say 3 days
 

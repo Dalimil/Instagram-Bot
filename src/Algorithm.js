@@ -2,11 +2,41 @@ const Data = require('./Data');
 const Api = require('./Api');
 
 const Algorithm = {
-  run() {
+  async run() {
+    console.info(new Date().toLocaleString(), 'Executing main follow algorithm...');
+    // For now we just use the first account
+    const initialAccount = Data.getInitialTargets().initial_accounts[0];
+    if (!initialAccount) {
+      console.error('No initial account target! Aborting...')
+      return;
+    }
+    const targetUsername = initialAccount.username;
+    const { id: targetUserId } = (await Api.getUser(targetUsername)).graphql.user;
 
-  }
+    const alreadyProcessed = new Set(Data.getProcessedAccountsList());
+    const futureFollowList = await Api.getUserFollowersFirstN(targetUserId, 50, alreadyProcessed);
+    
+    console.info(`Found ${futureFollowList.length} target accounts to process.`);
+    // Follow users
+    for (const ({ id, username }) of futureFollowList) {
+      console.info('Following', username);
+      await Api.followUser(id);
+    }
+    
+    // Update storage
+    const timestamp = Date.now();
+    const newlyFollowed = futureFollowList.map(({ id, username }) =>
+      ({ userId: id, username, timestamp })
+    );
+    // Store in 'processed' so we don't process them in the future
+    Data.storeProcessedAccountsList([ ...alreadyProcessed, ...newlyFollowed ]);
+    // Store in 'unfollow' so that we unfollow them after 3 days
+    const unfollowList = Data.getFutureUnfollowList();
+    Data.storeFutureUnfollowList([ ...unfollowList, ...newlyFollowed ]);
+  },
 
   async runMassUnfollow() {
+    console.info(new Date().toLocaleString(), 'Executing mass unfollow...');
     const unfollowList = Data.getFutureUnfollowList();
     const threeDaysAgo = Date.now() - (1000 * 60 * 60 * 24 * 3);
     const toKeep = [];
@@ -23,7 +53,7 @@ const Algorithm = {
     // Unfollow
     for (const userId of toUnfollow) {
       await Api.unfollowUser(userId);
-    });
+    };
     
     // Update storage
     Data.storeFutureUnfollowList(toKeep);
