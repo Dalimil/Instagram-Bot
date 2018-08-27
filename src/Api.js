@@ -113,19 +113,19 @@ const Api = {
   },
 
   // LocationId such as 895676663
-  getLocation: async (locationId) => {
+  getLocation(locationId) {
     return Api.getEndpoint(Url.getLocationUrl(locationId))
       .then(JSON.parse);
   },
 
   // Given the mediaId (= graph node 'shortcode'), it returns more details, such as location
-  getMediaDetail: async (mediaId) => {
+  getMediaDetail(mediaId) {
     return Api.getEndpoint(Url.getMediaDetailUrl(mediaId))
       .then(JSON.parse);
   },
 
-  // Get username's followers
-  getUserFollowers: async (userId, afterCursor = null) => {
+  // Get username's followers (first few) - working with pagination
+  getUserFollowers(userId, afterCursor = null) {
     const variables = {
       id: userId,
       first: 40, // must be < 50
@@ -142,8 +142,31 @@ const Api = {
       .then(JSON.parse);
   },
 
+  // Returns up to numFollowers of the target userId
+  // Wrapper around getUserFollowers() to simplify/remove pagination complications 
+  getUserFollowersFirstN: async (userId, numFollowers = null, blacklist = new Set()) => {
+    if (!numFollowers) {
+      return Api.getUserFollowers(userId);
+    }
+    const followers = [];
+    const appendFollowers = (data) => followers.push(...data.data.user.edge_followed_by.edges
+      .map(({ node: { id, username } }) => ({ id, username }))
+      .filter(({ id }) => !blacklist.has(id))
+    );
+
+    let endCursor = null;
+    let hasNextPage = false;
+    do {
+      const moreFollowers = await Api.getUserFollowers(userId, endCursor);
+      appendFollowers(moreFollowers);
+      const nextPage = moreFollowers.data.user.edge_followed_by.page_info;
+      endCursor = nextPage.end_cursor;
+      hasNextPage = nextPage.has_next_page;
+    } while (hasNextPage && followers.length < numFollowers);
+  }
+
   // Get people who liked this media
-  getMediaLikers: async (mediaId, afterCursor = null) => {
+  getMediaLikers(mediaId, afterCursor = null) {
     const variables = {
       shortcode: mediaId,
       first: afterCursor ? 12 : 24, // must be < 50
@@ -162,19 +185,19 @@ const Api = {
 
 
   /* POST api methods */
-  followUser: async (userId) => {
+  followUser(userId) {
     return Api.postEndpoint(Url.getFollowUrl(userId));
   },
 
-  unfollowUser: async (userId) => {
+  unfollowUser(userId) {
     return Api.postEndpoint(Url.getUnfollowUrl(userId));
   },
 
-  likeMedia: async (mediaId) => {
+  likeMedia(mediaId) {
     return Api.postEndpoint(Url.getLikeUrl(mediaId));
   },
 
-  unlikeMedia: async (mediaId) => {
+  unlikeMedia(mediaId) {
     return Api.postEndpoint(Url.getUnlikeUrl(mediaId));
   },
 };
