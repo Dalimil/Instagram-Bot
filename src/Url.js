@@ -13,9 +13,6 @@ const Url = {
   getUsernameUrl: (username) =>
     `https://www.instagram.com/${username}/?__a=1`,
 
-  /* getUserDetailUrl: (userId) =>
-   `https://i.instagram.com/api/v1/users/${userId}/info/`, */
-
   getFollowUrl: (userId) =>
     `https://www.instagram.com/web/friendships/${userId}/follow/`,
 

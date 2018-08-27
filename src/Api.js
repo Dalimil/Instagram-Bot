@@ -92,10 +92,9 @@ const Api = {
   },
 
   logout: async (username) => {
-    console.log('Logging out... 302 expected...');
-    await Api.postEndpoint(Url.logoutUrl, {
-      'csrfmiddlewaretoken': headers['X-CSRFToken'],
-    });
+    console.log('Logging out...');
+    await Api.getEndpoint(Url.logoutUrl);
+    // { 'csrfmiddlewaretoken': headers['X-CSRFToken'] }
     const body = await Api.getEndpoint(Url.defaultUrl);
     console.log('Authenticated:', body.includes(username.toLowerCase()));
   },
@@ -106,16 +105,19 @@ const Api = {
       .then(JSON.parse);
   },
 
+  // Returns a list of posts that have this hashtag
   getHashtag(hashtag) {
     return Api.getEndpoint(Url.getHashtagUrl(hashtag))
       .then(JSON.parse);
   },
 
+  // LocationId such as 895676663
   getLocation: async (locationId) => {
     return Api.getEndpoint(Url.getLocationUrl(locationId))
       .then(JSON.parse);
   },
 
+  // Given the mediaId (= graph node 'shortcode'), it returns more details, such as location
   getMediaDetail: async (mediaId) => {
     return Api.getEndpoint(Url.getMediaDetailUrl(mediaId))
       .then(JSON.parse);
