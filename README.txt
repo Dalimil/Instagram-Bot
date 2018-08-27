@@ -31,12 +31,15 @@ Implementation
 - Instagram account login
 - BFS Algorithm with time delays between each step
 - Algorithm
-	- Need a queue list of accounts or posts to start with
+	- Need a list of accounts or posts to start with
 		- initialize with target hashtags OR target (really good) accounts
-		- Idea: Crawl through accounts (people) that follow these hashtags or good accounts
-	- For each acc on 'Future Follow' list:
+		- Idea: Crawl through accounts (people) that follow these hashtags or good accounts,
+			and add them to the 'Future Follow' list (unless already processed in the past: `processed-accounts.json`)
+			- For good account there is going to be thousands of followers, so this is enough for now
+		- Keed adding to the 'Future Follow' list until it's filled with a set number of unprocessed accounts (e.g. 500)
+	- For each account on 'Future Follow' list:
 		- scrape for quality:
-			- must be public
+			- must be public, must not be already followed and not already following me
 			- must have > 30 posts
 			- must have < 3000 followers
 			- must have < 2000 following
@@ -45,10 +48,7 @@ Implementation
 			- must not have these words in name or username: "salon, sex, rental, free, follow, follower"
 			- randomly skip this acc with 10% chance (more human like behaviour)
 		- if checks OK:
-			- if not already following:
-				- follow this account and like maximum 1 or 2 of its posts
-				- add to the 'Future Unfollow' list
-			- append each person he/she follows to 'Future Follow' (unles processed visited)
-	- Run until set limit (e.g. 200)
+			- follow this account and like maximum 1 or 2 of its posts
+			- add to the 'Future Unfollow' list with timestamp
 	- Go through 'Future Unfollow' list and remove people older than say 3 days
 
