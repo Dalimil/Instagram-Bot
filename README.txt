@@ -30,8 +30,10 @@ Implementation
 	- OR: come up with an API script-only solution (<- we chose this, thanks to discovery of existing work)
 - Instagram account login
 - BFS Algorithm with time delays between each step
-- Algorithm A
-	- Need a queue list of accounts to start with (good 3 accounts is enough OR start with your own acc)
+- Algorithm
+	- Need a queue list of accounts or posts to start with
+		- initialize with target hashtags OR target (really good) accounts
+		- Idea: Crawl through accounts (people) that follow these hashtags or good accounts
 	- For each acc on 'Future Follow' list:
 		- scrape for quality:
 			- must be public
@@ -42,8 +44,6 @@ Implementation
 			- must not have these words in bio: "click, bio, link, webcam, cam, gain, snapchat, follow, followers, kik"
 			- must not have these words in name or username: "salon, sex, rental, free, follow, follower"
 			- randomly skip this acc with 10% chance (more human like behaviour)
-		- scrape for relevance:
-			- get hashtags from their posts
 		- if checks OK:
 			- if not already following:
 				- follow this account and like maximum 1 or 2 of its posts
@@ -51,7 +51,4 @@ Implementation
 			- append each person he/she follows to 'Future Follow' (unles processed visited)
 	- Run until set limit (e.g. 200)
 	- Go through 'Future Unfollow' list and remove people older than say 3 days
-- Algorithm B
-	- Similar to Algorithm A, but initialize with target hashtags + target (really good) accounts
-	- Crawl through accounts that follow these targets (people who follow these hashtags or good accounts)
 
