@@ -138,6 +138,7 @@ const Api = {
       query_hash: '7dd9a7e2160524fd85f50317462cff9f',
       variables: JSON.stringify(variables),
     };
+    console.info('GET followers', userId, afterCursor);
     return Api.getEndpoint(Url.graphqlApiUrl, query)
       .then(JSON.parse);
   },
@@ -163,7 +164,11 @@ const Api = {
       endCursor = nextPage.end_cursor;
       hasNextPage = nextPage.has_next_page;
     } while (hasNextPage && followers.length < numFollowers);
-  }
+    
+    const resultFollowers = followers.slice(0, numFollowers);
+    console.info(`Found ${resultFollowers.length} out of ${numFollowers} followers requested`);
+    return resultFollowers;
+  },
 
   // Get people who liked this media
   getMediaLikers(mediaId, afterCursor = null) {
@@ -179,6 +184,7 @@ const Api = {
       query_hash: 'e0f59e4a1c8d78d0161873bc2ee7ec44',
       variables: JSON.stringify(variables),
     };
+    console.info('GET media likers', mediaId, afterCursor);
     return Api.getEndpoint(Url.graphqlApiUrl, query)
       .then(JSON.parse);
   },

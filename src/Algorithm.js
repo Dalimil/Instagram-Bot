@@ -2,7 +2,7 @@ const Data = require('./Data');
 const Api = require('./Api');
 
 const Algorithm = {
-  async run() {
+  async runMain() {
     console.info(new Date().toLocaleString(), 'Executing main follow algorithm...');
     // For now we just use the first account
     const initialAccount = Data.getInitialTargets().initial_accounts[0];
@@ -18,9 +18,9 @@ const Algorithm = {
     
     console.info(`Found ${futureFollowList.length} target accounts to process.`);
     // Follow users
-    for (const ({ id, username }) of futureFollowList) {
-      console.info('Following', username);
-      await Api.followUser(id);
+    for (const account of futureFollowList) {
+      console.info('Following', account.username);
+      await Api.followUser(account.id);
     }
     
     // Update storage
