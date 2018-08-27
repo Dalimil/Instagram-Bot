@@ -38,13 +38,14 @@ const updateInstagramAjaxToken = (body = '') => {
 
 const Api = {
   // Generic GET request
-  getEndpoint: async (url) => {
+  getEndpoint: async (url, query = {}) => {
     console.info('GET', url);
     const res = await request.get({
       jar: cookieJar,
       url,
       headers,
       gzip: true,
+      qs: query,
     }).catch(err => console.error(err.name, err.message));
 
     await waiting(4000);
@@ -122,6 +123,43 @@ const Api = {
     return Api.getEndpoint(Url.getMediaDetailUrl(mediaId))
       .then(JSON.parse);
   },
+
+  // Get username's followers
+  getUserFollowers: async (userId, afterCursor = null) => {
+    const variables = {
+      id: userId,
+      first: 30, // must be < 50
+    };
+    // For pagination
+    if (afterCursor) {
+      variables.after = afterCursor;
+    }
+    const query = {
+      query_hash: '7dd9a7e2160524fd85f50317462cff9f',
+      variables: JSON.stringify(variables),
+    };
+    return Api.getEndpoint(Url.graphqlApiUrl, query)
+      .then(JSON.parse);
+  },
+
+  // Get people who liked this media
+  getMediaLikers: async (mediaId, afterCursor = null) => {
+    const variables = {
+      shortcode: mediaId,
+      first: afterCursor ? 12 : 24, // must be < 50
+    };
+    // For pagination
+    if (afterCursor) {
+      variables.after = afterCursor;
+    }
+    const query = {
+      query_hash: 'e0f59e4a1c8d78d0161873bc2ee7ec44',
+      variables: JSON.stringify(variables),
+    };
+    return Api.getEndpoint(Url.graphqlApiUrl, query)
+      .then(JSON.parse);
+  },
+
 
   /* POST api methods */
   followUser: async (userId) => {

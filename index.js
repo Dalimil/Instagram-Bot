@@ -8,7 +8,7 @@ const credentials = JSON.parse(fs.readFileSync('creds.json'));
   await Api.login(credentials);
   console.log('Call APIs now...');
 
-  // console.log(await Api.getEndpoint('https://i.instagram.com/api/v1/friendships/6719220571/following/'));
+  await debugAdvancedGetDataEndpoints();
   //  console.log(await Api.getLocation('1234'));
   //  console.log(await Api.followUser('1234'));
   //  console.log(await Api.unfollowUser('1234'));
@@ -28,3 +28,12 @@ async function debugGetDataEndpoints() {
   fs.writeFileSync('./out/debug-hashtag.json', JSON.stringify(tulipHashtag, null, 2));
   fs.writeFileSync('./out/debug-media-detail.json', JSON.stringify(mediaDetail, null, 2));
 }
+
+async function debugAdvancedGetDataEndpoints() {
+  const userFollowers = await Api.getUserFollowers('6719220571');
+  const mediaLikers = await Api.getMediaLikers('Bm1zLDaFSaF');
+
+  fs.writeFileSync('./out/debug-user-followers.json', JSON.stringify(userFollowers, null, 2));
+  fs.writeFileSync('./out/debug-media-likers.json', JSON.stringify(mediaLikers, null, 2));
+}
+

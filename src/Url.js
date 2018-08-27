@@ -3,6 +3,7 @@ const Url = {
   defaultUrl: 'https://www.instagram.com/',
   loginUrl: 'https://www.instagram.com/accounts/login/ajax/',
   logoutUrl: 'https://www.instagram.com/accounts/logout/',
+  graphqlApiUrl: 'https://www.instagram.com/graphql/query/',
 
   getHashtagUrl: (hashtag) =>
     `https://www.instagram.com/explore/tags/${hashtag}/?__a=1`,
