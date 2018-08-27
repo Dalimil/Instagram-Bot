@@ -9,8 +9,8 @@ const credentials = JSON.parse(fs.readFileSync('creds.json'));
   await Api.login(credentials);
   console.log('Call APIs now...');
 
-  // Algorithm.runMain();
-  // Algorithm.runMassUnfollow();
+  await Algorithm.runMain();
+  // await Algorithm.runMassUnfollow();
 
   await Api.logout(credentials.username);
 })();
@@ -40,8 +40,8 @@ async function debugAdvancedGetDataEndpoints() {
 }
 
 async function debugPostEndpoints() {
-  //  console.log(await Api.followUser('1234'));
-  //  console.log(await Api.unfollowUser('1234'));
+  await Api.followUser('8498057536');
+  await Api.unfollowUser('8498057536');
   //  console.log(await Api.likeMedia('1234'));
   //  console.log(await Api.unlikeMedia('1234'));
 }

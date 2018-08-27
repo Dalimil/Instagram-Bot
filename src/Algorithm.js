@@ -14,18 +14,24 @@ const Algorithm = {
     const { id: targetUserId } = (await Api.getUser(targetUsername)).graphql.user;
 
     const alreadyProcessed = new Set(Data.getProcessedAccountsList());
-    const futureFollowList = await Api.getUserFollowersFirstN(targetUserId, 50, alreadyProcessed);
+    const futureFollowList = await Api.getUserFollowersFirstN(targetUserId, 10, alreadyProcessed);
     
-    console.info(`Found ${futureFollowList.length} target accounts to process.`);
-    // Follow users
+    // Follow users (but make sure they are quality accounts first)
+    const qualityFutureFollowList = [];
     for (const account of futureFollowList) {
-      console.info('Following', account.username);
-      await Api.followUser(account.id);
+      const shouldSelectAccount = await Algorithm.shouldSelectAccount(account.username);
+      if (shouldSelectAccount) {
+        qualityFutureFollowList.push(account);
+        console.info('Following', account.username);
+        await Api.followUser(account.id);
+      } else {
+        console.log('Skipping', account.username);
+      }
     }
-    
+
     // Update storage
     const timestamp = Date.now();
-    const newlyFollowed = futureFollowList.map(({ id, username }) =>
+    const newlyFollowed = qualityFutureFollowList.map(({ id, username }) =>
       ({ userId: id, username, timestamp })
     );
     // Store in 'processed' so we don't process them in the future
@@ -59,12 +65,14 @@ const Algorithm = {
     Data.storeFutureUnfollowList(toKeep);
   },
 
-  selectAccount(userData) {
-    if (Algorithm.isQualityAccount(userData)) {
-      // Randomly skip this acc with 10% chance (more human like behaviour)
-      return Math.random() > 0.1;
-    }
-    return false;
+  shouldSelectAccount(username) {
+    return Api.getUser(username).then(userData => {
+      if (Algorithm.isQualityAccount(userData)) {
+        // Randomly skip this acc with 5% chance (more human like behaviour)
+        return Math.random() > 0.05;
+      }
+      return false;
+    });
   },
 
   /**
@@ -79,48 +87,56 @@ const Algorithm = {
     const alreadyFollowing = user.followed_by_viewer;
     const alreadyFollower = user.follows_viewer;
     if (alreadyFollower || alreadyFollowing) {
+      console.info('(already following or follower)')
       return false;
     }
 
     // must be public
     if (user.is_private) {
+      console.info('(is private account)');
       return false;
     }
 
-    // must have > 30 posts
+    // must have > 20 posts
     const { count: numPosts } = user.edge_owner_to_timeline_media;
-    if (numPosts < 30) {
+    if (numPosts < 20) {
+      console.info(`(does not have enough posts: ${numPosts})`);
       return false;
     }
 
     // must have < 3000 followers
     const { count: followers } = user.edge_followed_by;
     if (followers > 3000) {
+      console.info('(has over 3000 followers)');
       return false;
     }
     
     // must have < 2000 following
     const { count: following } = user.edge_follow;
     if (following > 2000) {
+      console.info('(is following over 2000 accounts)');
       return false;
     }
 
     // must have followers-per-post ratio below say 80 (e.g. account with 100 posts has max 8000 followers)
     if (followers / numPosts > 80) {
+      console.info(`(bad ratio: ${(followers / numPosts).toFixed(1)})`);
       return false;
     }
 
     // must not have offensive words in bio
     const cheapWords = ["click", "link", "webcam", "gain", "follow", "followers", "kik"];
     const { biography } = user;
-    if (cheapWords.find(word => biography.includes(word)) !== null) {
+    if (cheapWords.find(word => biography.includes(word))) {
+      console.info('(has offensive bio)');
       return false;
     }
 
     // must not have offensive words in name or username
     const badWords = ["salon", "sex", "rental", "free", "follow", "follower"];
     const { id, username, full_name, } = user;
-    if (badWords.find(word => username.includes(word) || name.includes(word)) !== null) {
+    if (badWords.find(word => username.includes(word) || name.includes(word))) {
+      console.info('(has offensive name)');
       return false;
     }
 

@@ -55,6 +55,7 @@ const Api = {
   // Generic POST request
   postEndpoint: async (url, data = {}) => {
     console.info('POST', url);
+    updateCsrfToken();
     const res = await request.post({
       jar: cookieJar,
       url,
@@ -72,13 +73,11 @@ const Api = {
     console.log('Trying to login as', username);
     const initialRequest = await Api.getEndpoint(Url.defaultUrl);
     updateInstagramAjaxToken(initialRequest);
-    updateCsrfToken();
 
     const login = await Api.postEndpoint(Url.loginUrl, { username, password });
-    updateCsrfToken();
 
     console.log(login.body);
-    const extraCookies = ['ig_vw=1536', 'ig_pr=1.25', 'ig_vh=772', 'ig_or=landscape-primary'];
+    const extraCookies = ['ig_vw=1536', 'ig_pr=1', 'ig_vh=772', 'ig_or=landscape-primary'];
     extraCookies.forEach(cookie => {
       cookieJar.setCookie(request.cookie(cookie), Url.defaultUrl);
     });
@@ -138,7 +137,7 @@ const Api = {
       query_hash: '7dd9a7e2160524fd85f50317462cff9f',
       variables: JSON.stringify(variables),
     };
-    console.info('GET followers', userId, afterCursor);
+    console.info('GET followers of user', userId, afterCursor);
     return Api.getEndpoint(Url.graphqlApiUrl, query)
       .then(JSON.parse);
   },
@@ -151,6 +150,7 @@ const Api = {
     }
     const followers = [];
     const appendFollowers = (data) => followers.push(...data.data.user.edge_followed_by.edges
+      .filter(({ node }) => !node.is_private)
       .map(({ node: { id, username } }) => ({ id, username }))
       .filter(({ id }) => !blacklist.has(id))
     );
