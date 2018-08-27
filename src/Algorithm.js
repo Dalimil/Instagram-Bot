@@ -13,8 +13,8 @@ const Algorithm = {
     const targetUsername = initialAccount.username;
     const { id: targetUserId } = (await Api.getUser(targetUsername)).graphql.user;
 
-    const alreadyProcessed = new Set(Data.getProcessedAccountsList());
-    const futureFollowList = await Api.getUserFollowersFirstN(targetUserId, 10, alreadyProcessed);
+    const alreadyProcessed = new Set(Data.getProcessedAccountsList().map(account => account.userId));
+    const futureFollowList = await Api.getUserFollowersFirstN(targetUserId, 50, alreadyProcessed);
     
     // Follow users (but make sure they are quality accounts first)
     const qualityFutureFollowList = [];
@@ -31,14 +31,22 @@ const Algorithm = {
 
     // Update storage
     const timestamp = Date.now();
+    const newlyProcessed = futureFollowList.map(({ id, username }) =>
+      ({ userId: id, username, timestamp })
+    );
     const newlyFollowed = qualityFutureFollowList.map(({ id, username }) =>
       ({ userId: id, username, timestamp })
     );
     // Store in 'processed' so we don't process them in the future
-    Data.storeProcessedAccountsList([ ...alreadyProcessed, ...newlyFollowed ]);
+    Data.storeProcessedAccountsList([
+      ...Data.getProcessedAccountsList(),
+      ...newlyProcessed
+    ]);
     // Store in 'unfollow' so that we unfollow them after 3 days
-    const unfollowList = Data.getFutureUnfollowList();
-    Data.storeFutureUnfollowList([ ...unfollowList, ...newlyFollowed ]);
+    Data.storeFutureUnfollowList([
+      ...Data.getFutureUnfollowList(),
+      ...newlyFollowed
+    ]);
   },
 
   async runMassUnfollow() {
@@ -57,6 +65,7 @@ const Algorithm = {
     });
 
     // Unfollow
+    console.info(`Accounts to be unfollowed: ${toUnfollow.length}`);
     for (const userId of toUnfollow) {
       await Api.unfollowUser(userId);
     };
@@ -97,9 +106,9 @@ const Algorithm = {
       return false;
     }
 
-    // must have > 20 posts
+    // must have > 10 posts
     const { count: numPosts } = user.edge_owner_to_timeline_media;
-    if (numPosts < 20) {
+    if (numPosts < 10) {
       console.info(`(does not have enough posts: ${numPosts})`);
       return false;
     }
@@ -134,8 +143,8 @@ const Algorithm = {
 
     // must not have offensive words in name or username
     const badWords = ["salon", "sex", "rental", "free", "follow", "follower"];
-    const { id, username, full_name, } = user;
-    if (badWords.find(word => username.includes(word) || name.includes(word))) {
+    const { id, username, full_name: fullName } = user;
+    if (badWords.find(word => username.includes(word) || fullName.includes(word))) {
       console.info('(has offensive name)');
       return false;
     }
