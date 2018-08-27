@@ -1,5 +1,34 @@
+const Data = require('./Data');
+const Api = require('./Api');
 
 const Algorithm = {
+  run() {
+
+  }
+
+  async runMassUnfollow() {
+    const unfollowList = Data.getFutureUnfollowList();
+    const threeDaysAgo = Date.now() - (1000 * 60 * 60 * 24 * 3);
+    const toKeep = [];
+    const toUnfollow = [];
+    // Determine which accounts were added long time ago
+    unfollowList.forEach(({ timestamp, userId }) => {
+      if (timestamp < threeDaysAgo) {
+        toUnfollow.push(userId);
+      } else {
+        toKeep.push({ userId, timestamp });
+      }
+    });
+
+    // Unfollow
+    for (const userId of toUnfollow) {
+      await Api.unfollowUser(userId);
+    });
+    
+    // Update storage
+    Data.storeFutureUnfollowList(toKeep);
+  },
+
   selectAccount(userData) {
     if (Algorithm.isQualityAccount(userData)) {
       // Randomly skip this acc with 10% chance (more human like behaviour)

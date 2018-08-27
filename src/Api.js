@@ -128,7 +128,7 @@ const Api = {
   getUserFollowers: async (userId, afterCursor = null) => {
     const variables = {
       id: userId,
-      first: 30, // must be < 50
+      first: 40, // must be < 50
     };
     // For pagination
     if (afterCursor) {
