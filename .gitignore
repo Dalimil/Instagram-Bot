@@ -68,3 +68,5 @@ creds.txt
 creds.json
 out/
 
+data/*.json
+
