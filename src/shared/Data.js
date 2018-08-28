@@ -44,7 +44,7 @@ const Data = {
       ...Data.getFutureUnfollowList(),
       ...newlyFollowed.map(({ id, username }) => ({ userId: id, username, timestamp })),
     ]);
-  }
+  },
 
   storeQualityListCollection(list) {
     fs.writeFileSync(Data.qualityListCollectionFile, JSON.stringify({ quality_accounts: list }, null, 2));

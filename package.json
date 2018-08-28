@@ -7,8 +7,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "selenium": "selenium-standalone start",
-    "browser": "node ./browser/main.js"
+    "selenium": "selenium-standalone start"
   },
   "dependencies": {
     "request": "^2.88.0",

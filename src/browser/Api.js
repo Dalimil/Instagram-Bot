@@ -32,13 +32,13 @@ const Api = {
       .executeAsync(
         (usernameUrl, done) => {
           fetch(usernameUrl, { credentials: 'include' })
-          .then(response => response.json())
-          .then(data => done(data.graphql.user))
+            .then(response => response.json())
+            .then(json => done(json.graphql.user));
         },
         Url.getUsernameApiUrl(username),
       );
     await waiting(3000);
-    return user;
+    return user.value;
   },
 
   // Get username's followers (first few) - working with pagination
@@ -55,21 +55,21 @@ const Api = {
       query_hash: '7dd9a7e2160524fd85f50317462cff9f',
       variables: JSON.stringify(variables),
     };
-    console.info(`GET ${afterCursor ? 'more' : ''} followers of user ${userId}`);
+    console.info(`GET ${afterCursor ? 'more ' : ''}followers of user ${userId}`);
     const followers = await browserInstance
       .executeAsync(
         (apiUrl, query, done) => {
           const url = new URL(apiUrl);
           url.search = new URLSearchParams(query);
           fetch(url, { credentials: 'include' })
-          .then(response => response.json())
-          .then(data => done(data.user.edge_followed_by))
+            .then(response => response.json())
+            .then(json => done(json.data.user.edge_followed_by));
         },
         Url.graphqlApiUrl,
         query,
       );
     await waiting(3000);
-    return followers;
+    return followers.value;
   },
 
   // Returns up to numFollowers of the target userId

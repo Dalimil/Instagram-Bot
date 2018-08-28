@@ -17,18 +17,18 @@ exports.runMain = async (numUsersToProcess) => {
   const targetUsername = Data.getInitialTargets().initial_accounts[0].username;
   const targetUserId = (await Api.getUser(client, targetUsername)).id;
   console.info('Target user id', targetUserId);
-
+  
   const alreadyProcessed = new Set(Data.getProcessedAccountsList().map(account => account.userId));
-  const futureFollowList = await Api.getUserFollowersFirstN(browserInstance, targetUserId,
+  const futureFollowList = await Api.getUserFollowersFirstN(client, targetUserId,
     numUsersToProcess, alreadyProcessed);
-    
+  
   // Follow users (but make sure they are quality accounts first)
   const qualityFutureFollowList = [];
   for (const account of futureFollowList) {
-    const accountData = await Api.getUser(browserInstance, account.username);
+    const accountData = await Api.getUser(client, account.username);
     if (Algorithm.isQualityAccount(accountData)) {
       qualityFutureFollowList.push(account);
-      await Api.followUser(account.username);
+      await Api.followUser(client, account.username);
     } else {
       console.log('Skipping', account.username);
     }
@@ -52,7 +52,7 @@ exports.runMassUnfollow = async () => {
   // Unfollow
   console.info(`Accounts to be unfollowed: ${toUnfollow.length}`);
   for (const userId of toUnfollow) {
-    await Api.unfollowUser(userId);
+    await Api.unfollowUser(client, userId);
   };
   
   // Update storage

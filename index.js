@@ -8,7 +8,7 @@ const TerminalBot = require('./src/terminal');
   // Max number of likes is 1.5x that amount
 
   // Browser (webdriver) version of the bot
-  await BrowserBot.runMain(10);
+  await BrowserBot.runMain(3);
   // await BrowserBot.runMassUnfollow();
 
   // TODO: terminal version of the bot is currently broken
