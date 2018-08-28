@@ -1,6 +1,7 @@
 
 const Url = {
   defaultUrl: 'https://www.instagram.com/',
+  defaultLoginUrl: 'https://www.instagram.com/accounts/login/',
   loginUrl: 'https://www.instagram.com/accounts/login/ajax/',
   logoutUrl: 'https://www.instagram.com/accounts/logout/',
   graphqlApiUrl: 'https://www.instagram.com/graphql/query/',
@@ -11,7 +12,10 @@ const Url = {
   getLocationUrl: (locationId) =>
     `https://www.instagram.com/explore/locations/${locationId}/?__a=1`,
 
-  getUsernameUrl: (username) =>
+  getUserPageUrl: (username) =>
+    `https://www.instagram.com/${username}/`,
+
+  getUsernameApiUrl: (username) =>
     `https://www.instagram.com/${username}/?__a=1`,
 
   getFollowUrl: (userId) =>

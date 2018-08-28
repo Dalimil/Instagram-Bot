@@ -18,7 +18,7 @@ const Api = require('./Api');
 
   // Get target user id
   const targetUsername = Data.getInitialTargets().initial_accounts[0].username;
-  const targetUserId = await Api.getUser(client, targetUsername);
+  const targetUserId = (await Api.getUser(client, targetUsername)).id;
   console.info('Target user id', targetUserId);
 
   const alreadyProcessed = new Set(Data.getProcessedAccountsList().map(account => account.userId));

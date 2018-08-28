@@ -1,4 +1,3 @@
-const Url = require('./src/shared/Url');
 const Api = require('./src/terminal/Api');
 const Algorithm = require('./src/Algorithm');
 const fs = require('fs');

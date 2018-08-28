@@ -110,7 +110,7 @@ const Api = {
 
   /* GET api methods */
   getUser(username) {
-    return Api.getEndpoint(Url.getUsernameUrl(username))
+    return Api.getEndpoint(Url.getUsernameApiUrl(username))
       .then(JSON.parse);
   },
 

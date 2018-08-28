@@ -1,9 +1,12 @@
 const Url = require('../shared/Url');
 
+const waiting = (ms) => new Promise(resolve => setTimeout(resolve, (ms * 0.7) + (0.3 * ms * Math.random())));
+
 const Api = {
   async login(browserInstance, credentials) {
+    console.info('Logging in', credentials.username, '...')
     await browserInstance
-      .url('https://www.instagram.com/accounts/login/')
+      .url(Url.defaultLoginUrl)
       .pause(2000)
       .click('[name=username]')
       .keys(credentials.username)
@@ -13,23 +16,33 @@ const Api = {
       .pause(2000)
       .click('button=Log in')
       .pause(5000)
-      .url('https://www.instagram.com/');
+      .url(Url.defaultUrl);
   },
 
-  getUser(browserInstance, username) {
-    return browserInstance
+  async logout(browserInstance) {
+    console.info('Logging out...');
+    await browserInstance
+      .url(Url.logoutUrl)
+      .pause(3000)
+      .url(Url.defaultUrl);
+  },
+
+  async getUser(browserInstance, username) {
+    const user = await browserInstance
       .executeAsync(
         (usernameUrl, done) => {
           fetch(usernameUrl, { credentials: 'include' })
           .then(response => response.json())
-          .then(data => done(data.graphql.user.id))
+          .then(data => done(data.graphql.user))
         },
-        Url.getUsernameUrl(username),
+        Url.getUsernameApiUrl(username),
       );
+    await waiting(3000);
+    return user;
   },
-/*
+
   // Get username's followers (first few) - working with pagination
-  getUserFollowers(userId, afterCursor = null) {
+  async getUserFollowers(browserInstance, userId, afterCursor = null) {
     const variables = {
       id: userId,
       first: 40, // must be < 50
@@ -42,11 +55,23 @@ const Api = {
       query_hash: '7dd9a7e2160524fd85f50317462cff9f',
       variables: JSON.stringify(variables),
     };
-    console.info('GET followers of user', userId, afterCursor);
-    return Api.getEndpoint(Url.graphqlApiUrl, query)
-      .then(JSON.parse);
+    console.info(`GET ${afterCursor ? 'more' : ''} followers of user ${userId}`);
+    const followers = await browserInstance
+      .executeAsync(
+        (apiUrl, query, done) => {
+          const url = new URL(apiUrl);
+          url.search = new URLSearchParams(query);
+          fetch(url, { credentials: 'include' })
+          .then(response => response.json())
+          .then(data => done(data.user.edge_followed_by))
+        },
+        Url.graphqlApiUrl,
+        query,
+      );
+    await waiting(3000);
+    return followers;
   },
-
+/*
   // Returns up to numFollowers of the target userId
   // Wrapper around getUserFollowers() to simplify/remove pagination complications 
   getUserFollowersFirstN: async (userId, numFollowers = null, blacklist = new Set()) => {
@@ -76,13 +101,23 @@ const Api = {
   },*/
 
   /* POST api methods */
-  /*followUser(userId) {
-    return Api.postEndpoint(Url.getFollowUrl(userId));
+  followUser(browserInstance, username) {
+    console.info('Following', username, '...');
+    return browserInstance
+      .url(Url.getUserPageUrl(username))
+      .pause(2000)
+      .click('button*=Follow')
+      .pause(3000);
   },
 
-  unfollowUser(userId) {
-    return Api.postEndpoint(Url.getUnfollowUrl(userId));
-  },*/
+  unfollowUser(browserInstance, username) {
+    console.info('Unfollowing', username, '...');
+    return browserInstance
+      .url(Url.getUserPageUrl(username))
+      .pause(2000)
+      .click('button*=Following')
+      .pause(3000);
+  },
 };
 
 module.exports = Api;
