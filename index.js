@@ -9,7 +9,7 @@ const credentials = JSON.parse(fs.readFileSync('creds.json'));
   await Api.login(credentials);
   console.log('Call APIs now...');
 
-  await Algorithm.runMain();
+  await Algorithm.runMain(50);
   // await Algorithm.runMassUnfollow();
 
   await Api.logout(credentials.username);

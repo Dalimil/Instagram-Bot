@@ -2,7 +2,7 @@ const Data = require('./Data');
 const Api = require('./Api');
 
 const Algorithm = {
-  async runMain() {
+  async runMain(numUsersToProcess) {
     console.info(new Date().toLocaleString(), 'Executing main follow algorithm...');
     // For now we just use the first account
     const initialAccount = Data.getInitialTargets().initial_accounts[0];
@@ -14,7 +14,7 @@ const Algorithm = {
     const { id: targetUserId } = (await Api.getUser(targetUsername)).graphql.user;
 
     const alreadyProcessed = new Set(Data.getProcessedAccountsList().map(account => account.userId));
-    const futureFollowList = await Api.getUserFollowersFirstN(targetUserId, 50, alreadyProcessed);
+    const futureFollowList = await Api.getUserFollowersFirstN(targetUserId, numUsersToProcess, alreadyProcessed);
     
     // Follow users (but make sure they are quality accounts first)
     const qualityFutureFollowList = [];
