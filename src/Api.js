@@ -1,5 +1,4 @@
 const Url = require('./Url');
-const zlib = require('zlib');
 const request = require('request-promise');
 const cookieJar = request.jar();
 const headers = {
