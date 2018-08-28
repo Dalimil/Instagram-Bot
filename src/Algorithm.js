@@ -1,5 +1,5 @@
-const Data = require('./Data');
-const Api = require('./Api');
+const Data = require('./shared/Data');
+const Api = require('./terminal/Api');
 
 const Algorithm = {
   async runMain(numUsersToProcess, collectListOnly = false) {

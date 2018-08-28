@@ -3,16 +3,20 @@ const options = { desiredCapabilities: { browserName: 'chrome' } };
 const client = webdriverio.remote(options);
 
 const fs = require('fs');
-const Url = require('../src/Url');
-const Data = require('../src/Data');
+const Url = require('../shared/Url');
+const Data = require('../shared/Data');
 
 const Api = require('./Api');
 
 (async () => {
   await client.init();
-  await Api.login(client);
+  // Log-in
+  const credentials = JSON.parse(fs.readFileSync('creds.json'));
+  await Api.login(client, credentials);
 
   console.info(new Date().toLocaleString(), 'Executing main follow algorithm...');
+
+  // Get target user id
   const targetUsername = Data.getInitialTargets().initial_accounts[0].username;
   const targetUserId = await Api.getUser(client, targetUsername);
   console.info('Target user id', targetUserId);

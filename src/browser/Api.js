@@ -1,8 +1,7 @@
-const Url = require('../src/Url');
+const Url = require('../shared/Url');
 
 const Api = {
-  async login(browserInstance) {
-    const credentials = JSON.parse(fs.readFileSync('creds.json'));
+  async login(browserInstance, credentials) {
     await browserInstance
       .url('https://www.instagram.com/accounts/login/')
       .pause(2000)
@@ -74,6 +73,15 @@ const Api = {
     const resultFollowers = followers.slice(0, numFollowers);
     console.info(`Found ${resultFollowers.length} out of ${numFollowers} followers requested`);
     return resultFollowers;
+  },*/
+
+  /* POST api methods */
+  /*followUser(userId) {
+    return Api.postEndpoint(Url.getFollowUrl(userId));
+  },
+
+  unfollowUser(userId) {
+    return Api.postEndpoint(Url.getUnfollowUrl(userId));
   },*/
 };
 

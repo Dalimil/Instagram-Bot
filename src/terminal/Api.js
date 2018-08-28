@@ -1,4 +1,4 @@
-const Url = require('./Url');
+const Url = require('../shared/Url');
 const request = require('request-promise');
 const cookieJar = request.jar();
 const headers = {
