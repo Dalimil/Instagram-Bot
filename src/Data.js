@@ -4,6 +4,7 @@ const Data = {
   futureUnfollowListFile: './data/future-unfollow.json',
   initialTargetsFile: './data/initial-targets.json',
   processedAccountsFile: './data/processed-accounts.json',
+  qualityListCollectionFile: './data/quality-accounts-collection.json',
 
   getFutureUnfollowList() {
     return JSON.parse(fs.readFileSync(Data.futureUnfollowListFile)).future_unfollow;
@@ -23,6 +24,10 @@ const Data = {
 
   storeProcessedAccountsList(data) {
     fs.writeFileSync(Data.processedAccountsFile, JSON.stringify({ processed_accounts: data }, null, 2));
+  },
+
+  storeQualityListCollection(list) {
+    fs.writeFileSync(Data.qualityListCollectionFile, JSON.stringify({ quality_accounts: list }, null, 2));
   },
 };
 

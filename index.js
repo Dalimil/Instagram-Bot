@@ -14,7 +14,7 @@ const credentials = JSON.parse(fs.readFileSync('creds.json'));
   // 7500 total following is the global MAX
   // Max number of likes is 1.5x that amount
 
-  await Algorithm.runMain(100);
+  await Algorithm.runMain(10, /* collectListOnly */ true);
   // await Algorithm.runMassUnfollow();
 
   await Api.logout(credentials.username);

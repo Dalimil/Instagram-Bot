@@ -2,7 +2,7 @@ const Data = require('./Data');
 const Api = require('./Api');
 
 const Algorithm = {
-  async runMain(numUsersToProcess) {
+  async runMain(numUsersToProcess, collectListOnly = false) {
     console.info(new Date().toLocaleString(), 'Executing main follow algorithm...');
     // For now we just use the first account
     const initialAccount = Data.getInitialTargets().initial_accounts[0];
@@ -23,7 +23,11 @@ const Algorithm = {
       if (shouldSelectAccount) {
         qualityFutureFollowList.push(account);
         console.info('Following', account.username);
-        await Api.followUser(account.id);
+        if (collectListOnly) {
+          Data.storeQualityListCollection(qualityFutureFollowList);
+        } else {
+          await Api.followUser(account.id);
+        }
       } else {
         console.log('Skipping', account.username);
       }

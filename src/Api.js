@@ -4,7 +4,7 @@ const request = require('request-promise');
 const cookieJar = request.jar();
 const headers = {
   'Accept': '*/*',
-  'Accept-Language': 'en-US,en;q=0.9',
+  'Accept-Language': 'en-US,en;q=0.5',
   'Accept-Encoding': 'gzip, deflate, br',
   'Connection': 'keep-alive',
   'Host': 'www.instagram.com',
@@ -46,7 +46,7 @@ const Api = {
       headers,
       gzip: true,
       qs: query,
-    }).catch(err => console.error(err.name, err.message));
+    });
 
     await waiting(4000);
     return res;
@@ -62,7 +62,7 @@ const Api = {
       headers,
       form: data,
       resolveWithFullResponse: true,
-    }).catch(err => console.error(err.name, err.message));
+    });
 
     await waiting(4000);
     return res;
@@ -74,8 +74,18 @@ const Api = {
     const initialRequest = await Api.getEndpoint(Url.defaultUrl);
     updateInstagramAjaxToken(initialRequest);
 
-    const login = await Api.postEndpoint(Url.loginUrl, { username, password });
-
+    // TODO: fix challenge checkpoint
+    // https://github.com/IvanMMM/instagram-private-api/blob/3dcdab90a2b0b93e7dcf31f4356e78c9b70bfaae/client/v1/web/challenge.js
+    const login = await new Promise(res => {
+      Api.postEndpoint(Url.loginUrl, { username, password }).then(res => {
+        return res;
+      }).catch(err => {
+        console.log('Error:', err.message);
+        const checkpointUrl = JSON.parse(err.error).checkpoint_url;
+        console.log(Url.defaultUrl + checkpointUrl.substr(1));
+        throw new Error('No clue how to solve challenge.');
+      });
+    });
     console.log(login.body);
     const extraCookies = ['ig_vw=1536', 'ig_pr=1', 'ig_vh=772', 'ig_or=landscape-primary'];
     extraCookies.forEach(cookie => {
