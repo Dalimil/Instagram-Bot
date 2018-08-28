@@ -9,7 +9,12 @@ const credentials = JSON.parse(fs.readFileSync('creds.json'));
   await Api.login(credentials);
   console.log('Call APIs now...');
 
-  await Algorithm.runMain(50);
+  // Follow limit: max 100 per day and 40 per hour
+  // - increase 20 per day and later up to max 500/day
+  // 7500 total following is the global MAX
+  // Max number of likes is 1.5x that amount
+
+  await Algorithm.runMain(100);
   // await Algorithm.runMassUnfollow();
 
   await Api.logout(credentials.username);
