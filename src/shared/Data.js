@@ -1,10 +1,15 @@
 const fs = require('fs');
 
 const Data = {
+  credentialsFile: './creds.json',
   futureUnfollowListFile: './data/future-unfollow.json',
   initialTargetsFile: './data/initial-targets.json',
   processedAccountsFile: './data/processed-accounts.json',
   qualityListCollectionFile: './data/quality-accounts-collection.json',
+
+  getCredentials() {
+    return JSON.parse(fs.readFileSync(Data.credentialsFile));
+  },
 
   getFutureUnfollowList() {
     return JSON.parse(fs.readFileSync(Data.futureUnfollowListFile)).future_unfollow;
@@ -25,6 +30,21 @@ const Data = {
   storeProcessedAccountsList(data) {
     fs.writeFileSync(Data.processedAccountsFile, JSON.stringify({ processed_accounts: data }, null, 2));
   },
+
+  persistNewlyProcessedAndFollowed(newlyProcessed, newlyFollowed) {
+    const timestamp = Date.now();
+
+    // Store in 'processed' so we don't process them in the future
+    Data.storeProcessedAccountsList([
+      ...Data.getProcessedAccountsList(),
+      ...newlyProcessed.map(({ id, username }) => ({ userId: id, username, timestamp })),
+    ]);
+    // Store in 'unfollow' so that we unfollow them after 3 days
+    Data.storeFutureUnfollowList([
+      ...Data.getFutureUnfollowList(),
+      ...newlyFollowed.map(({ id, username }) => ({ userId: id, username, timestamp })),
+    ]);
+  }
 
   storeQualityListCollection(list) {
     fs.writeFileSync(Data.qualityListCollectionFile, JSON.stringify({ quality_accounts: list }, null, 2));

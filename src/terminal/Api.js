@@ -111,7 +111,7 @@ const Api = {
   /* GET api methods */
   getUser(username) {
     return Api.getEndpoint(Url.getUsernameApiUrl(username))
-      .then(JSON.parse);
+      .then(data => JSON.parse(data).graphql.user);
   },
 
   // Returns a list of posts that have this hashtag

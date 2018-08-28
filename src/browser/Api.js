@@ -71,15 +71,15 @@ const Api = {
     await waiting(3000);
     return followers;
   },
-/*
+
   // Returns up to numFollowers of the target userId
   // Wrapper around getUserFollowers() to simplify/remove pagination complications 
-  getUserFollowersFirstN: async (userId, numFollowers = null, blacklist = new Set()) => {
+  async getUserFollowersFirstN(browserInstance, userId, numFollowers = null, blacklist = new Set()) {
     if (!numFollowers) {
-      return Api.getUserFollowers(userId);
+      return Api.getUserFollowers(browserInstance, userId);
     }
     const followers = [];
-    const appendFollowers = (data) => followers.push(...data.data.user.edge_followed_by.edges
+    const appendFollowers = (data) => followers.push(...data.edges
       .filter(({ node }) => !node.is_private)
       .map(({ node: { id, username } }) => ({ id, username }))
       .filter(({ id }) => !blacklist.has(id))
@@ -88,9 +88,9 @@ const Api = {
     let endCursor = null;
     let hasNextPage = false;
     do {
-      const moreFollowers = await Api.getUserFollowers(userId, endCursor);
+      const moreFollowers = await Api.getUserFollowers(browserInstance, userId, endCursor);
       appendFollowers(moreFollowers);
-      const nextPage = moreFollowers.data.user.edge_followed_by.page_info;
+      const nextPage = moreFollowers.page_info;
       endCursor = nextPage.end_cursor;
       hasNextPage = nextPage.has_next_page;
     } while (hasNextPage && followers.length < numFollowers);
@@ -98,7 +98,7 @@ const Api = {
     const resultFollowers = followers.slice(0, numFollowers);
     console.info(`Found ${resultFollowers.length} out of ${numFollowers} followers requested`);
     return resultFollowers;
-  },*/
+  },
 
   /* POST api methods */
   followUser(browserInstance, username) {
