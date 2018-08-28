@@ -6,10 +6,13 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "selenium": "selenium-standalone start",
+    "browser": "node ./browser/main.js"
   },
   "dependencies": {
     "request": "^2.88.0",
-    "request-promise": "^4.2.2"
+    "request-promise": "^4.2.2",
+    "webdriverio": "^4.13.2"
   }
 }
