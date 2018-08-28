@@ -35,8 +35,8 @@ async function debugAdvancedGetDataEndpoints() {
   fs.writeFileSync('./out/debug-user-followers.json', JSON.stringify(userFollowers, null, 2));
   fs.writeFileSync('./out/debug-media-likers.json', JSON.stringify(mediaLikers, null, 2));
 
-  const userFollowersFirstEighty = await Api.getUserFollowersFirstN('6719220571', 80);
-  console.log(userFollowersFirstEighty);
+  const userFollowersFirstOneEighty = await Api.getUserFollowersFirstN('6719220571', 180);
+  fs.writeFileSync('./out/debug-dalimil-followers.json', JSON.stringify(userFollowersFirstOneEighty, null, 2));
 }
 
 async function debugPostEndpoints() {
