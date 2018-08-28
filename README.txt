@@ -18,19 +18,20 @@ Competition - What is out there
 Requirements
 ------------
 0. You feed/account has to look good - for people to decide to follow you based on your page; Are you unique?
-1. Target audience - what hashtags or accounts do these people (photographers) follow
+1. Target audience
+	- what hashtags or accounts do these people (photographers) follow?
+	- Idea: if there is a good photographer I admire, then his/her followers could like my content too (follow me)
 2. Check instagram limits for daily follows and likes; Avoid bot & spam detectors
 3. Non-evil interactions:
-	- Limit to follow, unfollow, like (below 1000likes/day is safe)
+	- Limit to likes, follow, and unfollow
 	- other actions like DM, comments, reposts, could be spammy or harmful
 
 Implementation
 --------------
 - We need to drive a browser instance to do this (Webdriver.IO)
-	- OR: come up with an API script-only solution (<- we chose this, thanks to discovery of existing work)
+	- OR: come up with an API script-only solution (<- existing work/libraries attempted this)
 - Instagram account login
-- BFS Algorithm with time delays between each step
-- Algorithm
+- Algorithm (with time delays between steps)
 	- Need a list of accounts or posts to start with
 		- initialize with target hashtags OR target (really good) accounts
 		- Idea: Crawl through accounts (people) that follow these hashtags or good accounts,
@@ -40,13 +41,12 @@ Implementation
 	- For each account on 'Future Follow' list:
 		- scrape for quality:
 			- must be public, must not be already followed and not already following me
-			- must have > 30 posts
-			- must have < 3000 followers
+			- must have > 10 posts
+			- must have < 2000 followers
 			- must have < 2000 following
 			- must have followers-per-post ratio below say 80 (e.g. account with 100 posts has max 5000 followers)
-			- must not have these words in bio: "click, bio, link, webcam, cam, gain, snapchat, follow, followers, kik"
-			- must not have these words in name or username: "salon, sex, rental, free, follow, follower"
-			- randomly skip this acc with 10% chance (more human like behaviour)
+			- must not have offensive or spammy words in bio
+			- must not have offensive or spammy words in name or username
 		- if checks OK:
 			- follow this account and like maximum 1 or 2 of its posts
 			- add to the 'Future Unfollow' list with timestamp
