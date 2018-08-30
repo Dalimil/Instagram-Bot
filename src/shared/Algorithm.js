@@ -21,12 +21,21 @@ const Algorithm = {
       return false;
     }
 
-    // must have > 10 posts
-    const { count: numPosts } = userData.edge_owner_to_timeline_media;
-    if (numPosts < 10) {
+    // must have >= 5 posts
+    const { count: numPosts, edges: posts } = userData.edge_owner_to_timeline_media;
+    if (numPosts < 5) {
       console.info(`(does not have enough posts: ${numPosts})`);
       return false;
     }
+
+    // must have posted within the last 80 days
+    const eightyDaysAgo = Date.now() - (1000 * 60 * 60 * 24 * 90);
+    const latestPostTimestamp = posts[0].node.taken_at_timestamp;
+    if (latestPostTimestamp < eightyDaysAgo) {
+      console.info('(latest post is too old)');
+      return false;
+    }
+
 
     // must have < 2000 followers
     const { count: followers } = userData.edge_followed_by;
@@ -35,10 +44,10 @@ const Algorithm = {
       return false;
     }
     
-    // must have < 2000 following
+    // must have < 3000 following
     const { count: following } = userData.edge_follow;
-    if (following > 2000) {
-      console.info('(is following over 2000 accounts)');
+    if (following > 3000) {
+      console.info('(is following over 3000 accounts)');
       return false;
     }
 

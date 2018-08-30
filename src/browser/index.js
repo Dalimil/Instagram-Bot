@@ -37,6 +37,9 @@ exports.runMain = async (numUsersToProcess) => {
   // Update storage
   Data.persistNewlyProcessedAndFollowed(futureFollowList, qualityFutureFollowList);
 
+  console.info('Total processed: ', futureFollowList.length);
+  console.info('Total followed: ', qualityFutureFollowList.length);
+  console.info('Followed: ', qualityFutureFollowList);
   Api.logout(client);
   // await client.end();
 };
