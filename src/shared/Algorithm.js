@@ -30,17 +30,17 @@ const Algorithm = {
 
     // must have posted within the last 80 days
     const eightyDaysAgo = Date.now() - (1000 * 60 * 60 * 24 * 90);
-    const latestPostTimestamp = posts[0].node.taken_at_timestamp;
+    const latestPostTimestamp = posts[0].node.taken_at_timestamp * 1000;
     if (latestPostTimestamp < eightyDaysAgo) {
       console.info('(latest post is too old)');
       return false;
     }
 
 
-    // must have < 2000 followers
+    // must have < 3000 followers
     const { count: followers } = userData.edge_followed_by;
-    if (followers > 2000) {
-      console.info('(has over 2000 followers)');
+    if (followers > 3000) {
+      console.info('(has over 3000 followers)');
       return false;
     }
     
