@@ -10,7 +10,7 @@ const Api = {
       .pause(2000)
       .click('[name=username]')
       .keys(credentials.username)
-      .pause(2000)
+      .pause(7000) // wait to enter manually
       .click('[name=password]')
       .keys(credentials.password)
       .pause(2000)
