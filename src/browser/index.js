@@ -6,6 +6,7 @@ const Data = require('../shared/Data');
 const Algorithm = require('../shared/Algorithm');
 
 const Api = require('./Api');
+const followRequestsPerHourLimit = 40;
 
 exports.runMain = async (numUsersToProcess) => {
   await client.init();
@@ -19,16 +20,22 @@ exports.runMain = async (numUsersToProcess) => {
   console.info('Target user id', targetUserId);
   
   const alreadyProcessed = new Set(Data.getProcessedAccountsList().map(account => account.userId));
-  const futureFollowList = await Api.getUserFollowersFirstN(client, targetUserId,
+  let futureFollowList = await Api.getUserFollowersFirstN(client, targetUserId,
     numUsersToProcess, alreadyProcessed);
   
   // Follow users (but make sure they are quality accounts first)
   const qualityFutureFollowList = [];
-  for (const account of futureFollowList) {
+  for (const [index, account] of futureFollowList.entries()) {
     const accountData = await Api.getUser(client, account.username);
     if (Algorithm.isQualityAccount(accountData)) {
       qualityFutureFollowList.push(account);
       await Api.followUser(client, account.username);
+
+      // hourly follow limit reached? - stop now
+      if (qualityFutureFollowList.length >= followRequestsPerHourLimit - 2) {
+        futureFollowList = futureFollowList.slice(0, index + 1);
+        break;
+      }
     } else {
       console.log('Skipping', account.username);
     }
