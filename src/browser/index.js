@@ -6,16 +6,17 @@ const Data = require('../shared/Data');
 const Algorithm = require('../shared/Algorithm');
 
 const Api = require('./Api');
-const followRequestsPerHourLimit = 40;
+const followRequestsPerHourLimit = 40; // verified limit of maximum accounts one can follow in 1 hour
+const numUsersToProcess = 100; // We'll get this amount of followers first, many will be skipped
 
-exports.runMain = async (numUsersToProcess) => {
+exports.runMain = async (initialTarget) => {
   await client.init();
   await Api.login(client, Data.getCredentials());
 
   console.info(new Date().toLocaleString(), 'Executing main follow algorithm...');
 
   // Get target user id
-  const targetUsername = Data.getInitialTargets().initial_accounts[0].username;
+  const targetUsername = initialTarget.username;
   const targetUserId = (await Api.getUser(client, targetUsername)).id;
   console.info('Target user id', targetUserId);
   
@@ -33,6 +34,7 @@ exports.runMain = async (numUsersToProcess) => {
 
       // hourly follow limit reached? - stop now
       if (qualityFutureFollowList.length >= followRequestsPerHourLimit - 2) {
+        console.log('Hourly limit reached, skipping the rest...');
         futureFollowList = futureFollowList.slice(0, index + 1);
         break;
       }

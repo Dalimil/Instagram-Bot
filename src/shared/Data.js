@@ -3,7 +3,6 @@ const fs = require('fs');
 const Data = {
   credentialsFile: './creds.json',
   futureUnfollowListFile: './data/future-unfollow.json',
-  initialTargetsFile: './data/initial-targets.json',
   processedAccountsFile: './data/processed-accounts.json',
   qualityListCollectionFile: './data/quality-accounts-collection.json',
 
@@ -17,10 +16,6 @@ const Data = {
 
   storeFutureUnfollowList(data) {
     fs.writeFileSync(Data.futureUnfollowListFile, JSON.stringify({ future_unfollow: data }, null, 2));
-  },
-
-  getInitialTargets() {
-    return JSON.parse(fs.readFileSync(Data.initialTargetsFile));
   },
 
   getProcessedAccountsList() {

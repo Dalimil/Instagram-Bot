@@ -8,7 +8,9 @@ const TerminalBot = require('./src/terminal');
   // Max number of likes is 1.5x that amount
 
   // Browser (webdriver) version of the bot
-  await BrowserBot.runMain(100);
+  // TODO: Could implement name/username filtering for 'photography' to find photographers
+  // TODO: Could get #streetphotography feed likers because these are active users
+  await BrowserBot.runMain({ username: 'jordhammond' });
   // await BrowserBot.runMassUnfollow();
 
   // TODO: terminal version of the bot is currently broken
