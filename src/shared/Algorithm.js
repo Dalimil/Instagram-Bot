@@ -28,10 +28,10 @@ const Algorithm = {
       return false;
     }
 
-    // must have posted within the last 60 days
-    const sixtyDaysAgo = Date.now() - (1000 * 60 * 60 * 24 * 60);
+    // must have posted within the last 50 days
+    const fiftyDaysAgo = Date.now() - (1000 * 60 * 60 * 24 * 50);
     const latestPostTimestamp = posts[0].node.taken_at_timestamp * 1000;
-    if (latestPostTimestamp < sixtyDaysAgo) {
+    if (latestPostTimestamp < fiftyDaysAgo) {
       console.info('(latest post is too old)');
       return false;
     }
