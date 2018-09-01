@@ -81,6 +81,7 @@ const Api = {
     const followers = [];
     const appendFollowers = (data) => followers.push(...data.edges
       .filter(({ node }) => !node.is_private)
+      // .filter(({ node }) => node.full_name.toLowerCase().includes('photography'))
       .map(({ node: { id, username } }) => ({ id, username }))
       .filter(({ id }) => !blacklist.has(id))
     );
