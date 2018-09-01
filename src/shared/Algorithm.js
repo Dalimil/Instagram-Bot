@@ -86,11 +86,11 @@ const Algorithm = {
     const toKeep = [];
     const toUnfollow = [];
     // Determine which accounts were added long time ago
-    unfollowList.forEach(({ timestamp, userId }) => {
-      if (timestamp < threeDaysAgo) {
-        toUnfollow.push(userId);
+    unfollowList.forEach(account => {
+      if (account.timestamp < threeDaysAgo) {
+        toUnfollow.push(account);
       } else {
-        toKeep.push({ userId, timestamp });
+        toKeep.push(account);
       }
     });
 

@@ -63,8 +63,8 @@ exports.runMassUnfollow = async () => {
 
   // Unfollow
   console.info(`Accounts to be unfollowed: ${toUnfollow.length}`);
-  for (const userId of toUnfollow) {
-    await Api.unfollowUser(client, userId);
+  for (const account of toUnfollow) {
+    await Api.unfollowUser(client, account.username);
   };
   
   // Update storage
