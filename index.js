@@ -4,7 +4,7 @@ const TerminalBot = require('./src/terminal');
 (async () => {
   // Follow limit: between 100 up to max 500 per day
   // HARD LIMIT: 40 follows per hour!
-  // Unknown unfollow limit: but 70 per hour went without problems
+  // Unknown unfollow limit: but 120 per hour ran without problems
   // 7500 total following is the global MAX
   // Max number of likes is 1.5x that amount
 
