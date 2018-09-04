@@ -9,8 +9,9 @@ const TerminalBot = require('./src/terminal');
   // Max number of likes is 1.5x that amount
 
   // Browser (webdriver) version of the bot
-  // TODO: Could implement name/username filtering for 'photography' to find photographers
   // TODO: Could get #streetphotography feed likers because these are active users
+  // await BrowserBot.runMain({ hashtag: '#streetphotography' });
+  // 'Follow by username' has about 10-20% conversion rate:
   await BrowserBot.runMain({ username: 'jordhammond' });
   // await BrowserBot.runMassUnfollow();
 
