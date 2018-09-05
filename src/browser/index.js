@@ -15,14 +15,25 @@ exports.runMain = async (initialTarget) => {
 
   console.info(new Date().toLocaleString(), 'Executing main follow algorithm...');
 
-  // Get target user id
-  const targetUsername = initialTarget.username;
-  const targetUserId = (await Api.getUser(client, targetUsername)).id;
-  console.info('Target user id', targetUserId);
-  
+  let futureFollowList = [];
+  if (initialTarget.username) {
+    console.info(`Initial target is a user: ${initialTarget.username}`);
+    // Get target user id
+    const targetUsername = initialTarget.username;
+    const targetUserId = (await Api.getUser(client, targetUsername)).id;
+    console.info('Target user id:', targetUserId);
+    futureFollowList = await Api.getUserFollowersFirstN(client, targetUserId,
+      numUsersToProcess, alreadyProcessed);
+  } else if (initialTarget.hashtag) {
+    console.info(`Initial target is a hashtag: ${initialTarget.hashtag}`);
+    // Get hashtag media feed
+    // TODO
+  } else {
+    console.error('Invalid initial target. Aborting...');
+    return;
+  }
+
   const alreadyProcessed = new Set(Data.getProcessedAccountsList().map(account => account.userId));
-  let futureFollowList = await Api.getUserFollowersFirstN(client, targetUserId,
-    numUsersToProcess, alreadyProcessed);
   
   // Follow users (but make sure they are quality accounts first)
   const qualityFutureFollowList = [];

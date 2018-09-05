@@ -1,6 +1,9 @@
 const BrowserBot = require('./src/browser');
 const TerminalBot = require('./src/terminal');
+// Note: terminal version of the bot is currently broken due to security challenge issues
 
+// Usage: yarn start [--unfollow]
+//  or simply 'yarn follow' and 'yarn unfollow'
 (async () => {
   // Follow limit: between 100 up to max 500 per day
   // HARD LIMIT: 40 follows per hour!
@@ -9,14 +12,15 @@ const TerminalBot = require('./src/terminal');
   // Max number of likes is 1.5x that amount
 
   // Browser (webdriver) version of the bot
-  // TODO: Could get #streetphotography feed likers because these are active users
-  // await BrowserBot.runMain({ hashtag: '#streetphotography' });
-  // 'Follow by username' has about 10-20% conversion rate:
-  await BrowserBot.runMain({ username: 'jordhammond' });
-  // await BrowserBot.runMassUnfollow();
+  
+  const commandArg = process.argv[2];
+  if (commandArg === 'unfollow' || commandArg === '--unfollow') {
+    await BrowserBot.runMassUnfollow();
+    return;
+  }
 
-  // TODO: terminal version of the bot is currently broken
-  //  due to a security challenge issues
-  // await TerminalBot.runMain(10, /* collectListOnly */ true);
-  // await TerminalBot.runMassUnfollow();
+  // 'Follow by hashtag' follows feed likers (because these are active users)
+  await BrowserBot.runMain({ hashtag: '#streetphotography' });
+  // 'Follow by username' has about 10-20% conversion rate:
+  // await BrowserBot.runMain({ username: 'jordhammond' });
 })();
