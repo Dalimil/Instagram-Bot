@@ -57,45 +57,86 @@ const Api = {
     return hashtagData.value;
   },
 
-  // Get username's followers (first few) - working with pagination
-  async getUserFollowers(browserInstance, userId, afterCursor = null) {
-    const variables = {
-      id: userId,
-      first: 40, // must be < 50
-    };
-    // For pagination
-    if (afterCursor) {
-      variables.after = afterCursor;
-    }
+  // Generic method to get data from this specific API
+  async queryGraphqlApi(browserInstance, queryHash, variables) {
     const query = {
-      query_hash: '7dd9a7e2160524fd85f50317462cff9f',
+      query_hash: queryHash,
       variables: JSON.stringify(variables),
     };
-    console.info(`GET ${afterCursor ? 'more ' : ''}followers of user ${userId}`);
-    const followers = await browserInstance
+    const data = await browserInstance
       .executeAsync(
         (apiUrl, query, done) => {
           const url = new URL(apiUrl);
           url.search = new URLSearchParams(query);
           fetch(url, { credentials: 'include' })
             .then(response => response.json())
-            .then(json => done(json.data.user.edge_followed_by));
+            .then(json => done(json.data));
         },
         Url.graphqlApiUrl,
         query,
       );
     await waiting(3000);
-    return followers.value;
+    return data.value;
+  },
+
+  // Get username's followers (first few) - working with pagination
+  getUserFollowers(browserInstance, userId, afterCursor = null) {
+    const variables = {
+      id: userId,
+      first: 40, // must be < 50
+      ...(!!afterCursor ? { after: afterCursor } : {}), // for pagination
+    };
+    console.info(`GET ${afterCursor ? 'more ' : ''}followers of user ${userId}`);
+    return Api.queryGraphqlApi(browserInstance, '7dd9a7e2160524fd85f50317462cff9f', variables)
+      .then(data => data.user.edge_followed_by);
+  },
+
+  // Get a list of people who liked this media (first few) - working with pagination
+  getMediaLikers(browserInstance, mediaId, afterCursor = null) {
+    const variables = {
+      shortcode: mediaId,
+      first: afterCursor ? 12 : 24, // must be < 50
+      ...(!!afterCursor ? { after: afterCursor } : {}), // for pagination
+    };
+    console.info(`GET ${afterCursor ? 'more ' : ''}likers of media ${mediaId}`);
+    return Api.queryGraphqlApi(browserInstance, 'e0f59e4a1c8d78d0161873bc2ee7ec44', variables)
+      .then(data => data.shortcode_media.edge_liked_by);
+  },
+
+  // Returns up to numLikers of the target mediaId
+  // Wrapper around getMediaLikers() to simplify/remove pagination complications 
+  async getMediaLikersFirstN(browserInstance, mediaId, numLikers, blacklist) {
+    const mediaLikers = await Api.getListOfAccountsFirstN(
+      browserInstance,
+      (afterCursor) => Api.getMediaLikers(browserInstance, mediaId, afterCursor || null),
+      numLikers,
+      blacklist,
+    );
+    console.info(`Found ${mediaLikers.length} out of ${numLikers} likers requested`);
+    return mediaLikers;
   },
 
   // Returns up to numFollowers of the target userId
   // Wrapper around getUserFollowers() to simplify/remove pagination complications 
-  async getUserFollowersFirstN(browserInstance, userId, numFollowers = null, blacklist = new Set()) {
-    if (!numFollowers) {
-      return Api.getUserFollowers(browserInstance, userId);
+  async getUserFollowersFirstN(browserInstance, userId, numFollowers, blacklist) {
+    const userFollowers = await Api.getListOfAccountsFirstN(
+      browserInstance,
+      (afterCursor) => Api.getUserFollowers(browserInstance, userId, afterCursor || null),
+      numFollowers,
+      blacklist,
+    );
+    console.info(`Found ${userFollowers.length} out of ${numFollowers} followers requested`);
+    return userFollowers;
+  },
+
+  // Returns up to numAccounts accounts (followers or likers), using the apiGetDataMethod (which uses pagination)
+  // Wrapper to simplify/remove pagination complications
+  async getListOfAccountsFirstN(browserInstance, getApiDataMethod, numAccounts = null, blacklist = new Set()) {
+    if (!numAccounts) {
+      return getApiDataMethod();
     }
-    const followers = [];
-    const appendFollowers = (data) => followers.push(...data.edges
+    const accounts = [];
+    const appendAccounts = (data) => accounts.push(...data.edges
       .filter(({ node }) => !node.is_private)
       // .filter(({ node }) => node.full_name.toLowerCase().includes('photography'))
       .map(({ node: { id, username } }) => ({ id, username }))
@@ -105,36 +146,15 @@ const Api = {
     let endCursor = null;
     let hasNextPage = false;
     do {
-      const moreFollowers = await Api.getUserFollowers(browserInstance, userId, endCursor);
-      appendFollowers(moreFollowers);
-      const nextPage = moreFollowers.page_info;
+      const moreAccounts = await getApiDataMethod(endCursor);
+      appendAccounts(moreAccounts);
+      const nextPage = moreAccounts.page_info;
       endCursor = nextPage.end_cursor;
       hasNextPage = nextPage.has_next_page;
-    } while (hasNextPage && followers.length < numFollowers);
+    } while (hasNextPage && accounts.length < numAccounts);
     
-    const resultFollowers = followers.slice(0, numFollowers);
-    console.info(`Found ${resultFollowers.length} out of ${numFollowers} followers requested`);
-    return resultFollowers;
+    return accounts.slice(0, numAccounts);
   },
-
-  /* Get people who liked this media
-  getMediaLikers(mediaId, afterCursor = null) {
-    const variables = {
-      shortcode: mediaId,
-      first: afterCursor ? 12 : 24, // must be < 50
-    };
-    // For pagination
-    if (afterCursor) {
-      variables.after = afterCursor;
-    }
-    const query = {
-      query_hash: 'e0f59e4a1c8d78d0161873bc2ee7ec44',
-      variables: JSON.stringify(variables),
-    };
-    console.info('GET media likers', mediaId, afterCursor);
-    return Api.getEndpoint(Url.graphqlApiUrl, query)
-      .then(JSON.parse);
-  }, */
 
   /* POST api methods */
   followUser(browserInstance, username) {
