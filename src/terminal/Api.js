@@ -116,19 +116,19 @@ const Api = {
 
   // Returns a list of posts that have this hashtag
   getHashtag(hashtag) {
-    return Api.getEndpoint(Url.getHashtagUrl(hashtag))
+    return Api.getEndpoint(Url.getHashtagApiUrl(hashtag))
       .then(JSON.parse);
   },
 
   // LocationId such as 895676663
   getLocation(locationId) {
-    return Api.getEndpoint(Url.getLocationUrl(locationId))
+    return Api.getEndpoint(Url.getLocationApiUrl(locationId))
       .then(JSON.parse);
   },
 
   // Given the mediaId (= graph node 'shortcode'), it returns more details, such as location
   getMediaDetail(mediaId) {
-    return Api.getEndpoint(Url.getMediaDetailUrl(mediaId))
+    return Api.getEndpoint(Url.getMediaDetailApiUrl(mediaId))
       .then(JSON.parse);
   },
 

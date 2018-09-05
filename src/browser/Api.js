@@ -27,6 +27,7 @@ const Api = {
       .url(Url.defaultUrl);
   },
 
+  // Returns user info/details
   async getUser(browserInstance, username) {
     const user = await browserInstance
       .executeAsync(
@@ -39,6 +40,21 @@ const Api = {
       );
     await waiting(3000);
     return user.value;
+  },
+
+  // Returns a list of posts that have this hashtag
+  async getHashtag(browserInstance, hashtag) {
+    const hashtagData = await browserInstance
+      .executeAsync(
+        (hashtagUrl, done) => {
+          fetch(hashtagUrl, { credentials: 'include' })
+            .then(response => response.json())
+            .then(json => done(json.graphql.hashtag));
+        },
+        Url.getHashtagApiUrl(hashtag),
+      );
+    await waiting(3000);
+    return hashtagData.value;
   },
 
   // Get username's followers (first few) - working with pagination
@@ -100,6 +116,25 @@ const Api = {
     console.info(`Found ${resultFollowers.length} out of ${numFollowers} followers requested`);
     return resultFollowers;
   },
+
+  /* Get people who liked this media
+  getMediaLikers(mediaId, afterCursor = null) {
+    const variables = {
+      shortcode: mediaId,
+      first: afterCursor ? 12 : 24, // must be < 50
+    };
+    // For pagination
+    if (afterCursor) {
+      variables.after = afterCursor;
+    }
+    const query = {
+      query_hash: 'e0f59e4a1c8d78d0161873bc2ee7ec44',
+      variables: JSON.stringify(variables),
+    };
+    console.info('GET media likers', mediaId, afterCursor);
+    return Api.getEndpoint(Url.graphqlApiUrl, query)
+      .then(JSON.parse);
+  }, */
 
   /* POST api methods */
   followUser(browserInstance, username) {

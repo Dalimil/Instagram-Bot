@@ -12,7 +12,7 @@ const TerminalBot = require('./src/terminal');
   // Max number of likes is 1.5x that amount
 
   // Browser (webdriver) version of the bot
-  
+
   const commandArg = process.argv[2];
   if (commandArg === 'unfollow' || commandArg === '--unfollow') {
     await BrowserBot.runMassUnfollow();
@@ -20,7 +20,7 @@ const TerminalBot = require('./src/terminal');
   }
 
   // 'Follow by hashtag' follows feed likers (because these are active users)
-  await BrowserBot.runMain({ hashtag: '#streetphotography' });
+  await BrowserBot.runMain({ hashtag: 'streetphotography' });
   // 'Follow by username' has about 10-20% conversion rate:
   // await BrowserBot.runMain({ username: 'jordhammond' });
 })();

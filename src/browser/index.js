@@ -4,6 +4,7 @@ const client = webdriverio.remote(options);
 
 const Data = require('../shared/Data');
 const Algorithm = require('../shared/Algorithm');
+const Url = require('../shared/Url');
 
 const Api = require('./Api');
 const followRequestsPerHourLimit = 40; // verified limit of maximum accounts one can follow in 1 hour
@@ -19,14 +20,19 @@ exports.runMain = async (initialTarget) => {
   if (initialTarget.username) {
     console.info(`Initial target is a user: ${initialTarget.username}`);
     // Get target user id
-    const targetUsername = initialTarget.username;
-    const targetUserId = (await Api.getUser(client, targetUsername)).id;
+    const targetUserId = (await Api.getUser(client, initialTarget.username)).id;
     console.info('Target user id:', targetUserId);
     futureFollowList = await Api.getUserFollowersFirstN(client, targetUserId,
       numUsersToProcess, alreadyProcessed);
   } else if (initialTarget.hashtag) {
     console.info(`Initial target is a hashtag: ${initialTarget.hashtag}`);
     // Get hashtag media feed
+    const { edges: hashtagTopPosts } = (await Api.getHashtag(client, initialTarget.hashtag))
+      .edge_hashtag_to_top_posts;
+    const { node: targetPopularPost } = hashtagTopPosts[Math.floor(Math.random() * hashtagTopPosts.length)];
+    console.info(`Target likers of media post: ${Url.getMediaUrl(targetPopularPost.shortcode)}`);
+    
+
     // TODO
   } else {
     console.error('Invalid initial target. Aborting...');

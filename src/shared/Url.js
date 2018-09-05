@@ -6,10 +6,10 @@ const Url = {
   logoutUrl: 'https://www.instagram.com/accounts/logout/',
   graphqlApiUrl: 'https://www.instagram.com/graphql/query/',
 
-  getHashtagUrl: (hashtag) =>
+  getHashtagApiUrl: (hashtag) =>
     `https://www.instagram.com/explore/tags/${hashtag}/?__a=1`,
 
-  getLocationUrl: (locationId) =>
+  getLocationApiUrl: (locationId) =>
     `https://www.instagram.com/explore/locations/${locationId}/?__a=1`,
 
   getUserPageUrl: (username) =>
@@ -30,7 +30,10 @@ const Url = {
   getUnlikeUrl: (mediaId) =>
     `https://www.instagram.com/web/likes/${mediaId}/unlike/`,
 
-  getMediaDetailUrl: (mediaId) =>
+  getMediaUrl: (mediaId) =>
+   `https://www.instagram.com/p/${mediaId}/`,
+
+  getMediaDetailApiUrl: (mediaId) =>
    `https://www.instagram.com/p/${mediaId}/?__a=1`,
 };
 
