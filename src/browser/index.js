@@ -16,6 +16,7 @@ exports.runMain = async (initialTarget) => {
 
   console.info(new Date().toLocaleString(), 'Executing main follow algorithm...');
 
+  const alreadyProcessed = new Set(Data.getProcessedAccountsList().map(account => account.userId));
   let futureFollowList = [];
   if (initialTarget.username) {
     console.info(`Initial target is a user: ${initialTarget.username}`);
@@ -30,16 +31,14 @@ exports.runMain = async (initialTarget) => {
     const { edges: hashtagTopPosts } = (await Api.getHashtag(client, initialTarget.hashtag))
       .edge_hashtag_to_top_posts;
     const { node: targetPopularPost } = hashtagTopPosts[Math.floor(Math.random() * hashtagTopPosts.length)];
-    console.info(`Target likers of media post: ${Url.getMediaUrl(targetPopularPost.shortcode)}`);
-    
-
-    // TODO
+    const targetMediaId = targetPopularPost.shortcode;
+    console.info(`Target likers of media post: ${Url.getMediaUrl(targetMediaId)}`);
+    futureFollowList = await Api.getMediaLikersFirstN(client, targetMediaId,
+      numUsersToProcess, alreadyProcessed);
   } else {
     console.error('Invalid initial target. Aborting...');
     return;
   }
-
-  const alreadyProcessed = new Set(Data.getProcessedAccountsList().map(account => account.userId));
   
   // Follow users (but make sure they are quality accounts first)
   const qualityFutureFollowList = [];
@@ -56,7 +55,7 @@ exports.runMain = async (initialTarget) => {
         break;
       }
     } else {
-      console.log('Skipping', account.username);
+      console.log(':> skipping', account.username);
     }
   }
 

@@ -148,6 +148,7 @@ const Api = {
     do {
       const moreAccounts = await getApiDataMethod(endCursor);
       appendAccounts(moreAccounts);
+      console.info(`Accounts found so far: ${accounts.length}`);
       const nextPage = moreAccounts.page_info;
       endCursor = nextPage.end_cursor;
       hasNextPage = nextPage.has_next_page;
