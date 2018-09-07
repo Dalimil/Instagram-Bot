@@ -18,19 +18,30 @@ const Api = {
       .url(Url.defaultLoginUrl)
       .pause(2000);
     
-    const isNotLoggedIn = await browserInstance.getTitle().toLowerCase().includes('login');
+    const isNotLoggedIn = (await browserInstance.getTitle()).toLowerCase().includes('login');
     if (isNotLoggedIn) {
       console.info('Logging in', credentials.username, '...');
       await browserInstance
-      .click('[name=username]')
-      .keys(credentials.username)
-      .pause(7000) // wait to enter manually
-      .click('[name=password]')
-      .keys(credentials.password)
-      .pause(2000)
-      .click('button=Log in')
-      .pause(5000)
-      .url(Url.defaultUrl);
+        .click('[name=username]')
+        .keys(credentials.username)
+        .pause(7000) // wait to enter manually
+        .click('[name=password]')
+        .keys(credentials.password)
+        .pause(2000)
+        .click('button=Log in')
+        .pause(5000);
+
+      const isChallenged = (await browserInstance.getUrl()).includes('challenge');
+      if (isChallenged) {
+        // Wait for the user to solve it manually
+        console.info('Waiting for user to solve the challenge...');
+        await browserInstance.waitUntil(
+          () => browserInstance.getUrl().then(url => !url.includes('challenge')),
+          120 * 1000, // 2min
+          'Took too long to solve challenge',
+          1000, // check again every second
+        );
+      }
     } else {
       console.info('Already logged in');
     }
