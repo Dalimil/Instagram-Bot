@@ -2,12 +2,21 @@ const fs = require('fs');
 
 const Data = {
   credentialsFile: './creds.json',
+  cookieSessionFile: './session.json',
   futureUnfollowListFile: './data/future-unfollow.json',
   processedAccountsFile: './data/processed-accounts.json',
   qualityListCollectionFile: './data/quality-accounts-collection.json',
 
   getCredentials() {
     return JSON.parse(fs.readFileSync(Data.credentialsFile));
+  },
+
+  getCookieSession() {
+    return JSON.parse(fs.readFileSync(Data.cookieSessionFile)).cookies;
+  },
+
+  storeCookieSession(data) {
+    fs.writeFileSync(Data.cookieSessionFile, JSON.stringify({ cookies: data }, null, 2));
   },
 
   getFutureUnfollowList() {

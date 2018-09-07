@@ -1,13 +1,27 @@
 const Url = require('../shared/Url');
+const Data = require('../shared/Data');
 
 const waiting = (ms) => new Promise(resolve => setTimeout(resolve, (ms * 0.7) + (0.3 * ms * Math.random())));
 
 const Api = {
   async login(browserInstance, credentials) {
-    console.info('Logging in', credentials.username, '...')
+    await browserInstance
+      .url(Url.defaultUrl)
+      .pause(2000);
+
+    console.info('Trying to restore previous session...');
+    const cookies = Data.getCookieSession();
+    for (const cookie of cookies) {
+      await browserInstance.setCookie(cookie);
+    }
     await browserInstance
       .url(Url.defaultLoginUrl)
-      .pause(2000)
+      .pause(2000);
+    
+    const isNotLoggedIn = await browserInstance.getTitle().toLowerCase().includes('login');
+    if (isNotLoggedIn) {
+      console.info('Logging in', credentials.username, '...');
+      await browserInstance
       .click('[name=username]')
       .keys(credentials.username)
       .pause(7000) // wait to enter manually
@@ -17,14 +31,27 @@ const Api = {
       .click('button=Log in')
       .pause(5000)
       .url(Url.defaultUrl);
+    } else {
+      console.info('Already logged in');
+    }
   },
 
-  async logout(browserInstance) {
-    console.info('Logging out...');
-    await browserInstance
-      .url(Url.logoutUrl)
-      .pause(3000)
-      .url(Url.defaultUrl);
+  async logout(browserInstance, force = false) {
+    if (force) {
+      console.info('Logging out...');
+      await browserInstance
+        .url(Url.logoutUrl)
+        .pause(3000)
+        .url(Url.defaultUrl);
+    } else {
+      // persist cookies only
+      console.info('Ending session...');
+      const cookies = await browserInstance.getCookie();
+      Data.storeCookieSession(cookies);
+
+      await browserInstance
+        .url('https://example.com');
+    }
   },
 
   // Returns user info/details

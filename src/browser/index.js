@@ -13,7 +13,6 @@ const numUsersToProcess = 100; // We'll get this amount of followers first, many
 exports.runMain = async (initialTarget) => {
   await client.init();
   await Api.login(client, Data.getCredentials());
-
   console.info(new Date().toLocaleString(), 'Executing main follow algorithm...');
 
   const alreadyProcessed = new Set(Data.getProcessedAccountsList().map(account => account.userId));
