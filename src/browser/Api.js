@@ -144,6 +144,11 @@ const Api = {
   // Returns up to numLikers of the target mediaId
   // Wrapper around getMediaLikers() to simplify/remove pagination complications 
   async getMediaLikersFirstN(browserInstance, mediaId, numLikers, blacklist) {
+    // Navigating there first makes the behaviour more human
+    await browserInstance
+      .url(Url.getMediaUrl(mediaId))
+      .pause(2000);
+
     const mediaLikers = await Api.getListOfAccountsFirstN(
       browserInstance,
       (afterCursor) => Api.getMediaLikers(browserInstance, mediaId, afterCursor || null),
