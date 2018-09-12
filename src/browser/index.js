@@ -10,9 +10,17 @@ const Api = require('./Api');
 const followRequestsPerHourLimit = 40; // verified limit of maximum accounts one can follow in 1 hour
 const numUsersToProcess = 100; // We'll get this amount of followers first, many will be skipped
 
-exports.runMain = async (initialTarget) => {
+exports.init = async () => {
   await client.init();
   await Api.login(client, Data.getCredentials());
+};
+
+exports.end = async () => {
+  await Api.logout(client);
+  // await client.end();
+};
+
+exports.runMain = async (initialTarget) => {
   console.info(new Date().toLocaleString(), 'Executing main follow algorithm...');
 
   const alreadyProcessed = new Set(Data.getProcessedAccountsList().map(account => account.userId));
@@ -64,14 +72,9 @@ exports.runMain = async (initialTarget) => {
   console.info('Total processed: ', futureFollowList.length);
   console.info('Total followed: ', qualityFutureFollowList.length);
   console.info('Followed: ', qualityFutureFollowList);
-  Api.logout(client);
-  // await client.end();
 };
 
 exports.runMassUnfollow = async () => {
-  await client.init();
-  await Api.login(client, Data.getCredentials());
-
   console.info(new Date().toLocaleString(), 'Executing mass unfollow...');
 
   const { toKeep, toUnfollow } = Algorithm.getCurrentUnfollowLists();
@@ -84,9 +87,6 @@ exports.runMassUnfollow = async () => {
   
   // Update storage
   Data.storeFutureUnfollowList(toKeep);
-
-  Api.logout(client);
-  // await client.end();
 };
 
 

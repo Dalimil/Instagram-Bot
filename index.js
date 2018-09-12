@@ -11,16 +11,22 @@ const TerminalBot = require('./src/terminal');
   // 7500 total following is the global MAX
   // Max number of likes is 1.5x that amount
 
-  // Browser (webdriver) version of the bot
-
   const commandArg = process.argv[2];
-  if (commandArg === 'unfollow' || commandArg === '--unfollow') {
+  const skipFollow = ['unfollow', '--unfollow'].includes(commandArg);
+  const skipUnfollow = ['follow', '--follow'].includes(commandArg);
+
+  // Browser (webdriver) version of the bot
+  BrowserBot.init();
+
+  if (!skipFollow) {
+    // 'Follow by hashtag' follows feed likers (because these are active users)
+    await BrowserBot.runMain({ hashtag: 'streetphotography' });
+    // 'Follow by username' has about 10-20% conversion rate:
+    // await BrowserBot.runMain({ username: 'jordhammond' });
+  }
+  if (!skipUnfollow) {
     await BrowserBot.runMassUnfollow();
-    return;
   }
 
-  // 'Follow by hashtag' follows feed likers (because these are active users)
-  await BrowserBot.runMain({ hashtag: 'streetphotography' });
-  // 'Follow by username' has about 10-20% conversion rate:
-  // await BrowserBot.runMain({ username: 'jordhammond' });
+  await BrowserBot.end();
 })();

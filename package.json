@@ -7,7 +7,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "follow": "yarn start",
+    "follow": "yarn start --follow",
     "unfollow": "yarn start --unfollow",
     "selenium": "selenium-standalone start"
   },
