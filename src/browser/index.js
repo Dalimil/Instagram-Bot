@@ -35,8 +35,12 @@ exports.runMain = async (initialTarget) => {
   } else if (initialTarget.hashtag) {
     console.info(`Initial target is a hashtag: ${initialTarget.hashtag}`);
     // Get hashtag media feed
-    const { edges: hashtagTopPosts } = (await Api.getHashtag(client, initialTarget.hashtag))
-      .edge_hashtag_to_top_posts;
+    const hashtagApiData = await Api.getHashtag(client, initialTarget.hashtag);
+    const hashtagTopPosts = [
+      ...hashtagApiData.edge_hashtag_to_top_posts.edges,
+      ...hashtagApiData.edge_hashtag_to_media.edges,
+    ].filter(x => x.node.edge_liked_by.count > 50);
+
     const { node: targetPopularPost } = hashtagTopPosts[Math.floor(Math.random() * hashtagTopPosts.length)];
     const targetMediaId = targetPopularPost.shortcode;
     console.info(`Target likers of media post: ${Url.getMediaUrl(targetMediaId)}`);

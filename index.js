@@ -16,7 +16,7 @@ const TerminalBot = require('./src/terminal');
   const skipUnfollow = ['follow', '--follow'].includes(commandArg);
 
   // Browser (webdriver) version of the bot
-  BrowserBot.init();
+  await BrowserBot.init();
 
   if (!skipFollow) {
     // 'Follow by hashtag' follows feed likers (because these are active users)
