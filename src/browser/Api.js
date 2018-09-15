@@ -214,7 +214,6 @@ const Api = {
     console.info('Unfollowing', username, '...');
     return browserInstance
       .url(Url.getUserPageUrl(username))
-      .pause(2000)
       .click('button*=Following')
       .pause(2000)
       .click('button*=Unfollow')
