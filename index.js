@@ -26,7 +26,7 @@ const TerminalBot = require('./src/terminal');
   }
   if (!skipUnfollow) {
     await BrowserBot.runMassUnfollow();
-    // await BrowserBot.runMassUnfollowFromList([]);
+    // await BrowserBot.runMassUnfollowFromList(["abc", "def", ...]);
   }
 
   await BrowserBot.end();

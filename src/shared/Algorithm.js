@@ -38,8 +38,8 @@ const Algorithm = {
 
     // must have < 2000 followers
     const { count: followers } = userData.edge_followed_by;
-    if (followers > 2000) {
-      console.info('(has over 2000 followers)');
+    if (followers > 1500) {
+      console.info('(has over 1500 followers)');
       return false;
     }
     

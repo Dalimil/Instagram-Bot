@@ -98,7 +98,7 @@ exports.runMassUnfollowFromList = async (usernamesToUnfollow) => {
   console.info(new Date().toLocaleString(), 'Executing mass unfollow based on the provided list...');
   console.info(`Accounts to be unfollowed: ${usernamesToUnfollow.length}`);
   for (const [index, username] of usernamesToUnfollow.entries()) {
-    console.info(`Processing ${(index + 1) / usernamesToUnfollow.length}`);
+    console.info(`Processing ${(index + 1)}/${usernamesToUnfollow.length}`);
     await Api.unfollowUser(client, username);
   };
 };
