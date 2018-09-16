@@ -224,10 +224,10 @@ const Api = {
         .url(Url.getUserPageUrl(username))
         .click('button*=Following')
         .waitForExist('button*=Unfollow', 5000)
-        .pause(1000)
+        .pause(4000)
         .click('button*=Unfollow')
         .waitForExist('button*=Following', 5000, /* reverse */ true)
-        .pause(1000)
+        .pause(4000)
         .catch(err => {
           console.info('Already unfollowed');
         });
