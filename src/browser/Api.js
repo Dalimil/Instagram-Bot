@@ -215,9 +215,9 @@ const Api = {
     return browserInstance
       .url(Url.getUserPageUrl(username))
       .click('button*=Following')
-      .pause(2000)
+      .waitForExist('button*=Unfollow', 5000)
       .click('button*=Unfollow')
-      .pause(3000)
+      .waitForExist('button*=Following', 5000, /* reverse */ true)
       .catch(err => {
         console.info('Already unfollowed');
       });
