@@ -210,17 +210,34 @@ const Api = {
       .pause(3000);
   },
 
-  unfollowUser(browserInstance, username) {
-    console.info('Unfollowing', username, '...');
-    return browserInstance
-      .url(Url.getUserPageUrl(username))
-      .click('button*=Following')
-      .waitForExist('button*=Unfollow', 5000)
-      .click('button*=Unfollow')
-      .waitForExist('button*=Following', 5000, /* reverse */ true)
-      .catch(err => {
-        console.info('Already unfollowed');
-      });
+  async unfollowUser(browserInstance, username) {
+    let isFirstAttempt = true;
+    do {
+      console.info('Unfollowing', username, '...');
+      if (isFirstAttempt) {
+        isFirstAttempt = false;
+      } else {
+        // Instagram is rate limiting us, we need to wait
+        await browserInstance.pause(60 * 1000);
+      }
+      await browserInstance
+        .url(Url.getUserPageUrl(username))
+        .click('button*=Following')
+        .waitForExist('button*=Unfollow', 5000)
+        .pause(1000)
+        .click('button*=Unfollow')
+        .waitForExist('button*=Following', 5000, /* reverse */ true)
+        .pause(1000)
+        .catch(err => {
+          console.info('Already unfollowed');
+        });
+      // If we are doing too many unfollows in a row, Instagram pretends we unfollowed
+      //  the person but it switches back on refresh, so we need confirmation
+    } while (
+      await browserInstance
+        .url(Url.getUserPageUrl(username))
+        .isExisting('button*=Following')
+    );
   },
 };
 
