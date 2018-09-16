@@ -41,7 +41,7 @@ exports.runMain = async (initialTarget) => {
       ...hashtagApiData.edge_hashtag_to_media.edges,
     ].filter(x => x.node.edge_liked_by.count > 100);
 
-    const { node: targetPopularPost } = hashtagTopPosts[Math.floor(Math.random() * 3)];
+    const { node: targetPopularPost } = hashtagTopPosts[Math.floor(Math.random() * hashtagTopPosts.length)];
     const targetMediaId = targetPopularPost.shortcode;
     console.info(`Target likers of media post: ${Url.getMediaUrl(targetMediaId)}`);
     futureFollowList = await Api.getMediaLikersFirstN(client, targetMediaId,

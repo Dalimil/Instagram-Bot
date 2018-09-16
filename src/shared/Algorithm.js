@@ -50,9 +50,15 @@ const Algorithm = {
       return false;
     }
 
+    // must follow back a good amount of people
+    if (2 * following < followers) {
+      console.info('(is not following many people back)');
+      return false;
+    }
+
     // must have followers-per-post ratio below say 80 (e.g. account with 100 posts has max 8000 followers)
     if (followers / numPosts > 80) {
-      console.info(`(bad ratio: ${(followers / numPosts).toFixed(1)})`);
+      console.info(`(bad followers-per-post ratio: ${(followers / numPosts).toFixed(1)})`);
       return false;
     }
 

@@ -25,8 +25,8 @@ const TerminalBot = require('./src/terminal');
     // await BrowserBot.runMain({ username: 'jordhammond' });
   }
   if (!skipUnfollow) {
-    // await BrowserBot.runMassUnfollow();
-    await BrowserBot.runMassUnfollowFromList(JSON.parse(require('fs').readFileSync('./tmp.json')).data);
+    await BrowserBot.runMassUnfollow();
+    // await BrowserBot.runMassUnfollowFromList(JSON.parse(require('fs').readFileSync('./tmp.json')).data);
   }
 
   await BrowserBot.end();
