@@ -103,3 +103,10 @@ exports.runMassUnfollowFromList = async (usernamesToUnfollow) => {
   };
 };
 
+// manually goes through a list of accounts (e.g. manually decide to unfollow or not)
+exports.runBrowseList = async (usernameList) => {
+  console.info('Iterating a list of accounts...');
+  for (const [index, username] of usernameList) {
+    await client.url(Url.getUserPageUrl(username)).pause(5000);
+  }
+};

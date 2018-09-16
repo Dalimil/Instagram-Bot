@@ -9,6 +9,7 @@
     "start": "node index.js",
     "follow": "yarn start --follow",
     "unfollow": "yarn start --unfollow",
+    "experiment": "yarn start --experiment",
     "selenium": "selenium-standalone start"
   },
   "dependencies": {

@@ -14,19 +14,27 @@ const TerminalBot = require('./src/terminal');
   const commandArg = process.argv[2];
   const skipFollow = ['unfollow', '--unfollow'].includes(commandArg);
   const skipUnfollow = ['follow', '--follow'].includes(commandArg);
+  const isExperimentMode = ['experiment', '--experiment'].includes(commandArg);
 
   // Browser (webdriver) version of the bot
   await BrowserBot.init();
 
-  if (!skipFollow) {
-    // 'Follow by hashtag' follows feed likers (because these are active users)
-    await BrowserBot.runMain({ hashtag: 'portraiture_kings' });
-    // 'Follow by username' has about 10-20% conversion rate:
-    // await BrowserBot.runMain({ username: 'jordhammond' });
-  }
-  if (!skipUnfollow) {
-    await BrowserBot.runMassUnfollow();
-    // await BrowserBot.runMassUnfollowFromList(JSON.parse(require('fs').readFileSync('./tmp.json')).data);
+  if (isExperimentMode) {
+    // EXPERIMENT MODE
+    const inputData = JSON.parse(require('fs').readFileSync('./tmp.json')).data;
+    await BrowserBot.runBrowseList(inputData);
+    // await BrowserBot.runMassUnfollowFromList(inputData);
+  } else {
+    // STANDARD MODE
+    if (!skipFollow) {
+      // 'Follow by hashtag' follows feed likers (because these are active users)
+      await BrowserBot.runMain({ hashtag: 'portraiture_kings' });
+      // 'Follow by username' has about 10-20% conversion rate:
+      // await BrowserBot.runMain({ username: 'jordhammond' });
+    }
+    if (!skipUnfollow) {
+      await BrowserBot.runMassUnfollow();
+    }
   }
 
   await BrowserBot.end();
