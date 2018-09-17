@@ -86,8 +86,7 @@ const Algorithm = {
    * Returns which accounts from the currently marked as future-unfollow
    * have reached their time-to-live of 3 days
    */
-  getCurrentUnfollowLists() {
-    const unfollowLimit = 30;
+  getCurrentUnfollowLists(unfollowLimit = 20) {
     const unfollowList = Data.getFutureUnfollowList();
     const threeDaysAgo = Date.now() - (1000 * 60 * 60 * 24 * 2);
     const toKeep = [];

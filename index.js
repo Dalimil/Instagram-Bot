@@ -26,7 +26,10 @@ const TerminalBot = require('./src/terminal');
     // await BrowserBot.runBrowseList(inputData);
     // await BrowserBot.runMassUnfollowFromList(inputData);
   } else {
-    // STANDARD MODE (10-20% conversion rate):
+    // STANDARD MODE (10-20% conversion rate)
+    if (!skipUnfollow) {
+      await BrowserBot.runMassUnfollow(20);
+    }
     if (!skipFollow) {
       // 'Follow by hashtag' follows feed likers (because these are active users)
       await BrowserBot.runMain({ hashtag: 'portraiture_kings' });
@@ -34,7 +37,7 @@ const TerminalBot = require('./src/terminal');
       // await BrowserBot.runMain({ username: 'jordhammond' });
     }
     if (!skipUnfollow) {
-      await BrowserBot.runMassUnfollow();
+      await BrowserBot.runMassUnfollow(20);
     }
   }
 

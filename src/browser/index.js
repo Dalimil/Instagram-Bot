@@ -78,10 +78,10 @@ exports.runMain = async (initialTarget) => {
   console.info('Followed: ', qualityFutureFollowList);
 };
 
-exports.runMassUnfollow = async () => {
+exports.runMassUnfollow = async (unfollowLimit) => {
   console.info(new Date().toLocaleString(), 'Executing mass unfollow...');
 
-  const { toKeep, toUnfollow } = Algorithm.getCurrentUnfollowLists();
+  const { toKeep, toUnfollow } = Algorithm.getCurrentUnfollowLists(unfollowLimit);
 
   // Unfollow
   console.info(`Accounts to be unfollowed: ${toUnfollow.length}`);
