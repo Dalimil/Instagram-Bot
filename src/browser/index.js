@@ -39,7 +39,7 @@ exports.runMain = async (initialTarget) => {
     const hashtagTopPosts = [
       ...hashtagApiData.edge_hashtag_to_top_posts.edges,
       ...hashtagApiData.edge_hashtag_to_media.edges,
-    ].filter(x => x.node.edge_liked_by.count > 100);
+    ].filter(x => x.node.edge_liked_by.count > 150);
 
     const { node: targetPopularPost } = hashtagTopPosts[Math.floor(Math.random() * hashtagTopPosts.length)];
     const targetMediaId = targetPopularPost.shortcode;
@@ -85,7 +85,8 @@ exports.runMassUnfollow = async () => {
 
   // Unfollow
   console.info(`Accounts to be unfollowed: ${toUnfollow.length}`);
-  for (const account of toUnfollow) {
+  for (const [index, account] of toUnfollow.entries()) {
+    console.info(`Processing ${(index + 1)}/${toUnfollow.length}`);
     await Api.unfollowUser(client, account.username);
   };
   
