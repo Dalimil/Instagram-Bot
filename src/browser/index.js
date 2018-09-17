@@ -20,7 +20,7 @@ exports.end = async () => {
   // await client.end();
 };
 
-exports.runMain = async (initialTarget) => {
+exports.runMain = async (initialTarget, followRequestsCount = 40) => {
   console.info(new Date().toLocaleString(), 'Executing main follow algorithm...');
 
   const alreadyProcessed = new Set(Data.getProcessedAccountsList().map(account => account.userId));
@@ -60,7 +60,7 @@ exports.runMain = async (initialTarget) => {
       await Api.followUser(client, account.username);
 
       // hourly follow limit reached? - stop now
-      if (qualityFutureFollowList.length >= followRequestsPerHourLimit - 2) {
+      if (qualityFutureFollowList.length >= Math.min(followRequestsPerHourLimit - 2, followRequestsCount)) {
         console.log('Hourly limit reached, skipping the rest...');
         futureFollowList = futureFollowList.slice(0, index + 1);
         break;

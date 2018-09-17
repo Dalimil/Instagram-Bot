@@ -28,16 +28,23 @@ const TerminalBot = require('./src/terminal');
   } else {
     // STANDARD MODE (10-20% conversion rate)
     if (!skipUnfollow) {
-      await BrowserBot.runMassUnfollow(20);
+      await BrowserBot.runMassUnfollow(15);
     }
     if (!skipFollow) {
       // 'Follow by hashtag' follows feed likers (because these are active users)
-      await BrowserBot.runMain({ hashtag: 'portraiture_kings' });
+      await BrowserBot.runMain({ hashtag: 'portraiture_kings' }, 19);
       // 'Follow by username' follows accounts following the given account
       // await BrowserBot.runMain({ username: 'jordhammond' });
     }
     if (!skipUnfollow) {
-      await BrowserBot.runMassUnfollow(20);
+      await BrowserBot.runMassUnfollow(15);
+    }
+    if (!skipFollow) {
+      await BrowserBot.runMain({ hashtag: 'portrait_bw' }, 19);
+    }
+    if (!skipUnfollow && !skipFollow) {
+      // Final batch
+      await BrowserBot.runMassUnfollow(15);
     }
   }
 
