@@ -22,15 +22,15 @@ const TerminalBot = require('./src/terminal');
 
   if (isExperimentMode) {
     // EXPERIMENT MODE
-    const inputData = JSON.parse(require('fs').readFileSync('./tmp.json')).data;
-    //await BrowserBot.runBrowseList(inputData);
-    await BrowserBot.runMassUnfollowFromList(inputData);
+    // const inputData = JSON.parse(require('fs').readFileSync('./tmp.json')).data;
+    // await BrowserBot.runBrowseList(inputData);
+    // await BrowserBot.runMassUnfollowFromList(inputData);
   } else {
-    // STANDARD MODE
+    // STANDARD MODE (10-20% conversion rate):
     if (!skipFollow) {
       // 'Follow by hashtag' follows feed likers (because these are active users)
       await BrowserBot.runMain({ hashtag: 'portraiture_kings' });
-      // 'Follow by username' has about 10-20% conversion rate:
+      // 'Follow by username' follows accounts following the given account
       // await BrowserBot.runMain({ username: 'jordhammond' });
     }
     if (!skipUnfollow) {
