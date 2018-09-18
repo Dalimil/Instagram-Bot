@@ -8,7 +8,7 @@ const Url = require('../shared/Url');
 
 const Api = require('./Api');
 const followRequestsPerHourLimit = 40; // verified limit of maximum accounts one can follow in 1 hour
-const numUsersToProcess = 100; // We'll get this amount of followers first, many will be skipped
+const numUsersToProcess = 130; // We'll get this amount of followers first, many will be skipped
 
 exports.init = async () => {
   await client.init();
