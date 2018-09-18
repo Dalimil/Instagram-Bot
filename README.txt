@@ -41,10 +41,11 @@ Implementation
 	- For each account on 'Future Follow' list:
 		- scrape for quality:
 			- must be public, must not be already followed and not already following me
-			- must have > 10 posts and must have at least one post in the last 80 days
-			- must have < 3000 followers and must have < 3000 following
+			- must have > 10 posts and must have at least one post in the last 14 days
+			- must have < 1000 followers and must have < 2000 following
 			- must have followers-per-post ratio below say 80 (e.g. account with 100 posts has max 5000 followers)
 			- must not have offensive or spammy words in bio, name, or username
+			- and more requirements... (see code for implementation details)
 		- if checks OK:
 			- follow this account and like maximum 1 or 2 of its posts
 			- add to the 'Future Unfollow' list with timestamp
