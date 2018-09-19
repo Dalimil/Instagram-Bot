@@ -8,7 +8,7 @@ const Url = require('../shared/Url');
 
 const Api = require('./Api');
 const followRequestsPerHourLimit = 40; // verified limit of maximum accounts one can follow in 1 hour
-const numUsersToProcess = 130; // We'll get this amount of followers first, many will be skipped
+const numUsersToProcess = 220; // We'll get this amount of followers first, many will be skipped
 
 exports.init = async () => {
   await client.init();
@@ -39,7 +39,7 @@ exports.runMain = async (initialTarget, followRequestsCount = 40) => {
     const hashtagTopPosts = [
       ...hashtagApiData.edge_hashtag_to_top_posts.edges,
       ...hashtagApiData.edge_hashtag_to_media.edges,
-    ].filter(x => x.node.edge_liked_by.count > 150);
+    ].filter(x => x.node.edge_liked_by.count > numUsersToProcess);
 
     const { node: targetPopularPost } = hashtagTopPosts[Math.floor(Math.random() * hashtagTopPosts.length)];
     const targetMediaId = targetPopularPost.shortcode;
