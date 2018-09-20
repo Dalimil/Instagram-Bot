@@ -200,6 +200,20 @@ const Api = {
     return accounts.slice(0, numAccounts);
   },
 
+  async getUserFollowing(browserInstance, username) {
+    const followingList = await browserInstance
+      .url(Url.getUserPageUrl(username))
+      .pause(2000)
+      .click('a*=following')
+      .executeAsync(
+        (done) => {
+          // todo implement the scrolling here
+        },
+      );
+    await waiting(3000);
+    return followingList.value;
+  },
+
   /* POST api methods */
   followUser(browserInstance, username) {
     console.info('Following', username, '...');

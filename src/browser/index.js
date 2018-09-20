@@ -131,3 +131,17 @@ exports.runBrowseList = async (usernameList) => {
     await client.url(Url.getUserPageUrl(username)).pause(5000);
   }
 };
+
+// Sometimes people get away from our list, (e.g. they change their username)
+// This function finds the full following list, and subtracts my fixed
+// following list (the list of usernames that I actually want to follow) and also
+// subtracts the accounts that are actually tracked
+exports.runGetUntrackedFutureUnfollowAccounts = async (username, fixedFollowingList) => {
+  const followingList = await Api.getUserFollowing(username);
+  const currentUnfollowList = Data.getFutureUnfollowList();
+  const untrackedFutureUnfollows = followingList.filter(x =>
+    !fixedFollowingList.includes(x) && !currentUnfollowList.includes(x)
+  );
+  console.log(untrackedFutureUnfollows);
+  console.log('Accounts untracked:', untrackedFutureUnfollows.length);
+};
