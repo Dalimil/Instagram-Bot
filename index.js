@@ -32,7 +32,7 @@ const TerminalBot = require('./src/terminal');
     }
     if (!skipFollow) {
       // 'Follow by hashtag' follows feed likers (because these are active users)
-      await BrowserBot.runMain({ hashtag: 'portraiture_kings' }, 19);
+      await BrowserBot.runMain({ hashtag: 'streetphotography_bw' }, 19); // or 'portraiture_kings'
       // 'Follow by username' follows accounts following the given account
       // await BrowserBot.runMain({ username: 'jordhammond' });
     }
