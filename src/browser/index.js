@@ -1,3 +1,4 @@
+const { spawn } = require('child_process');
 const webdriverio = require('webdriverio');
 const options = { desiredCapabilities: { browserName: 'chrome' } };
 const client = webdriverio.remote(options);
@@ -9,8 +10,20 @@ const Url = require('../shared/Url');
 const Api = require('./Api');
 const followRequestsPerHourLimit = 40; // verified limit of maximum accounts one can follow in 1 hour
 const numUsersToProcess = 220; // We'll get this amount of followers first, many will be skipped
+let seleniumProcess = null;
 
 exports.init = async () => {
+  console.info('Starting Selenium process...');
+  seleniumProcess = spawn('selenium-standalone', ['start'], { shell: true });
+  await new Promise(resolve => {
+    seleniumProcess.stdout.on('data', (data) => {
+      if (data.toString().toLowerCase().includes('selenium started')) {
+        resolve();
+      }
+    });
+  });
+  console.info('Selenium process started.');
+
   await client.init();
   await Api.login(client, Data.getCredentials());
 };
@@ -18,6 +31,12 @@ exports.init = async () => {
 exports.end = async () => {
   await Api.logout(client);
   // await client.end();
+
+  if (seleniumProcess) {
+    console.info('Terminating selenium process...');
+    seleniumProcess.kill();
+    // process.exit();
+  }
 };
 
 exports.runMain = async (initialTarget, followRequestsCount = 40) => {
