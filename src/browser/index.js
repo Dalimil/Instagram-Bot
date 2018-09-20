@@ -15,6 +15,7 @@ let seleniumProcess = null;
 exports.init = async () => {
   console.info('Starting Selenium process...');
   seleniumProcess = spawn('selenium-standalone', ['start'], { shell: true });
+  seleniumProcess.on('error', err => console.log('Error inside selenium process:', err));
   await new Promise(resolve => {
     seleniumProcess.stdout.on('data', (data) => {
       if (data.toString().toLowerCase().includes('selenium started')) {
