@@ -31,12 +31,11 @@ exports.init = async () => {
 
 exports.end = async () => {
   await Api.logout(client);
-  // await client.end();
+  await client.end();
 
   if (seleniumProcess) {
     console.info('Terminating selenium process...');
     seleniumProcess.kill();
-    // process.exit();
   }
 };
 
@@ -75,7 +74,8 @@ exports.runMain = async (initialTarget, followRequestsCount = 40) => {
   const qualityFutureFollowList = [];
   for (const [index, account] of futureFollowList.entries()) {
     const accountData = await Api.getUser(client, account.username);
-    if (Algorithm.isQualityAccount(accountData)) {
+    const accountQualityDecision = Algorithm.decideAccountQuality(accountData);
+    if (accountQualityDecision.isQualityAccount) {
       qualityFutureFollowList.push(account);
       await Api.followUser(client, account.username);
 
@@ -86,16 +86,16 @@ exports.runMain = async (initialTarget, followRequestsCount = 40) => {
         break;
       }
     } else {
-      console.log(':> skipping', account.username);
+      console.log(`:> skipping ${account.username} (${accountQualityDecision.reason})`);
     }
   }
 
   // Update storage
   Data.persistNewlyProcessedAndFollowed(futureFollowList, qualityFutureFollowList);
 
+  console.info('Followed: ', qualityFutureFollowList);
   console.info('Total processed: ', futureFollowList.length);
   console.info('Total followed: ', qualityFutureFollowList.length);
-  console.info('Followed: ', qualityFutureFollowList);
 };
 
 exports.runMassUnfollow = async (unfollowLimit) => {

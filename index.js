@@ -49,4 +49,6 @@ const TerminalBot = require('./src/terminal');
   }
 
   await BrowserBot.end();
+  // Force terminate (because selenium subprocess kill is buggy)
+  process.exit();
 })();
