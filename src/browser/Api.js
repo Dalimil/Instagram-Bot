@@ -207,7 +207,23 @@ const Api = {
       .click('a*=following')
       .executeAsync(
         (done) => {
-          // todo implement the scrolling here
+          // Manually scroll down to load the full list of accounts
+          const listNode = document.querySelector('.TODO');
+          const getList = () => [...document.querySelectorAll('.FPmhX')].map(x => x.textContent);
+          let previousListLength = 0;
+          let terminationTask = null;
+          const scrollingTask = setInterval(() => {
+            listNode.scrollBy(0, 1000);
+            if (terminationTask === null && previousListLength === getList().length) {
+              terminationTask = setTimeout(() => {
+                clearInterval(scrollingTask);
+                done(getList());
+              }, 5000);
+            } else {
+              clearTimeout(terminationTask);
+              terminationTask = null;
+            }
+          }, 500);
         },
       );
     await waiting(3000);
