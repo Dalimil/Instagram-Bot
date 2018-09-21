@@ -137,11 +137,11 @@ exports.runBrowseList = async (usernameList) => {
 // following list (the list of usernames that I actually want to follow) and also
 // subtracts the accounts that are actually tracked
 exports.runGetUntrackedFutureUnfollowAccounts = async (username, fixedFollowingList) => {
-  const followingList = await Api.getUserFollowing(username);
-  const currentUnfollowList = Data.getFutureUnfollowList();
+  const followingList = await Api.getUserFollowing(client, username);
+  const currentUnfollowList = Data.getFutureUnfollowList().map(acc => acc.username);
   const untrackedFutureUnfollows = followingList.filter(x =>
     !fixedFollowingList.includes(x) && !currentUnfollowList.includes(x)
   );
-  console.log(untrackedFutureUnfollows);
+  console.log(JSON.stringify(untrackedFutureUnfollows, null, 2));
   console.log('Accounts untracked:', untrackedFutureUnfollows.length);
 };

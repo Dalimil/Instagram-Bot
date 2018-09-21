@@ -201,25 +201,35 @@ const Api = {
   },
 
   async getUserFollowing(browserInstance, username) {
+    console.info('Retrieving user following list...');
     const followingList = await browserInstance
       .url(Url.getUserPageUrl(username))
       .pause(2000)
       .click('a*=following')
+      .waitForExist('.j6cq2')
       .executeAsync(
         (done) => {
           // Manually scroll down to load the full list of accounts
-          const listNode = document.querySelector('.TODO');
+          const listNode = document.querySelector('.j6cq2');
           const getList = () => [...document.querySelectorAll('.FPmhX')].map(x => x.textContent);
+          console.info('Initiating scrolling...');
           let previousListLength = 0;
           let terminationTask = null;
           const scrollingTask = setInterval(() => {
             listNode.scrollBy(0, 1000);
-            if (terminationTask === null && previousListLength === getList().length) {
-              terminationTask = setTimeout(() => {
-                clearInterval(scrollingTask);
-                done(getList());
-              }, 5000);
+            const newList = getList();
+            if (previousListLength === newList.length) {
+              // same length, so initialize termination task, unless already (in that case do nothing)
+              if (terminationTask === null) {
+                terminationTask = setTimeout(() => {
+                  console.info('Finished scrolling task.');
+                  clearInterval(scrollingTask);
+                  done(newList);
+                }, 5000);
+              }
             } else {
+              // new list length differs, so update
+              previousListLength = newList.length;
               clearTimeout(terminationTask);
               terminationTask = null;
             }
