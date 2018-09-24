@@ -128,7 +128,11 @@ exports.runMassUnfollowFromList = async (usernamesToUnfollow) => {
 exports.runBrowseList = async (usernameList) => {
   console.info('Iterating a list of accounts...');
   for (const [index, username] of usernameList.entries()) {
-    await client.url(Url.getUserPageUrl(username)).pause(5000);
+    await client.url(Url.getUserPageUrl(username))
+      .pause(5000)
+      .catch(() => {
+        console.error('Error loading', username);
+      });
   }
 };
 

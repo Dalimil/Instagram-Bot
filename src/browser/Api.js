@@ -241,13 +241,24 @@ const Api = {
   },
 
   /* POST api methods */
-  followUser(browserInstance, username) {
+  async followUser(browserInstance, username) {
     console.info('Following', username, '...');
-    return browserInstance
-      .url(Url.getUserPageUrl(username))
-      .pause(2000)
-      .click('button*=Follow')
-      .pause(3000);
+    do {
+      await browserInstance
+        .url(Url.getUserPageUrl(username))
+        .pause(2000)
+        .click('button*=Follow')
+        .waitForExist('button*=Following', 5000)
+        .pause(2000)
+        .catch(() => {
+          console.error('Error occurred when trying to follow', username);
+        });
+    } while (
+      await browserInstance
+        .url(Url.getUserPageUrl(username))
+        .isExisting('button*=Follow')
+        .catch(() => true) // retry on error
+    );
   },
 
   async unfollowUser(browserInstance, username) {
@@ -269,7 +280,7 @@ const Api = {
         .waitForExist('button*=Following', 5000, /* reverse */ true)
         .pause(4000)
         .catch(err => {
-          console.info('Already unfollowed');
+          console.info('Already unfollowed or an error.');
         });
       // If we are doing too many unfollows in a row, Instagram pretends we unfollowed
       //  the person but it switches back on refresh, so we need confirmation
@@ -277,6 +288,7 @@ const Api = {
       await browserInstance
         .url(Url.getUserPageUrl(username))
         .isExisting('button*=Following')
+        .catch(() => true) // retry on error
     );
   },
 };
