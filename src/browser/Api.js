@@ -247,8 +247,8 @@ const Api = {
       await browserInstance
         .url(Url.getUserPageUrl(username))
         .pause(2000)
-        .click('button*=Follow')
-        .waitForExist('button*=Following', 5000)
+        .click('button=Follow')
+        .waitForExist('button=Following', 5000)
         .pause(2000)
         .catch(() => {
           console.error('Error occurred when trying to follow', username);
@@ -256,7 +256,7 @@ const Api = {
     } while (
       await browserInstance
         .url(Url.getUserPageUrl(username))
-        .isExisting('button*=Follow')
+        .isExisting('button=Follow')
         .catch(() => true) // retry on error
     );
   },
@@ -273,11 +273,11 @@ const Api = {
       }
       await browserInstance
         .url(Url.getUserPageUrl(username))
-        .click('button*=Following')
+        .click('button=Following')
         .waitForExist('button*=Unfollow', 5000)
         .pause(4000)
         .click('button*=Unfollow')
-        .waitForExist('button*=Following', 5000, /* reverse */ true)
+        .waitForExist('button=Following', 5000, /* reverse */ true)
         .pause(4000)
         .catch(err => {
           console.info('Already unfollowed or an error.');
@@ -287,7 +287,7 @@ const Api = {
     } while (
       await browserInstance
         .url(Url.getUserPageUrl(username))
-        .isExisting('button*=Following')
+        .isExisting('button=Following')
         .catch(() => true) // retry on error
     );
   },
