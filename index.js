@@ -17,6 +17,8 @@ const TerminalBot = require('./src/terminal');
   const skipUnfollow = ['follow', '--follow'].includes(commandArg);
   const isExperimentMode = ['experiment', '--experiment'].includes(commandArg);
 
+  console.log('Started at', new Date().toLocaleString());
+
   // Browser (webdriver) version of the bot
   await BrowserBot.init();
 
@@ -50,6 +52,7 @@ const TerminalBot = require('./src/terminal');
   }
 
   await BrowserBot.end();
+  console.log('Finished at', new Date().toLocaleString());
   // Force terminate (because selenium subprocess kill is buggy)
   process.exit();
 })();
