@@ -202,15 +202,18 @@ const Api = {
 
   async getUserFollowing(browserInstance, username) {
     console.info('Retrieving user following list...');
+    const listNodeSelector = '.isgrP';
     const followingList = await browserInstance
       .url(Url.getUserPageUrl(username))
       .pause(2000)
       .click('a*=following')
-      .waitForExist('.j6cq2')
+      .waitForExist(listNodeSelector)
+      .pause(2000)
+      .timeouts('script', 60 * 1000) // 60s
       .executeAsync(
-        (done) => {
+        (listNodeSelector, done) => {
           // Manually scroll down to load the full list of accounts
-          const listNode = document.querySelector('.j6cq2');
+          const listNode = document.querySelector(listNodeSelector);
           const getList = () => [...document.querySelectorAll('.FPmhX')].map(x => x.textContent);
           console.info('Initiating scrolling...');
           let previousListLength = 0;
@@ -233,8 +236,9 @@ const Api = {
               clearTimeout(terminationTask);
               terminationTask = null;
             }
-          }, 500);
+          }, 700);
         },
+        listNodeSelector
       );
     await waiting(3000);
     return followingList.value;
