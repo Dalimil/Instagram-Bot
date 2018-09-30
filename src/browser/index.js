@@ -58,13 +58,10 @@ exports.runMain = async (initialTarget, followRequestsCount = 40) => {
     const hashtagTopPosts = [
       ...hashtagApiData.edge_hashtag_to_top_posts.edges,
       ...hashtagApiData.edge_hashtag_to_media.edges,
-    ].filter(x => x.node.edge_liked_by.count > numUsersToProcess);
+    ].filter(x => x.node.edge_liked_by.count > 50);
 
-    const { node: targetPopularPost } = hashtagTopPosts[Math.floor(Math.random() * hashtagTopPosts.length)];
-    const targetMediaId = targetPopularPost.shortcode;
-    console.info(`Target likers of media post: ${Url.getMediaUrl(targetMediaId)}`);
-    futureFollowList = await Api.getMediaLikersFirstN(client, targetMediaId,
-      numUsersToProcess, alreadyProcessed);
+    futureFollowList = await Api.getMediaLikersFromPosts(client,
+      hashtagTopPosts.map(post => post.node.shortcode), numUsersToProcess, alreadyProcessed);
   } else {
     console.error('Invalid initial target. Aborting...');
     return;
@@ -74,6 +71,10 @@ exports.runMain = async (initialTarget, followRequestsCount = 40) => {
   const qualityFutureFollowList = [];
   for (const [index, account] of futureFollowList.entries()) {
     const accountData = await Api.getUser(client, account.username);
+    if (!accountData) {
+      console.log(`Error when retrieving account data for ${account.username}.`);
+      continue;
+    }
     const accountQualityDecision = Algorithm.decideAccountQuality(accountData);
     if (accountQualityDecision.isQualityAccount) {
       qualityFutureFollowList.push(account);

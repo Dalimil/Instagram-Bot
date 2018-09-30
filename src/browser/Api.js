@@ -75,7 +75,9 @@ const Api = {
             .then(json => done(json.graphql.user));
         },
         Url.getUsernameApiUrl(username),
-      );
+      ).catch(() => ({
+        value: null,
+      }));
     await waiting(3000);
     return user.value;
   },
@@ -157,6 +159,39 @@ const Api = {
     );
     console.info(`Found ${mediaLikers.length} out of ${numLikers} likers requested`);
     return mediaLikers;
+  },
+
+  // Takes a list of media shortcodes and returns up to numLikers accounts who have liked
+  // some of those media. Utilizes getMediaLikersFirstN for individual calls
+  async getMediaLikersFromPosts(browserInstance, rawMediaShortcodes, numLikers, accountBlacklist) {
+    const blacklistedMediaPosts = Data.getBlacklistedMediaPosts();
+    const mediaShortcodes = rawMediaShortcodes.filter(x => !blacklistedMediaPosts.includes(x));
+
+    // Try to pull accounts from each media post one by one
+    //  (often first media might be enough to fill limit)
+    const resultAccounts = [];
+    for (const mediaShortcode of mediaShortcodes) {
+      const likersNeeded = numLikers - resultAccounts.length;
+      console.info(`Target likers (need ${likersNeeded}) of media post:` +
+        ` ${Url.getMediaUrl(mediaShortcode)}`);
+
+      const likerAccounts = await Api.getMediaLikersFirstN(
+        browserInstance,
+        mediaShortcode,
+        likersNeeded,
+        new Set([...accountBlacklist, ...resultAccounts.map(acc => acc.userId)]),
+      );
+      resultAccounts.push(...likerAccounts);
+
+      if (resultAccounts.length < numLikers) {
+        // did not fill up limit
+        Data.appendBlacklistedMediaPost(mediaShortcode);
+      } else { // done
+        break;
+      }
+    }
+
+    return resultAccounts;
   },
 
   // Returns up to numFollowers of the target userId
