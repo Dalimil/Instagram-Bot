@@ -6,6 +6,7 @@ const Data = {
   futureUnfollowListFile: './data/future-unfollow.json',
   processedAccountsFile: './data/processed-accounts.json',
   qualityListCollectionFile: './data/quality-accounts-collection.json',
+  blacklistedMediaPosts: './data/blacklisted-media.json',
 
   getCredentials() {
     return JSON.parse(fs.readFileSync(Data.credentialsFile));
@@ -33,6 +34,19 @@ const Data = {
 
   storeProcessedAccountsList(data) {
     fs.writeFileSync(Data.processedAccountsFile, JSON.stringify({ processed_accounts: data }, null, 2));
+  },
+
+  getBlacklistedMediaPosts() {
+    return JSON.parse(fs.readFileSync(Data.blacklistedMediaPosts)).blacklisted_media;
+  },
+
+  appendBlacklistedMediaPost(mediaShortcode) {
+    const currentBlacklist = Data.getBlacklistedMediaPosts();
+    const newBlacklist = [...new Set([...currentBlacklist, mediaShortcode])];
+    fs.writeFileSync(
+      Data.blacklistedMediaPosts,
+      JSON.stringify({ blacklisted_media: newBlacklist }, null, 2),
+    );
   },
 
   persistNewlyProcessedAndFollowed(newlyProcessed, newlyFollowed) {
