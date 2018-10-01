@@ -26,8 +26,9 @@ const TerminalBot = require('./src/terminal');
     // EXPERIMENT MODE
     const inputData = JSON.parse(require('fs').readFileSync('./tmp.json')).data;
     // await BrowserBot.runBrowseList(inputData);
-    // await BrowserBot.runMassUnfollowFromList(inputData);
-    await BrowserBot.runGetUntrackedFutureUnfollowAccounts('dali_mil', inputData);
+    const untrackedAccounts =
+      await BrowserBot.runGetUntrackedFutureUnfollowAccounts('dali_mil', inputData);
+    await BrowserBot.runMassUnfollowFromList(untrackedAccounts);
   } else {
     // STANDARD MODE (10-20% conversion rate)
     if (!skipUnfollow) {

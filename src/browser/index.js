@@ -149,4 +149,5 @@ exports.runGetUntrackedFutureUnfollowAccounts = async (username, fixedFollowingL
   );
   console.log(JSON.stringify(untrackedFutureUnfollows, null, 2));
   console.log('Accounts untracked:', untrackedFutureUnfollows.length);
+  return untrackedFutureUnfollows;
 };
