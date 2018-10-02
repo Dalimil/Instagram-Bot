@@ -9,7 +9,7 @@ const Url = require('../shared/Url');
 
 const Api = require('./Api');
 const followRequestsPerHourLimit = 40; // verified limit of maximum accounts one can follow in 1 hour
-const numUsersToProcess = 180; // We'll get this amount of followers first, many will be skipped
+const numUsersToProcess = 120; // We'll get this amount of followers first, many will be skipped
 let seleniumProcess = null;
 
 exports.init = async () => {
