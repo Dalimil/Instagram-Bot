@@ -2,8 +2,9 @@ const BrowserBot = require('./src/browser');
 const TerminalBot = require('./src/terminal');
 // Note: terminal version of the bot is currently broken due to security challenge issues
 
-// Usage: yarn start [--follow] [--unfollow] [--experiment]
-//  or simply 'yarn start', 'yarn follow', 'yarn unfollow', 'yarn experiment'
+// Usage: yarn start [(--follow | --unfollow | --experiment)] [--headless]
+//  or simply 'yarn start', 'yarn follow', 'yarn unfollow', 'yarn experiment',
+//  'yarn start --headless' etc.
 (async () => {
   // Follow limit: between 100 up to max 500 per day
   // HARD LIMIT: 40 follows per hour!
@@ -13,9 +14,9 @@ const TerminalBot = require('./src/terminal');
   // Max number of likes is 1.5x that amount
 
   const commandArg = process.argv[2];
-  const skipFollow = ['unfollow', '--unfollow'].includes(commandArg);
-  const skipUnfollow = ['follow', '--follow'].includes(commandArg);
-  const isExperimentMode = ['experiment', '--experiment'].includes(commandArg);
+  const skipFollow = (commandArg === '--unfollow');
+  const skipUnfollow = (commandArg === '--follow');
+  const isExperimentMode = (commandArg === '--experiment');
 
   console.log('Started at', new Date().toLocaleString());
 

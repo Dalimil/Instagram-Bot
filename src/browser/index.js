@@ -1,7 +1,13 @@
 const { spawn } = require('child_process');
 const webdriverio = require('webdriverio');
-const options = { desiredCapabilities: { browserName: 'chrome' } };
-const client = webdriverio.remote(options);
+const client = webdriverio.remote({
+  desiredCapabilities: {
+    browserName: 'chrome',
+    chromeOptions: {
+      args: (process.argv.includes('--headless') ? [ 'headless', 'disable-gpu' ] : []),
+    },
+  },
+});
 
 const Data = require('../shared/Data');
 const Algorithm = require('../shared/Algorithm');
