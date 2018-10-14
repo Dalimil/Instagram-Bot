@@ -86,12 +86,12 @@ const Algorithm = {
    */
   getCurrentUnfollowLists(unfollowLimit = 20) {
     const unfollowList = Data.getFutureUnfollowList();
-    const threeDaysAgo = Date.now() - (1000 * 60 * 60 * 24 * 3);
+    const fiveDaysAgo = Date.now() - (1000 * 60 * 60 * 24 * 5);
     const toKeep = [];
     const toUnfollow = [];
     // Determine which accounts were added long time ago
     unfollowList.forEach(account => {
-      if (toUnfollow.length < unfollowLimit && account.timestamp < threeDaysAgo) {
+      if (toUnfollow.length < unfollowLimit && account.timestamp < fiveDaysAgo) {
         toUnfollow.push(account);
       } else {
         toKeep.push(account);
