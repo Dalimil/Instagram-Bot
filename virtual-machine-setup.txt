@@ -1,0 +1,27 @@
+# Bash instructions to set up a new machine for Instagram Bot
+
+curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+
+sudo apt install nodejs default-jre chromium zip nginx -y
+
+sudo npm install -g selenium-standalone yarn
+
+sudo selenium-standalone install --version=3.141.5 --baseURL=https://selenium-release.storage.googleapis.com 
+# this version should be specified in /src/browser/index.js as an argument: selenium-standalone start --version=3.141.5
+
+# Cron:
+crontab -e
+36 8,13,17,22 * * * /home/dalimilhajek/main-source/start.sh
+# or 7,13,18,23
+
+# Nginx: (change config root to /home/dalimilhajek/served/;)
+sudo nano /etc/nginx/sites-available/default 
+sudo /etc/init.d/nginx start
+
+# Copy files from old instance
+zip -r a.zip served/
+ # remove node_modules and other stuff from main-source
+zip -r b.zip main-source
+ # now download the two files /home/dalimilhajek/a.zip via UI
+ # upload both to the new machine instance and unzip
+yarn # run inside main-source
