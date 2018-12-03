@@ -4,7 +4,7 @@ const client = webdriverio.remote({
   desiredCapabilities: {
     browserName: 'chrome',
     chromeOptions: {
-      args: (process.argv.includes('--headless') ? [ 'headless', 'disable-gpu' ] : []),
+      args: (process.argv.includes('--headless') ? ['headless', 'disable-gpu'] : []),
     },
   },
 });
@@ -20,7 +20,7 @@ let seleniumProcess = null;
 
 exports.init = async () => {
   console.info('Starting Selenium process...');
-  seleniumProcess = spawn('selenium-standalone', ['start'], { shell: true });
+  seleniumProcess = spawn('selenium-standalone', ['start', '--version=3.141.5'], { shell: true });
   seleniumProcess.on('error', err => console.log('Error inside selenium process:', err));
   await new Promise(resolve => {
     seleniumProcess.stdout.on('data', (data) => {
