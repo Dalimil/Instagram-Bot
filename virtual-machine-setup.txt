@@ -12,7 +12,6 @@ sudo selenium-standalone install --version=3.141.5 --baseURL=https://selenium-re
 # Cron:
 crontab -e
 36 8,13,17,22 * * * /home/dalimilhajek/main-source/start.sh
-# or 7,13,18,23
 
 # Nginx: (change config root to /home/dalimilhajek/served/;)
 sudo nano /etc/nginx/sites-available/default 
