@@ -4,7 +4,7 @@ const client = webdriverio.remote({
   desiredCapabilities: {
     browserName: 'chrome',
     chromeOptions: {
-      args: (process.argv.includes('--headless') ? ['headless', 'disable-gpu'] : []),
+      args: (process.argv.includes('--headless') ? ['headless', 'disable-gpu', 'disable-sync', 'no-sandbox', '--js-flags="--max-old-space-size=400"'] : []),
     },
   },
 });
