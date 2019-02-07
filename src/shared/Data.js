@@ -33,7 +33,7 @@ const Data = {
   },
 
   storeProcessedAccountsList(data) {
-    fs.writeFileSync(Data.processedAccountsFile, JSON.stringify({ processed_accounts: data }, null, 2));
+    fs.writeFileSync(Data.processedAccountsFile, JSON.stringify({ processed_accounts: data }));
   },
 
   getBlacklistedMediaPosts() {
@@ -55,7 +55,7 @@ const Data = {
     // Store in 'processed' so we don't process them in the future
     Data.storeProcessedAccountsList([
       ...Data.getProcessedAccountsList(),
-      ...newlyProcessed.map(({ id }) => ({ userId: id, timestamp })),
+      ...newlyProcessed.map(({ id }) => ({ id, ts: timestamp })),
     ]);
     // Store in 'unfollow' so that we unfollow them after 3 days
     Data.storeFutureUnfollowList([

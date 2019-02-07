@@ -16,7 +16,7 @@ exports.runMain = async (numUsersToProcess, collectListOnly = false) => {
   const targetUsername = initialAccount.username;
   const { id: targetUserId } = (await Api.getUser(targetUsername)).graphql.user;
 
-  const alreadyProcessed = new Set(Data.getProcessedAccountsList().map(account => account.userId));
+  const alreadyProcessed = new Set(Data.getProcessedAccountsList().map(account => account.id));
   const futureFollowList = await Api.getUserFollowersFirstN(targetUserId, numUsersToProcess, alreadyProcessed);
   
   // Follow users (but make sure they are quality accounts first)

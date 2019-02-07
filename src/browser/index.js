@@ -48,7 +48,7 @@ exports.end = async () => {
 exports.runMain = async (initialTarget, followRequestsCount = 40) => {
   console.info(new Date().toLocaleString(), 'Executing main follow algorithm...');
 
-  const alreadyProcessed = new Set(Data.getProcessedAccountsList().map(account => account.userId));
+  const alreadyProcessed = new Set(Data.getProcessedAccountsList().map(account => account.id));
   let futureFollowList = [];
   if (initialTarget.username) {
     console.info(`Initial target is a user: ${initialTarget.username}`);
