@@ -55,7 +55,7 @@ const Data = {
     // Store in 'processed' so we don't process them in the future
     Data.storeProcessedAccountsList([
       ...Data.getProcessedAccountsList(),
-      ...newlyProcessed.map(({ id, username }) => ({ userId: id, username, timestamp })),
+      ...newlyProcessed.map(({ id }) => ({ userId: id, timestamp })),
     ]);
     // Store in 'unfollow' so that we unfollow them after 3 days
     Data.storeFutureUnfollowList([
