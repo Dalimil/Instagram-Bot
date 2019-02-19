@@ -69,7 +69,6 @@ creds.json
 session.json
 out/
 
-data/
-!data/template/
+data/*.json
 
 tmp.json
