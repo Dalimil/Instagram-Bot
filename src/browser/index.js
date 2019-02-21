@@ -30,6 +30,7 @@ exports.init = async () => {
     });
   });
   console.info('Selenium process started.');
+  console.info('Browser in headless mode?', process.argv.includes('--headless'));
 
   await client.init();
   await Api.login(client, Data.getCredentials());

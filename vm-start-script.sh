@@ -6,7 +6,7 @@ pkill -9 .*chrome
 pkill -9 node
 
 cd /home/dalimilhajek/main-source/
-yarn start --headless | tee -a ../served/log.txt
+yarn start --headless 2>&1 | tee -a ../served/log.txt
 
 pkill -9 java
 pkill -9 chromium
