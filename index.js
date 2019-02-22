@@ -29,7 +29,8 @@ const TerminalBot = require('./src/terminal');
     // await BrowserBot.runBrowseList(inputData);
     const untrackedAccounts =
       await BrowserBot.runGetUntrackedFutureUnfollowAccounts('dali_mil', inputData);
-    await BrowserBot.runMassUnfollowFromList(untrackedAccounts);
+    console.log(untrackedAccounts);
+    // await BrowserBot.runMassUnfollowFromList(untrackedAccounts);
   } else {
     // STANDARD MODE (10-20% conversion rate)
     if (!skipUnfollow) {

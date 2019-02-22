@@ -254,7 +254,7 @@ const Api = {
           let previousListLength = 0;
           let terminationTask = null;
           const scrollingTask = setInterval(() => {
-            listNode.scrollBy(0, 1000);
+            listNode.scrollBy(0, 100);
             const newList = getList();
             if (previousListLength === newList.length) {
               // same length, so initialize termination task, unless already (in that case do nothing)

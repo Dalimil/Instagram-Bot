@@ -4,7 +4,7 @@ const client = webdriverio.remote({
   desiredCapabilities: {
     browserName: 'chrome',
     chromeOptions: {
-      args: (process.argv.includes('--headless') ? ['headless', 'disable-gpu', 'disable-sync', 'no-sandbox', '--js-flags="--max-old-space-size=400"'] : []),
+      args: (process.argv.includes('--headless') ? ['headless', 'disable-gpu', 'disable-sync', 'no-sandbox'] : []),
     },
   },
   /*
@@ -60,7 +60,7 @@ exports.end = async () => {
 exports.runMain = async (initialTarget, followRequestsCount = 40) => {
   console.info(new Date().toLocaleString(), 'Executing main follow algorithm...');
 
-  const alreadyProcessed = new Set(Data.getProcessedAccountsList().map(account => account.id));
+  const alreadyProcessed = new Set(Data.getProcessedAccountsList());
   let futureFollowList = [];
   if (initialTarget.username) {
     console.info(`Initial target is a user: ${initialTarget.username}`);
