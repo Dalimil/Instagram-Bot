@@ -1,4 +1,4 @@
-const { spawn } = require('child_process');
+const selenium = require('selenium-standalone');
 const webdriverio = require('webdriverio');
 const client = webdriverio.remote({
   desiredCapabilities: {
@@ -28,15 +28,18 @@ let seleniumProcess = null;
 
 exports.init = async () => {
   console.info('Starting Selenium process...');
-  seleniumProcess = spawn('selenium-standalone', ['start', '--version=3.141.5'], { shell: true });
-  seleniumProcess.on('error', err => console.log('Error inside selenium process:', err));
-  await new Promise(resolve => {
-    seleniumProcess.stdout.on('data', (data) => {
-      if (data.toString().toLowerCase().includes('selenium started')) {
-        resolve();
+  seleniumProcess = await new Promise((resolve, reject) => {
+    selenium.start({
+      logger: message => console.log('Selenium logs: ', message),
+    }, (error, child) => {
+      if (error) {
+        console.error(error);
+        return reject(error);
       }
+      resolve(child);
     });
   });
+  
   console.info('Selenium process started.');
   console.info('Browser in headless mode?', process.argv.includes('--headless'));
 
