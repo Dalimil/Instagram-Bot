@@ -7,6 +7,14 @@ const client = webdriverio.remote({
       args: (process.argv.includes('--headless') ? ['headless', 'disable-gpu', 'disable-sync', 'no-sandbox', '--js-flags="--max-old-space-size=400"'] : []),
     },
   },
+  /*
+    desiredCapabilities: {
+      browserName: 'firefox',
+      "moz:firefoxOptions": {
+        args: (process.argv.includes('--headless') ? ['-headless'] : []),
+      },
+    },
+  */
 });
 
 const Data = require('../shared/Data');
