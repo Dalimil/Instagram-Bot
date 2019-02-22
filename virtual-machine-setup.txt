@@ -1,29 +1,24 @@
 # Bash instructions to set up a new machine for Instagram Bot
 
-# Image: Ubuntu 18.04 LTS minimal image + micro instance on GCloud
+# Image: Ubuntu 18.04 LTS image + micro instance on GCloud
 
-curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
-
-sudo apt install nano nodejs default-jre firefox chromium-browser zip nginx -y && sudo npm install -g selenium-standalone yarn
-
-sudo selenium-standalone install --version=3.141.5 --baseURL=https://selenium-release.storage.googleapis.com 
-# this version should be specified in /src/browser/index.js as an argument: selenium-standalone start --version=3.141.5
-
-# Cron:
-crontab -e
-36 8,13,17,22 * * * /home/dalimilhajek/main-source/start.sh
-
-# Nginx: (change config root to /home/dalimilhajek/served/;)
-sudo nano /etc/nginx/sites-available/default 
-sudo /etc/init.d/nginx start
+curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash - && sudo apt install nano nodejs default-jre chromium-browser zip nginx -y && sudo npm install -g yarn
 
 # Copy files from old instance
 # (first remove node_modules and other stuff from main-source)
 rm -rf main-source/node_modules/ && zip -r a.zip served/ && zip -r a.zip main-source/
 
-# now download the zip file /home/dalimilhajek/a.zip via UI
-# upload to the new machine instance and run:
-unzip a.zip && sudo chown dalimilhajek:dalimilhajek .config && cd ./main-source/ && yarn
+# Now download the zip file /home/dalimilhajek/a.zip via UI
+# Upload to the new machine instance and run:
+unzip a.zip && sudo chown dalimilhajek:dalimilhajek .config && cd ./main-source/ && yarn && ./node_modules/.bin/selenium-standalone install
 
-# test that it works
+# Test that it works
 ./start.sh
+
+# Set up Cron:
+crontab -e
+36 8,13,17,22 * * * /home/dalimilhajek/main-source/start.sh
+
+# Set up Nginx: (change config root to /home/dalimilhajek/served/;)
+sudo nano /etc/nginx/sites-available/default 
+sudo /etc/init.d/nginx start
