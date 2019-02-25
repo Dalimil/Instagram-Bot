@@ -226,7 +226,7 @@ const Api = {
     do {
       const moreAccounts = await getApiDataMethod(endCursor);
       if (!moreAccounts) {
-        break;;
+        break;
       }
       appendAccounts(moreAccounts);
       console.info(`Accounts found so far: ${accounts.length}`);
