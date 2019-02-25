@@ -140,7 +140,7 @@ const Api = {
     };
     console.info(`GET ${afterCursor ? 'more ' : ''}likers of media ${mediaId}`);
     return Api.queryGraphqlApi(browserInstance, 'e0f59e4a1c8d78d0161873bc2ee7ec44', variables)
-      .then(data => data.shortcode_media.edge_liked_by);
+      .then(data => data ? data.shortcode_media.edge_liked_by : null);
   },
 
   // Returns up to numLikers of the target mediaId
@@ -225,6 +225,9 @@ const Api = {
     let hasNextPage = false;
     do {
       const moreAccounts = await getApiDataMethod(endCursor);
+      if (!moreAccounts) {
+        break;;
+      }
       appendAccounts(moreAccounts);
       console.info(`Accounts found so far: ${accounts.length}`);
       const nextPage = moreAccounts.page_info;
