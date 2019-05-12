@@ -27,10 +27,10 @@ const TerminalBot = require('./src/terminal');
     // EXPERIMENT MODE
     const inputData = JSON.parse(require('fs').readFileSync('./tmp.json')).data;
     // await BrowserBot.runBrowseList(inputData);
-    const untrackedAccounts =
-      await BrowserBot.runGetUntrackedFutureUnfollowAccounts('dali_mil', inputData);
-    console.log(untrackedAccounts);
-    // await BrowserBot.runMassUnfollowFromList(untrackedAccounts);
+    // const untrackedAccounts =
+    //   await BrowserBot.runGetUntrackedFutureUnfollowAccounts('dali_mil', inputData);
+    // console.log(untrackedAccounts);
+    await BrowserBot.runMassUnfollowFromList(inputData.slice(0, 30));
   } else {
     // STANDARD MODE (10-20% conversion rate)
     if (!skipUnfollow) {

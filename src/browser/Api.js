@@ -247,7 +247,7 @@ const Api = {
       .click('a*=following')
       .waitForExist(listNodeSelector)
       .pause(2000)
-      .timeouts('script', 60 * 1000) // 60s
+      .timeouts('script', 600 * 1000) // 600s
       .executeAsync(
         (listNodeSelector, done) => {
           // Manually scroll down to load the full list of accounts
