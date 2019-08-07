@@ -27,10 +27,10 @@ const TerminalBot = require('./src/terminal');
     // EXPERIMENT MODE
     const inputData = JSON.parse(require('fs').readFileSync('./tmp.json')).data;
     // await BrowserBot.runBrowseList(inputData);
-    // const untrackedAccounts =
-    //   await BrowserBot.runGetUntrackedFutureUnfollowAccounts('dali_mil', inputData);
-    // console.log(untrackedAccounts);
-    await BrowserBot.runMassUnfollowFromList(inputData.slice(0, 30));
+    const untrackedAccounts =
+       await BrowserBot.runGetUntrackedFutureUnfollowAccounts('dali_mil', inputData);
+    console.log(untrackedAccounts);
+    // await BrowserBot.runMassUnfollowFromList(inputData.slice(0, 30));
   } else {
     // STANDARD MODE (10-20% conversion rate)
     if (!skipUnfollow) {
@@ -38,7 +38,7 @@ const TerminalBot = require('./src/terminal');
     }
     if (!skipFollow) {
       // 'Follow by hashtag' follows feed likers (because these are active users)
-      await BrowserBot.runMain({ hashtag: 'streetphotography_bw' }, 19); // or 'portraiture_kings'
+      await BrowserBot.runMain({ hashtag: 'streetphotography' }, 19); // or 'portraiture_kings'
       // 'Follow by username' follows accounts following the given account
       // await BrowserBot.runMain({ username: 'jordhammond' });
     }
@@ -46,7 +46,7 @@ const TerminalBot = require('./src/terminal');
       await BrowserBot.runMassUnfollow(15);
     }
     if (!skipFollow) {
-      await BrowserBot.runMain({ hashtag: 'portrait_bw' }, 19);
+      await BrowserBot.runMain({ hashtag: 'bbctravel' }, 19);
     }
     if (!skipUnfollow && !skipFollow) {
       // Final batch

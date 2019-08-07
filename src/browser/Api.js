@@ -25,10 +25,10 @@ const Api = {
         .click('[name=username]')
         .keys(credentials.username)
         .pause(7000) // wait to enter manually
-        .click('[name=password]')
-        .keys(credentials.password)
-        .pause(2000)
-        .click('button=Log in')
+        //.click('[name=password]')
+        //.keys(credentials.password)
+        //.pause(2000)
+        .click('button=Log In')
         .pause(5000);
 
       const isChallenged = (await browserInstance.getUrl()).includes('challenge');
