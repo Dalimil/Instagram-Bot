@@ -146,8 +146,12 @@ exports.runMassUnfollowFromList = async (usernamesToUnfollow) => {
 // manually goes through a list of accounts (e.g. manually decide to unfollow or not)
 exports.runBrowseList = async (usernameList) => {
   console.info('Iterating a list of accounts...');
+  const confuseAutomationDetection = () => {
+    Object.defineProperty(navigator, 'webdriver', { get: () => false });
+  };
   for (const [index, username] of usernameList.entries()) {
     await client.url(Url.getUserPageUrl(username))
+      .execute(confuseAutomationDetection)
       .pause(5000)
       .catch(() => {
         console.error('Error loading', username);
@@ -165,6 +169,7 @@ exports.runGetUntrackedFutureUnfollowAccounts = async (username, fixedFollowingL
   const untrackedFutureUnfollows = followingList.filter(x =>
     !fixedFollowingList.includes(x) && !currentUnfollowList.includes(x)
   );
+  console.log(JSON.stringify(followingList, null, 2));
   console.log(JSON.stringify(untrackedFutureUnfollows, null, 2));
   console.log('Accounts untracked:', untrackedFutureUnfollows.length);
   return untrackedFutureUnfollows;

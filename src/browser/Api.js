@@ -1,13 +1,20 @@
 const Url = require('../shared/Url');
 const Data = require('../shared/Data');
 
-const waiting = (ms) => new Promise(resolve => setTimeout(resolve, (ms * 0.7) + (0.3 * ms * Math.random())));
+const getPauseMs = (ms) => (ms * 0.7) + (0.3 * ms * Math.random());
+const waiting = (ms) => new Promise(resolve => setTimeout(resolve, getPauseMs(ms)));
+const confuseAutomationDetection = () => {
+  Object.defineProperty(navigator, 'webdriver', {
+    get: () => false,
+  });
+};
 
 const Api = {
   async login(browserInstance, credentials) {
     await browserInstance
       .url(Url.defaultUrl)
-      .pause(2000);
+      .execute(confuseAutomationDetection)
+      .pause(getPauseMs(2000));
 
     console.info('Trying to restore previous session...');
     const cookies = Data.getCookieSession();
@@ -16,7 +23,8 @@ const Api = {
     }
     await browserInstance
       .url(Url.defaultLoginUrl)
-      .pause(2000);
+      .execute(confuseAutomationDetection)
+      .pause(getPauseMs(2000));
     
     const isNotLoggedIn = (await browserInstance.getTitle()).toLowerCase().includes('login');
     if (isNotLoggedIn) {
@@ -24,12 +32,12 @@ const Api = {
       await browserInstance
         .click('[name=username]')
         .keys(credentials.username)
-        .pause(7000) // wait to enter manually
+        .pause(getPauseMs(7000)) // wait to enter manually
         //.click('[name=password]')
         //.keys(credentials.password)
-        //.pause(2000)
+        //.pause(getPauseMs(2000))
         .click('button=Log In')
-        .pause(5000);
+        .pause(getPauseMs(5000));
 
       const isChallenged = (await browserInstance.getUrl()).includes('challenge');
       if (isChallenged) {
@@ -39,7 +47,7 @@ const Api = {
           () => browserInstance.getUrl().then(url => !url.includes('challenge')),
           120 * 1000, // 2min
           'Took too long to solve challenge',
-          1000, // check again every second
+          getPauseMs(1000), // check again every second
         );
       }
     } else {
@@ -52,8 +60,10 @@ const Api = {
       console.info('Logging out...');
       await browserInstance
         .url(Url.logoutUrl)
-        .pause(3000)
-        .url(Url.defaultUrl);
+        .execute(confuseAutomationDetection)
+        .pause(getPauseMs(3000))
+        .url(Url.defaultUrl)
+        .execute(confuseAutomationDetection);
     } else {
       // persist cookies only
       console.info('Ending session...');
@@ -149,7 +159,8 @@ const Api = {
     // Navigating there first makes the behaviour more human
     await browserInstance
       .url(Url.getMediaUrl(mediaId))
-      .pause(2000);
+      .execute(confuseAutomationDetection)
+      .pause(getPauseMs(2000));
 
     const mediaLikers = await Api.getListOfAccountsFirstN(
       browserInstance,
@@ -243,10 +254,11 @@ const Api = {
     const listNodeSelector = '.isgrP';
     const followingList = await browserInstance
       .url(Url.getUserPageUrl(username))
-      .pause(2000)
+      .execute(confuseAutomationDetection)
+      .pause(getPauseMs(2000))
       .click('a*=following')
       .waitForExist(listNodeSelector)
-      .pause(2000)
+      .pause(getPauseMs(2000))
       .timeouts('script', 600 * 1000) // 600s
       .executeAsync(
         (listNodeSelector, done) => {
@@ -285,22 +297,32 @@ const Api = {
   /* POST api methods */
   async followUser(browserInstance, username) {
     console.info('Following', username, '...');
+    let triesLeft = 5;
     do {
       await browserInstance
         .url(Url.getUserPageUrl(username))
-        .pause(2000)
+        .execute(confuseAutomationDetection)
+        .pause(getPauseMs(2000))
         .click('button=Follow')
         .waitForExist('button=Following', 5000)
-        .pause(2000)
+        .pause(getPauseMs(2000))
         .catch(() => {
           console.error('Error occurred when trying to follow', username);
         });
+      triesLeft -= 1;
     } while (
       await browserInstance
         .url(Url.getUserPageUrl(username))
+        .execute(confuseAutomationDetection)
         .isExisting('button=Follow')
         .catch(() => true) // retry on error
+      && triesLeft > 0
     );
+
+    if (triesLeft <= 0) {
+      console.error('Tried 5 times and it did not work!');
+      await browserInstance.saveScreenshot('./error_capture.png');
+    }
   },
 
   async unfollowUser(browserInstance, username) {
@@ -311,16 +333,17 @@ const Api = {
         isFirstAttempt = false;
       } else {
         // Instagram is rate limiting us, we need to wait
-        await browserInstance.pause(60 * 1000);
+        await browserInstance.pause(5 * 60 * 1000); // 5min
       }
       await browserInstance
         .url(Url.getUserPageUrl(username))
+        .execute(confuseAutomationDetection)
         .click('button=Following')
         .waitForExist('button*=Unfollow', 5000)
-        .pause(4000)
+        .pause(getPauseMs(4000))
         .click('button*=Unfollow')
         .waitForExist('button=Following', 5000, /* reverse */ true)
-        .pause(4000)
+        .pause(getPauseMs(4000))
         .catch(err => {
           console.info('Already unfollowed or an error.');
         });
@@ -329,6 +352,7 @@ const Api = {
     } while (
       await browserInstance
         .url(Url.getUserPageUrl(username))
+        .execute(confuseAutomationDetection)
         .isExisting('button=Following')
         .catch(() => true) // retry on error
     );
