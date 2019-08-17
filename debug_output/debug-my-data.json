@@ -1,0 +1,116 @@
+{
+  "logging_page_id": "profilePage_7467402824",
+  "show_suggested_profiles": false,
+  "graphql": {
+    "user": {
+      "biography": "",
+      "blocked_by_viewer": false,
+      "country_block": false,
+      "external_url": null,
+      "external_url_linkshimmed": null,
+      "edge_followed_by": {
+        "count": 11
+      },
+      "followed_by_viewer": false,
+      "edge_follow": {
+        "count": 11
+      },
+      "follows_viewer": false,
+      "full_name": "David Thornton",
+      "has_channel": false,
+      "has_blocked_viewer": false,
+      "highlight_reel_count": 0,
+      "has_requested_viewer": false,
+      "id": "7467402824",
+      "is_business_account": false,
+      "is_private": false,
+      "is_verified": false,
+      "mutual_followers": null,
+      "edge_mutual_followed_by": {
+        "count": 0,
+        "edges": []
+      },
+      "profile_pic_url": "https://instagram.flim5-2.fna.fbcdn.net/vp/74d4a001973ffb1c519909dc584b0316/5C328D7A/t51.2885-19/11906329_960233084022564_1448528159_a.jpg",
+      "profile_pic_url_hd": "https://instagram.flim5-2.fna.fbcdn.net/vp/74d4a001973ffb1c519909dc584b0316/5C328D7A/t51.2885-19/11906329_960233084022564_1448528159_a.jpg",
+      "requested_by_viewer": false,
+      "username": "david_thorn_ton",
+      "connected_fb_page": null,
+      "edge_felix_combined_post_uploads": {
+        "count": 0,
+        "page_info": {
+          "has_next_page": false,
+          "end_cursor": null
+        },
+        "edges": []
+      },
+      "edge_felix_combined_draft_uploads": {
+        "count": 0,
+        "page_info": {
+          "has_next_page": false,
+          "end_cursor": null
+        },
+        "edges": []
+      },
+      "edge_felix_video_timeline": {
+        "count": 0,
+        "page_info": {
+          "has_next_page": false,
+          "end_cursor": null
+        },
+        "edges": []
+      },
+      "edge_felix_drafts": {
+        "count": 0,
+        "page_info": {
+          "has_next_page": false,
+          "end_cursor": null
+        },
+        "edges": []
+      },
+      "edge_felix_pending_post_uploads": {
+        "count": 0,
+        "page_info": {
+          "has_next_page": false,
+          "end_cursor": null
+        },
+        "edges": []
+      },
+      "edge_felix_pending_draft_uploads": {
+        "count": 0,
+        "page_info": {
+          "has_next_page": false,
+          "end_cursor": null
+        },
+        "edges": []
+      },
+      "edge_owner_to_timeline_media": {
+        "count": 0,
+        "page_info": {
+          "has_next_page": false,
+          "end_cursor": null
+        },
+        "edges": []
+      },
+      "edge_saved_media": {
+        "count": 0,
+        "page_info": {
+          "has_next_page": false,
+          "end_cursor": null
+        },
+        "edges": []
+      },
+      "edge_media_collections": {
+        "count": 0,
+        "page_info": {
+          "has_next_page": false,
+          "end_cursor": null
+        },
+        "edges": []
+      }
+    }
+  },
+  "felix_onboarding_video_resources": {
+    "mp4": "/static/videos/felix-onboarding/onboardingVideo.mp4/9d16838ca7f9.mp4",
+    "poster": "/static/images/felix-onboarding/onboardingVideoPoster.png/8fdba7cf2120.png"
+  }
+}

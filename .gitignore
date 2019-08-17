@@ -67,8 +67,5 @@ typings/
 creds.txt
 creds.json
 session.json
-out/
-
-data/*.json
 
 tmp.json
