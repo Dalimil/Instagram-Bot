@@ -84,18 +84,19 @@ const Api = {
       .executeAsync(
         (done) => {
           done({
-            'followed_by_viewer': true/false,
-            'follows_viewer': true/false,
-            'is_private': true/false,
-            'edge_owner_to_timeline_media': {
-              count: 34,
-              edges: [{ node: { 'taken_at_timestamp': 1535159232, } }] // just the most recent
-            },
-            'edge_followed_by': { count: 34 },
-            'edge_follow': { count: 15 },
-            'biography': 'blablabla',
-            'full_name': 'blabla a',
-            'username': username
+            ...window._sharedData.entry_data.ProfilePage[0].graphql.user
+            // 'followed_by_viewer': true/false,
+            // 'follows_viewer': true/false,
+            // 'is_private': true/false,
+            // 'edge_owner_to_timeline_media': {
+            //   count: 34,
+            //   edges: [{ node: { 'taken_at_timestamp': 1535159232, } }] // just the most recent
+            // },
+            // 'edge_followed_by': { count: 34 },
+            // 'edge_follow': { count: 15 },
+            // 'biography': 'blablabla',
+            // 'full_name': 'blabla a',
+            // 'username': username
           });
         }
       ).catch(() => null);
