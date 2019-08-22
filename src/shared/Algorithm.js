@@ -65,7 +65,7 @@ const Algorithm = {
 
       // must not have offensive words in name or username
       const badWords = ["salon", "sex", "rental", "free", "follow", "follower"];
-      const { id, username, full_name: fullName } = userData;
+      const { username, full_name: fullName } = userData;
       if (badWords.find(word => username.includes(word) || fullName.includes(word))) {
         return 'has offensive name';
       }

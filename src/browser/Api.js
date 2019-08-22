@@ -1,7 +1,7 @@
 const Url = require('../shared/Url');
 const Data = require('../shared/Data');
 
-const getPauseMs = (ms) => (ms * 0.7) + (0.3 * ms * Math.random());
+const getPauseMs = (ms) => (ms * 0.7) + (0.3 * ms * Math.random() * 2);
 const waiting = (ms) => new Promise(resolve => setTimeout(resolve, getPauseMs(ms)));
 const confuseAutomationDetection = () => {
   Object.defineProperty(navigator, 'webdriver', {
@@ -77,19 +77,30 @@ const Api = {
 
   // Returns user info/details
   async getUser(browserInstance, username) {
-    const user = await browserInstance
+    const userData = await browserInstance
+      .url(Url.getUserPageUrl(username))
+      .execute(confuseAutomationDetection)
+      .pause(getPauseMs(2000))
       .executeAsync(
-        (usernameUrl, done) => {
-          fetch(usernameUrl, { credentials: 'include' })
-            .then(response => response.json())
-            .then(json => done(json.graphql.user));
-        },
-        Url.getUsernameApiUrl(username),
-      ).catch(() => ({
-        value: null,
-      }));
-    await waiting(3000);
-    return user.value;
+        (done) => {
+          done({
+            'followed_by_viewer': true/false,
+            'follows_viewer': true/false,
+            'is_private': true/false,
+            'edge_owner_to_timeline_media': {
+              count: 34,
+              edges: [{ node: { 'taken_at_timestamp': 1535159232, } }] // just the most recent
+            },
+            'edge_followed_by': { count: 34 },
+            'edge_follow': { count: 15 },
+            'biography': 'blablabla',
+            'full_name': 'blabla a',
+            'username': username
+          });
+        }
+      ).catch(() => null);
+    await waiting(2000);
+    return userData;
   },
 
   // Returns a list of posts that have this hashtag
