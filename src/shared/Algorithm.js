@@ -21,14 +21,14 @@ const Algorithm = {
       // 'full_name': 'blabla a',
       // 'username': username
     const requiredDataEntries = [
-      'followed_by_viewer', 'follows_viewer', 'is_private', 'edge_owner_to_timeline_data',
+      'followed_by_viewer', 'follows_viewer', 'is_private', 'edge_owner_to_timeline_media',
       'edge_followed_by', 'edge_follow', 'biography', 'full_name', 'username'
     ];
     const missingEntry = requiredDataEntries.find(entry => !(entry in userData));
     if (missingEntry != null) {
       console.error('Missing data in userData, cannot decide account quality.', missingEntry);
       return ({
-        isQualityAccount: true
+        isQualityAccount: false
       });
     }
     const badQualityReason = (() => {

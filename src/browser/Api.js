@@ -4,9 +4,11 @@ const Data = require('../shared/Data');
 const getPauseMs = (ms) => (ms * 0.7) + (0.3 * ms * Math.random() * 2);
 const waiting = (ms) => new Promise(resolve => setTimeout(resolve, getPauseMs(ms)));
 const confuseAutomationDetection = () => {
-  Object.defineProperty(navigator, 'webdriver', {
-    get: () => false,
-  });
+  const falsifyWebdriver = () => {
+    Object.defineProperty(navigator, 'webdriver', {value: false, configurable: true});
+  };
+  falsifyWebdriver();
+  setInterval(falsifyWebdriver, 500);
 };
 
 const Api = {
@@ -302,13 +304,11 @@ const Api = {
     const maxTries = 5;
     let triesLeft = maxTries;
     do {
-      // only skip go to user page on the first try if requested
-      if (!skipGoToUserPage || maxTries !== triesLeft) {
-        await browserInstance.url(Url.getUserPageUrl(username));
-      }
       await browserInstance
+        .url(Url.getUserPageUrl(username))
         .execute(confuseAutomationDetection)
         .pause(getPauseMs(2000))
+        .execute(confuseAutomationDetection)
         .click('button=Follow')
         .waitForExist('button=Following', 5000)
         .pause(getPauseMs(2000))
