@@ -7,7 +7,30 @@ const Algorithm = {
    * @param userData - JSON obtained from API
    */
   decideAccountQuality(userData) {
-
+    // REQUIRED ENTRIES
+      // 'followed_by_viewer': true/false,
+      // 'follows_viewer': true/false,
+      // 'is_private': true/false,
+      // 'edge_owner_to_timeline_media': {
+      //   count: 34,
+      //   edges: [{ node: { 'taken_at_timestamp': 1535159232, } }] // just the most recent
+      // },
+      // 'edge_followed_by': { count: 34 },
+      // 'edge_follow': { count: 15 },
+      // 'biography': 'blablabla',
+      // 'full_name': 'blabla a',
+      // 'username': username
+    const requiredDataEntries = [
+      'followed_by_viewer', 'follows_viewer', 'is_private', 'edge_owner_to_timeline_data',
+      'edge_followed_by', 'edge_follow', 'biography', 'full_name', 'username'
+    ];
+    const missingEntry = requiredDataEntries.find(entry => !(entry in userData));
+    if (missingEntry != null) {
+      console.error('Missing data in userData, cannot decide account quality.', missingEntry);
+      return ({
+        isQualityAccount: true
+      });
+    }
     const badQualityReason = (() => {
       // not already following, and not already my follower
       const alreadyFollowing = userData.followed_by_viewer;
@@ -21,14 +44,14 @@ const Algorithm = {
         return 'is private account';
       }
 
-      // must have >= 10 posts
+      // must have >= 5 posts
       const { count: numPosts, edges: posts } = userData.edge_owner_to_timeline_media;
-      if (numPosts < 10) {
+      if (numPosts < 5) {
         return `does not have enough posts: ${numPosts})`;
       }
 
-      // must have posted within the last 14 days
-      const severalDaysAgo = Date.now() - (1000 * 60 * 60 * 24 * 14);
+      // must have posted within the last 30 days
+      const severalDaysAgo = Date.now() - (1000 * 60 * 60 * 24 * 30);
       const latestPostTimestamp = posts[0].node.taken_at_timestamp * 1000;
       if (latestPostTimestamp < severalDaysAgo) {
         return 'latest post is too old';

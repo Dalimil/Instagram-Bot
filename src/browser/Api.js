@@ -83,25 +83,15 @@ const Api = {
       .pause(getPauseMs(2000))
       .executeAsync(
         (done) => {
-          done({
+          done(JSON.stringify({
             ...window._sharedData.entry_data.ProfilePage[0].graphql.user
-            // 'followed_by_viewer': true/false,
-            // 'follows_viewer': true/false,
-            // 'is_private': true/false,
-            // 'edge_owner_to_timeline_media': {
-            //   count: 34,
-            //   edges: [{ node: { 'taken_at_timestamp': 1535159232, } }] // just the most recent
-            // },
-            // 'edge_followed_by': { count: 34 },
-            // 'edge_follow': { count: 15 },
-            // 'biography': 'blablabla',
-            // 'full_name': 'blabla a',
-            // 'username': username
-          });
+          }));
         }
-      ).catch(() => null);
+      ).catch(() => ({
+        value: JSON.stringify(null),
+      }));
     await waiting(2000);
-    return userData;
+    return JSON.parse(userData.value);
   },
 
   // Returns a list of posts that have this hashtag
@@ -137,7 +127,7 @@ const Api = {
         Url.graphqlApiUrl,
         query,
       );
-    await waiting(3000);
+    await waiting(5000);
     return data.value;
   },
 
@@ -307,12 +297,16 @@ const Api = {
   },
 
   /* POST api methods */
-  async followUser(browserInstance, username) {
+  async followUser(browserInstance, username, skipGoToUserPage) {
     console.info('Following', username, '...');
-    let triesLeft = 5;
+    const maxTries = 5;
+    let triesLeft = maxTries;
     do {
+      // only skip go to user page on the first try if requested
+      if (!skipGoToUserPage || maxTries !== triesLeft) {
+        await browserInstance.url(Url.getUserPageUrl(username));
+      }
       await browserInstance
-        .url(Url.getUserPageUrl(username))
         .execute(confuseAutomationDetection)
         .pause(getPauseMs(2000))
         .click('button=Follow')
