@@ -2,9 +2,9 @@ const BrowserBot = require('./src/browser');
 const TerminalBot = require('./src/terminal');
 // Note: terminal version of the bot is currently broken due to security challenge issues
 
-// Usage: yarn start [(--follow | --unfollow | --experiment)] [--headless]
+// Usage: yarn start [(--follow | --unfollow | --experiment)] [--lightweight] [--headless]
 //  or simply 'yarn start', 'yarn follow', 'yarn unfollow', 'yarn experiment',
-//  'yarn start --headless' etc.
+//  'yarn start --lightweight --headless' etc.
 (async () => {
   // Follow limit: between 100 up to max 500 per day
   // HARD LIMIT: 40 follows per hour!
@@ -17,6 +17,7 @@ const TerminalBot = require('./src/terminal');
   const skipFollow = (commandArg === '--unfollow');
   const skipUnfollow = (commandArg === '--follow');
   const isExperimentMode = (commandArg === '--experiment');
+  const followNumberTarget = process.argv.includes('--lightweight') ? 1 : 10;
 
   console.log('Started at', new Date().toLocaleString());
 
@@ -38,7 +39,7 @@ const TerminalBot = require('./src/terminal');
     }
     if (!skipFollow) {
       // 'Follow by hashtag' follows feed likers (because these are active users)
-      await BrowserBot.runMain({ hashtag: 'streetphotography' }, 19); // or 'portraiture_kings'
+      await BrowserBot.runMain({ hashtag: 'pnw' }, followNumberTarget);
       // 'Follow by username' follows accounts following the given account
       // await BrowserBot.runMain({ username: 'jordhammond' });
     }
@@ -46,7 +47,7 @@ const TerminalBot = require('./src/terminal');
       await BrowserBot.runMassUnfollow(15);
     }
     if (!skipFollow) {
-      await BrowserBot.runMain({ hashtag: 'bbctravel' }, 19);
+      await BrowserBot.runMain({ hashtag: 'vancouver' }, followNumberTarget);
     }
     if (!skipUnfollow && !skipFollow) {
       // Final batch
@@ -57,5 +58,7 @@ const TerminalBot = require('./src/terminal');
   await BrowserBot.end();
   console.log('Finished at', new Date().toLocaleString());
   // Force terminate (because selenium subprocess kill is buggy)
-  process.exit();
+  setTimeout(() => {
+    process.exit();
+  }, 5000);
 })();

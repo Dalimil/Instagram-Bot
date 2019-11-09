@@ -24,9 +24,6 @@ const Url = require('../shared/Url');
 const Api = require('./Api');
 // verified limit of maximum accounts one can follow in 1 hour
 const followRequestsPerHourLimit = 40;
-// We'll get this amount of followers first, many will be skipped
-// Should be 100, but let's go with 50 to prevent spam detection
-const numUsersToProcess = 50;
 let seleniumProcess = null;
 
 exports.init = async () => {
@@ -39,6 +36,9 @@ exports.init = async () => {
         console.error(error);
         return reject(error);
       }
+      child.stderr.on('data', data => {
+        console.log(data.toString());
+      });
       resolve(child);
     });
   });
@@ -60,11 +60,15 @@ exports.end = async () => {
   }
 };
 
+// We'll get larger amount of followers first, many will be skipped
+
 exports.runMain = async (initialTarget, followRequestsCount = 40) => {
   console.info(new Date().toLocaleString(), 'Executing main follow algorithm...');
 
+  const numUsersToProcess = followRequestsCount * 5;
   const alreadyProcessed = new Set(Data.getProcessedAccountsList());
   let futureFollowList = [];
+
   if (initialTarget.username) {
     console.info(`Initial target is a user: ${initialTarget.username}`);
     // Get target user id
