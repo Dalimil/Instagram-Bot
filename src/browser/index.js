@@ -138,6 +138,8 @@ exports.runMassUnfollow = async (unfollowLimit) => {
   
   // Update storage
   Data.storeFutureUnfollowList(toKeep);
+
+  await Api.unfollowUsersBlank(client, Math.max(0, unfollowLimit - toUnfollow.length));
 };
 
 // Unfollow based on a provided list

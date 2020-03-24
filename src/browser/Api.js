@@ -363,6 +363,15 @@ const Api = {
         .catch(() => true) // retry on error
     );
   },
+
+  // This function doesn't actually do anything just takes the same amount of time it would normally take
+  async unfollowUsersBlank(browserInstance, userCount) {
+    await browserInstance
+      .pause(getPauseMs(userCount * 8000))
+      .catch(err => {
+        console.info('Error during unfollow users blank.');
+      });
+  },
 };
 
 module.exports = Api;

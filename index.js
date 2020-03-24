@@ -15,10 +15,10 @@ const TerminalBot = require('./src/terminal');
     // Max number of likes is 1.5x that amount
 
     const commandArg = process.argv[2];
-    const skipFollow = (commandArg === '--unfollow');
-    const skipUnfollow = (commandArg === '--follow');
-    const isExperimentMode = (commandArg === '--experiment');
-    const followNumberTarget = process.argv.includes('--lightweight') ? 1 : 10;
+    const skipFollow = commandArg === '--unfollow';
+    const skipUnfollow = commandArg === '--follow';
+    const isExperimentMode = commandArg === '--experiment';
+    const followNumberTarget = process.argv.includes('--lightweight') ? 6 : 19;
 
     console.log('Started at', new Date().toLocaleString());
 
@@ -27,16 +27,19 @@ const TerminalBot = require('./src/terminal');
 
     if (isExperimentMode) {
       // EXPERIMENT MODE
-      const inputData = JSON.parse(require('fs').readFileSync('./tmp.json')).data;
-      // await BrowserBot.runBrowseList(inputData);
-      const untrackedAccounts =
-        await BrowserBot.runGetUntrackedFutureUnfollowAccounts('dali_mil', inputData);
-      console.log(untrackedAccounts);
+      const inputData = JSON.parse(require('fs').readFileSync('./tmp.json'))
+        .data;
+      await BrowserBot.runBrowseList(inputData);
+      // const untrackedAccounts = await BrowserBot.runGetUntrackedFutureUnfollowAccounts(
+      //   "dali_mil",
+      //   inputData
+      // );
+      // console.log(untrackedAccounts);
       // await BrowserBot.runMassUnfollowFromList(inputData.slice(0, 30));
     } else {
       // STANDARD MODE (10-20% conversion rate)
       if (!skipUnfollow) {
-        await BrowserBot.runMassUnfollow(15);
+        await BrowserBot.runMassUnfollow(Math.min(15, followNumberTarget));
       }
       if (!skipFollow) {
         // 'Follow by hashtag' follows feed likers (because these are active users)
@@ -45,17 +48,13 @@ const TerminalBot = require('./src/terminal');
         // await BrowserBot.runMain({ username: 'jordhammond' });
       }
       if (!skipUnfollow) {
-        await BrowserBot.runMassUnfollow(15);
+        await BrowserBot.runMassUnfollow(Math.min(15, followNumberTarget));
       }
       if (!skipFollow) {
         await BrowserBot.runMain({ hashtag: 'vancouver' }, followNumberTarget);
       }
-      if (!skipUnfollow && !skipFollow) {
-        // Final batch
-        await BrowserBot.runMassUnfollow(15);
-      }
     }
-  } catch(e) {
+  } catch (e) {
     console.error('------------- Terminated with an error -----------');
     console.error(e);
   } finally {

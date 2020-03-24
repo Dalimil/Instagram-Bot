@@ -57,15 +57,15 @@ const Algorithm = {
         return 'latest post is too old';
       }
 
-      // must have < 1000 followers
+      // must have < 1500 followers
       const { count: followers } = userData.edge_followed_by;
-      if (followers > 1000) {
+      if (followers > 1500 || followers < 100) {
         return 'has over 1000 followers';
       }
-      
-      // must have < 2000 following
+
+      // must have < 1500 following
       const { count: following } = userData.edge_follow;
-      if (following > 2000) {
+      if (following > 1500 || following < 100) {
         return 'is following over 2000 accounts';
       }
 
@@ -109,7 +109,7 @@ const Algorithm = {
    */
   getCurrentUnfollowLists(unfollowLimit = 20) {
     const unfollowList = Data.getFutureUnfollowList();
-    const fiveDaysAgo = Date.now() - (1000 * 60 * 60 * 24 * 5);
+    const fiveDaysAgo = Date.now() - (1000 * 60 * 60 * 24 * 8);
     const toKeep = [];
     const toUnfollow = [];
     // Determine which accounts were added long time ago
