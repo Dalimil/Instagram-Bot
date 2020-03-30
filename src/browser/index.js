@@ -65,7 +65,7 @@ exports.end = async () => {
 exports.runMain = async (initialTarget, followRequestsCount = 40) => {
   console.info(new Date().toLocaleString(), 'Executing main follow algorithm...');
 
-  const numUsersToProcess = followRequestsCount * 5;
+  const numUsersToProcess = followRequestsCount * 4;
   const alreadyProcessed = new Set(Data.getProcessedAccountsList());
   let futureFollowList = [];
 
@@ -126,6 +126,7 @@ exports.runMain = async (initialTarget, followRequestsCount = 40) => {
 
 exports.runMassUnfollow = async (unfollowLimit) => {
   console.info(new Date().toLocaleString(), 'Executing mass unfollow...');
+  await Api.waitPerUser(client, 10); // pause for safety
 
   const { toKeep, toUnfollow } = Algorithm.getCurrentUnfollowLists(unfollowLimit);
 
@@ -139,7 +140,7 @@ exports.runMassUnfollow = async (unfollowLimit) => {
   // Update storage
   Data.storeFutureUnfollowList(toKeep);
 
-  await Api.unfollowUsersBlank(client, Math.max(0, unfollowLimit - toUnfollow.length));
+  await Api.waitPerUser(client, 10 + Math.max(0, unfollowLimit - toUnfollow.length));
 };
 
 // Unfollow based on a provided list
@@ -155,17 +156,12 @@ exports.runMassUnfollowFromList = async (usernamesToUnfollow) => {
 // manually goes through a list of accounts (e.g. manually decide to unfollow or not)
 exports.runBrowseList = async (usernameList) => {
   console.info('Iterating a list of accounts...');
-  const confuseAutomationDetection = () => {
-    Object.defineProperty(navigator, 'webdriver', { get: () => false });
-  };
   for (const [index, username] of usernameList.entries()) {
-    await client.url(Url.getUserPageUrl(username))
-      .execute(confuseAutomationDetection)
-      .pause(5000)
-      .catch(() => {
-        console.error('Error loading', username);
-      });
+    const data = await Api.getUser(client, username);
+    // console.log('Data: ', data);
   }
+  // Uncomment to pause after being done (debugging purposes)
+  // await Api.waitPerUser(client, 1000);
 };
 
 // Sometimes people get away from our list, (e.g. they change their username)

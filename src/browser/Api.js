@@ -1,5 +1,6 @@
 const Url = require('../shared/Url');
 const Data = require('../shared/Data');
+const Utils = require('../shared/Utils');
 
 const getPauseMs = (ms) => (ms * 0.7) + (0.3 * ms * Math.random() * 2);
 const waiting = (ms) => new Promise(resolve => setTimeout(resolve, getPauseMs(ms)));
@@ -79,20 +80,39 @@ const Api = {
 
   // Returns user info/details
   async getUser(browserInstance, username) {
-    const userData = await browserInstance
+    const userDataTest = await browserInstance
       .url(Url.getUserPageUrl(username))
       .execute(confuseAutomationDetection)
-      .pause(getPauseMs(2000))
+      .pause(getPauseMs(10000))
+      .executeAsync(done => {
+        done(window._sharedData.entry_data.ProfilePage[0].graphql.user.profile_pic_url);
+      })
+      .catch(e => {
+        console.error('Error in accessing getUser data.', e);
+        return null;
+      });
+    if (userDataTest === null) {
+      // For some reason, user data is not available at this time.
+      // Bot detection suspected. Wait this out... (2 minutes)
+      await waiting(120 * 1000);
+    }
+    const userData = await browserInstance
       .executeAsync(
-        (done) => {
-          done(JSON.stringify({
+        (decycleFnString, done) => {
+          // executeAsync can only take primitive types as arguments
+          const Utils = { decycle: eval(decycleFnString) };
+          const graphData = {
             ...window._sharedData.entry_data.ProfilePage[0].graphql.user
-          }));
-        }
-      ).catch(() => ({
-        value: JSON.stringify(null),
-      }));
-    await waiting(2000);
+          };
+          const normalizedGraphData = Utils.decycle(graphData);
+          done(JSON.stringify(normalizedGraphData));
+        },
+        Utils.decycle.toString()
+      ).catch((e) => {
+        console.error('Error in getUser: ', e);
+        return { value: JSON.stringify(null) };
+      });
+    await waiting(5000);
     return JSON.parse(userData.value);
   },
 
@@ -364,10 +384,11 @@ const Api = {
     );
   },
 
-  // This function doesn't actually do anything just takes the same amount of time it would normally take
-  async unfollowUsersBlank(browserInstance, userCount) {
+  // This function just takes the same amount of time it would normally take to
+  // perform a follow or unfollow action
+  async waitPerUser(browserInstance, userCount) {
     await browserInstance
-      .pause(getPauseMs(userCount * 8000))
+      .pause(getPauseMs(userCount * 20000))
       .catch(err => {
         console.info('Error during unfollow users blank.');
       });
