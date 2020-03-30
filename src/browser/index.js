@@ -97,10 +97,11 @@ exports.runMain = async (initialTarget, followRequestsCount = 40) => {
   for (const [index, account] of futureFollowList.entries()) {
     const accountData = await Api.getUser(client, account.username);
     if (!accountData) {
-      console.log(`Error when retrieving account data for ${account.username}.`);
-      continue;
+      console.log(`Error when retrieving account data for ${account.username}. Following anyway.`);
+      // continue;
     }
-    const accountQualityDecision = Algorithm.decideAccountQuality(accountData);
+    const accountQualityDecision = accountData ?
+      Algorithm.decideAccountQuality(accountData) : { isQualityAccount: true };
     if (accountQualityDecision.isQualityAccount) {
       qualityFutureFollowList.push(account);
       await Api.followUser(client, account.username);
@@ -126,7 +127,7 @@ exports.runMain = async (initialTarget, followRequestsCount = 40) => {
 
 exports.runMassUnfollow = async (unfollowLimit) => {
   console.info(new Date().toLocaleString(), 'Executing mass unfollow...');
-  await Api.waitPerUser(client, 10); // pause for safety
+  await Api.waitPerUser(client, 20); // pause for safety
 
   const { toKeep, toUnfollow } = Algorithm.getCurrentUnfollowLists(unfollowLimit);
 
@@ -140,7 +141,7 @@ exports.runMassUnfollow = async (unfollowLimit) => {
   // Update storage
   Data.storeFutureUnfollowList(toKeep);
 
-  await Api.waitPerUser(client, 10 + Math.max(0, unfollowLimit - toUnfollow.length));
+  await Api.waitPerUser(client, 20 + Math.max(0, unfollowLimit - toUnfollow.length));
 };
 
 // Unfollow based on a provided list

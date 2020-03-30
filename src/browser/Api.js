@@ -85,27 +85,54 @@ const Api = {
       .execute(confuseAutomationDetection)
       .pause(getPauseMs(10000))
       .executeAsync(done => {
-        done(window._sharedData.entry_data.ProfilePage[0].graphql.user.profile_pic_url);
+        if (!window._sharedData) {
+          done(JSON.stringify({
+            botDetected: document.documentElement.innerHTML.includes('wait a few minutes')
+          }));
+        } else {
+          done(JSON.stringify({
+            data: window._sharedData.entry_data.ProfilePage[0].graphql.user.profile_pic_url
+          }));
+        }
       })
       .catch(e => {
         console.error('Error in accessing getUser data.', e);
         return null;
       });
     if (userDataTest === null) {
-      // For some reason, user data is not available at this time.
-      // Bot detection suspected. Wait this out... (2 minutes)
+      // For some unknown reason, user data is not available at this time.
+      await browserInstance.saveScreenshot('./error_capture_userDataTest_null.png');
       await waiting(120 * 1000);
+    } else {
+      const testData = JSON.parse(userDataTest.value);
+      if (!testData.data) {
+        console.error('_sharedData was not defined on window and bot detected?: ', testData.botDetected);
+        if (!!testData.botDetected) {
+          await waiting(7 * 60 * 1000); // wait 7 minutes (the bot has been detected)
+        } else {
+          // Unknown error
+          await browserInstance.saveScreenshot('./error_capture_sharedData_undefined.png');
+        }
+      }
     }
     const userData = await browserInstance
+      .url(Url.getUserPageUrl(username))
+      .execute(confuseAutomationDetection)
+      .pause(getPauseMs(10000))
       .executeAsync(
         (decycleFnString, done) => {
-          // executeAsync can only take primitive types as arguments
-          const Utils = { decycle: eval(decycleFnString) };
-          const graphData = {
-            ...window._sharedData.entry_data.ProfilePage[0].graphql.user
-          };
-          const normalizedGraphData = Utils.decycle(graphData);
-          done(JSON.stringify(normalizedGraphData));
+          if (!window._sharedData) {
+            console.error('User data still blocked via bot detection.');
+            done(JSON.stringify(null));
+          } else {
+            // executeAsync can only take primitive types as arguments
+            const Utils = { decycle: eval(decycleFnString) };
+            const graphData = {
+              ...window._sharedData.entry_data.ProfilePage[0].graphql.user
+            };
+            const normalizedGraphData = Utils.decycle(graphData);
+            done(JSON.stringify(normalizedGraphData));
+          }
         },
         Utils.decycle.toString()
       ).catch((e) => {
@@ -332,8 +359,9 @@ const Api = {
         .click('button=Follow')
         .waitForExist('button=Following', 5000)
         .pause(getPauseMs(2000))
-        .catch(() => {
-          console.error('Error occurred when trying to follow', username);
+        .catch(e => {
+          console.error('Error occurred when trying to follow', username, e);
+          browserInstance.saveScreenshot('./error_capture_when_following.png');
         });
       triesLeft -= 1;
     } while (
