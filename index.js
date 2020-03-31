@@ -18,6 +18,9 @@ const TerminalBot = require('./src/terminal');
 // You will get to 4*19*2 = 152 follows a day, which is good enough and I wouldn't push it more
 // The unfollow cycles between your follow cycles are very important and if they don't introduce
 // the pauses, the 19*2 follow actions will get you blocked.
+// I'm starting to suspect that it looks at session history to suspect a bot. So when you wipe
+// the session and try to restart at previous rate, it will break again, because this new session
+// is not trusted. I think with each new session you need to slowly ramp up.
 (async () => {
   try {
     // Follow limit: between 100 up to max 500 per day
@@ -31,7 +34,7 @@ const TerminalBot = require('./src/terminal');
     const skipFollow = commandArg === '--unfollow';
     const skipUnfollow = commandArg === '--follow';
     const isExperimentMode = commandArg === '--experiment';
-    const followNumberTarget = process.argv.includes('--lightweight') ? 9 : 10;
+    const followNumberTarget = process.argv.includes('--lightweight') ? 1 : 1;
 
     console.log('Started at', new Date().toLocaleString());
 

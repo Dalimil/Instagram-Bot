@@ -108,7 +108,8 @@ const Api = {
       if (!testData.data) {
         console.error('_sharedData was not defined on window and bot detected?: ', testData.botDetected);
         if (!!testData.botDetected) {
-          await waiting(7 * 60 * 1000); // wait 7 minutes (the bot has been detected)
+          await waiting(9 * 60 * 1000); // wait 9 minutes (the bot has been detected)
+          await browserInstance.url(Url.getUserPageUrl(username)); // retry
         } else {
           // Unknown error
           await browserInstance.saveScreenshot('./error_capture_sharedData_undefined.png');
@@ -116,9 +117,6 @@ const Api = {
       }
     }
     const userData = await browserInstance
-      .url(Url.getUserPageUrl(username))
-      .execute(confuseAutomationDetection)
-      .pause(getPauseMs(10000))
       .executeAsync(
         (decycleFnString, done) => {
           if (!window._sharedData) {
@@ -346,37 +344,23 @@ const Api = {
   },
 
   /* POST api methods */
-  async followUser(browserInstance, username, skipGoToUserPage) {
+  async followUser(browserInstance, username, skipNavigationToPage) {
     console.info('Following', username, '...');
-    const maxTries = 5;
-    let triesLeft = maxTries;
-    do {
+    if (!skipNavigationToPage) {
       await browserInstance
         .url(Url.getUserPageUrl(username))
         .execute(confuseAutomationDetection)
         .pause(getPauseMs(2000))
-        .execute(confuseAutomationDetection)
-        .click('button=Follow')
-        .waitForExist('button=Following', 5000)
-        .pause(getPauseMs(2000))
-        .catch(e => {
-          console.error('Error occurred when trying to follow', username, e);
-          browserInstance.saveScreenshot('./error_capture_when_following.png');
-        });
-      triesLeft -= 1;
-    } while (
-      await browserInstance
-        .url(Url.getUserPageUrl(username))
-        .execute(confuseAutomationDetection)
-        .isExisting('button=Follow')
-        .catch(() => true) // retry on error
-      && triesLeft > 0
-    );
-
-    if (triesLeft <= 0) {
-      console.error('Tried 5 times and it did not work!');
-      await browserInstance.saveScreenshot('./error_capture.png');
+        .execute(confuseAutomationDetection);
     }
+    await browserInstance
+      .click('button=Follow')
+      .waitForExist('button=Following', 5000)
+      .pause(getPauseMs(2000))
+      .catch(e => {
+        console.error('Error occurred when trying to follow', username, e);
+        browserInstance.saveScreenshot('./error_capture_when_following.png');
+      });
   },
 
   async unfollowUser(browserInstance, username) {

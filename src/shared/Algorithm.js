@@ -6,7 +6,7 @@ const Algorithm = {
    *
    * @param userData - JSON obtained from API
    */
-  decideAccountQuality(userData) {
+  decideAccountQuality(userData, isSimplified) {
     // REQUIRED ENTRIES
       // 'followed_by_viewer': true/false,
       // 'follows_viewer': true/false,
@@ -42,6 +42,19 @@ const Algorithm = {
       // must be public
       if (userData.is_private) {
         return 'is private account';
+      }
+
+      // must not have offensive words in name or username
+      const badWords = ["salon", "sex", "rental", "free", "follow", "follower"];
+      const { username, full_name: fullName } = userData;
+      if (badWords.find(word => username.includes(word) || fullName.includes(word))) {
+        return 'has offensive name';
+      }
+
+      //// To limit the API calls we can just decide to follow pretty much anybody
+      if (isSimplified) {
+        // Passed!
+        return null;
       }
 
       // must have >= 5 posts
@@ -84,13 +97,6 @@ const Algorithm = {
       const { biography } = userData;
       if (cheapWords.find(word => biography.includes(word))) {
         return 'has offensive bio';
-      }
-
-      // must not have offensive words in name or username
-      const badWords = ["salon", "sex", "rental", "free", "follow", "follower"];
-      const { username, full_name: fullName } = userData;
-      if (badWords.find(word => username.includes(word) || fullName.includes(word))) {
-        return 'has offensive name';
       }
 
       // All passed

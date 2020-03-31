@@ -101,10 +101,10 @@ exports.runMain = async (initialTarget, followRequestsCount = 40) => {
       // continue;
     }
     const accountQualityDecision = accountData ?
-      Algorithm.decideAccountQuality(accountData) : { isQualityAccount: true };
+      Algorithm.decideAccountQuality(accountData, /* isSimplified */ true) : { isQualityAccount: true };
     if (accountQualityDecision.isQualityAccount) {
       qualityFutureFollowList.push(account);
-      await Api.followUser(client, account.username);
+      await Api.followUser(client, account.username, /* skipNavigationToPage */ true);
 
       // hourly follow limit reached? - stop now
       if (qualityFutureFollowList.length >= Math.min(followRequestsPerHourLimit - 2, followRequestsCount)) {
