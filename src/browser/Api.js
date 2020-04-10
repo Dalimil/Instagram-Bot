@@ -11,6 +11,11 @@ const confuseAutomationDetection = () => {
   falsifyWebdriver();
   setInterval(falsifyWebdriver, 500);
 };
+const Selectors = {
+  followButton: 'button=Follow',
+  followingButton: '[aria-label="Following"]',
+  unfollowButton: 'button*=Unfollow'
+}
 
 const Api = {
   async login(browserInstance, credentials) {
@@ -354,8 +359,8 @@ const Api = {
         .execute(confuseAutomationDetection);
     }
     await browserInstance
-      .click('button=Follow')
-      .waitForExist('button=Following', 5000)
+      .click(Selectors.followButton)
+      .waitForExist(Selectors.followingButton, 5000)
       .pause(getPauseMs(2000))
       .catch(e => {
         console.error('Error occurred when trying to follow', username, e);
@@ -376,14 +381,15 @@ const Api = {
       await browserInstance
         .url(Url.getUserPageUrl(username))
         .execute(confuseAutomationDetection)
-        .click('button=Following')
-        .waitForExist('button*=Unfollow', 5000)
+        .click(Selectors.followingButton)
+        .waitForExist(Selectors.unfollowButton, 5000)
         .pause(getPauseMs(4000))
-        .click('button*=Unfollow')
-        .waitForExist('button=Following', 5000, /* reverse */ true)
+        .click(Selectors.unfollowButton)
+        .waitForExist(Selectors.followingButton, 5000, /* reverse */ true)
         .pause(getPauseMs(4000))
         .catch(err => {
-          console.info('Already unfollowed or an error.');
+          console.info('Already unfollowed or an error.', username, err);
+          browserInstance.saveScreenshot('./error_capture_when_unfollowing.png');
         });
       // If we are doing too many unfollows in a row, Instagram pretends we unfollowed
       //  the person but it switches back on refresh, so we need confirmation
@@ -391,7 +397,7 @@ const Api = {
       await browserInstance
         .url(Url.getUserPageUrl(username))
         .execute(confuseAutomationDetection)
-        .isExisting('button=Following')
+        .isExisting(Selectors.followingButton)
         .catch(() => true) // retry on error
     );
   },

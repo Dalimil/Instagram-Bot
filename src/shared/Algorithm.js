@@ -51,10 +51,23 @@ const Algorithm = {
         return 'has offensive name';
       }
 
-      //// To limit the API calls we can just decide to follow pretty much anybody
-      if (isSimplified) {
-        // Passed!
-        return null;
+      // must have < 2000 followers
+      const { count: followers } = userData.edge_followed_by;
+      if (followers > 2000 || followers < 100) {
+        return 'has over 2000 followers or < 100 followers';
+      }
+
+      // must have < 2000 following
+      const { count: following } = userData.edge_follow;
+      if (following > 2000 || following < 100) {
+        return 'is following > 2000 accounts or < 100 accounts';
+      }
+
+      // must follow back a good amount of people. If followed by 1000, should be following at least 500
+      // This works because people who follow pages will have following > followers.
+      // Otherwise we suspect it is an arrogant business page
+      if (2 * following < followers) {
+        return 'is not following many people back';
       }
 
       // must have >= 5 posts
@@ -63,33 +76,22 @@ const Algorithm = {
         return `does not have enough posts: ${numPosts})`;
       }
 
-      // must have posted within the last 30 days
-      const severalDaysAgo = Date.now() - (1000 * 60 * 60 * 24 * 30);
-      const latestPostTimestamp = posts[0].node.taken_at_timestamp * 1000;
-      if (latestPostTimestamp < severalDaysAgo) {
-        return 'latest post is too old';
-      }
-
-      // must have < 1500 followers
-      const { count: followers } = userData.edge_followed_by;
-      if (followers > 1500 || followers < 100) {
-        return 'has over 1000 followers';
-      }
-
-      // must have < 1500 following
-      const { count: following } = userData.edge_follow;
-      if (following > 1500 || following < 100) {
-        return 'is following over 2000 accounts';
-      }
-
-      // must follow back a good amount of people
-      if (2 * following < followers) {
-        return 'is not following many people back';
+      //// To limit the API calls we can just decide to follow pretty much anybody
+      if (isSimplified) {
+        // Passed!
+        return null;
       }
 
       // must have followers-per-post ratio below say 80 (e.g. account with 100 posts has max 8000 followers)
       if (followers / numPosts > 80) {
         return `bad followers-per-post ratio: ${(followers / numPosts).toFixed(1)}`;
+      }
+
+      // must have posted within the last 30 days
+      const severalDaysAgo = Date.now() - (1000 * 60 * 60 * 24 * 30);
+      const latestPostTimestamp = posts[0].node.taken_at_timestamp * 1000;
+      if (latestPostTimestamp < severalDaysAgo) {
+        return 'latest post is too old';
       }
 
       // must not have offensive words in bio

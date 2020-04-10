@@ -5,22 +5,25 @@ const TerminalBot = require('./src/terminal');
 // Usage: yarn start [(--follow | --unfollow | --experiment)] [--lightweight] [--headless]
 //  or simply 'yarn start', 'yarn follow', 'yarn unfollow', 'yarn experiment',
 //  'yarn start --lightweight --headless' etc.
-//
-// When something throws an error or you get blocked, wipe session and login again
-// The machine learning to detect bots on Instagram servers is looking at user behavior.
-// Any unusual behavior gets blocked. If you suddenly start following 100 accounts every day,
-// you get blocked. Instead you need to start with 1 every day, then 2, then maybe every other
-// day you add one more to still look like your usual behavior to match behavior history.
-// Avoid regularities, don't follow 1 every hour, or don't follow 20 at 12pm exactly.
-// Task Scheduler should not start your task at 2pm exactly, but randomly between 1pm and 3pm
-// Way to ramp up - start increasing 1, 2, ..., 19 at 12:30pm. Then add three more triggers during
-// daytime hours (say 7:30am, 10:30am, 11pm) and slowly increase these from 1 to 19
-// You will get to 4*19*2 = 152 follows a day, which is good enough and I wouldn't push it more
-// The unfollow cycles between your follow cycles are very important and if they don't introduce
-// the pauses, the 19*2 follow actions will get you blocked.
-// I'm starting to suspect that it looks at session history to suspect a bot. So when you wipe
-// the session and try to restart at previous rate, it will break again, because this new session
-// is not trusted. I think with each new session you need to slowly ramp up.
+
+/**
+ * When something throws an error or you get blocked, wipe session and login again.
+ * It looks at session history to suspect a bot. So when you wipe the session and try to restart
+ * at previous rate, it will break again, because this new session is not trusted.
+ * With each new session you need to slowly ramp up again I believe.
+ * 
+ * The machine learning to detect bots on Instagram servers is looking at user behavior.
+ * Any unusual behavior gets blocked. If you suddenly start following 100 accounts every day,
+ * you get blocked. Instead you need to start with 1 every day, then 2, then maybe every other
+ * day you add one more to still look like your usual behavior to match behavior history.
+ * Avoid regularities, don't follow 1 every hour, or don't follow 20 at 12pm exactly.
+ * Task Scheduler should not start your task at 2pm exactly, but randomly between 1pm and 3pm
+ * Way to ramp up - start increasing 1, 2, ..., 19 at 12:30pm. Then add three more triggers during
+ * daytime hours (say 7:30am, 10:30am, 11pm) and slowly increase these from 1 to 19
+ * You will get to 4*19*2 = 152 follows a day, which is good enough and I wouldn't push it more
+ * The unfollow cycles between your follow cycles are very important and if they don't introduce
+ * the pauses, the 19*2 follow actions will get you blocked.
+ */
 (async () => {
   try {
     // Follow limit: between 100 up to max 500 per day
@@ -34,7 +37,7 @@ const TerminalBot = require('./src/terminal');
     const skipFollow = commandArg === '--unfollow';
     const skipUnfollow = commandArg === '--follow';
     const isExperimentMode = commandArg === '--experiment';
-    const followNumberTarget = process.argv.includes('--lightweight') ? 1 : 1;
+    const followNumberTarget = process.argv.includes('--lightweight') ? 6 : 7;
 
     console.log('Started at', new Date().toLocaleString());
 
