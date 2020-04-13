@@ -97,11 +97,10 @@ exports.runMain = async (initialTarget, followRequestsCount = 40) => {
   for (const [index, account] of futureFollowList.entries()) {
     const accountData = await Api.getUser(client, account.username);
     if (!accountData) {
-      console.log(`Error when retrieving account data for ${account.username}. Following anyway.`);
-      // continue;
+      console.log(`Error when retrieving account data for ${account.username}. Skipping.`);
+      continue;
     }
-    const accountQualityDecision = accountData ?
-      Algorithm.decideAccountQuality(accountData, /* isSimplified */ true) : { isQualityAccount: true };
+    const accountQualityDecision = Algorithm.decideAccountQuality(accountData, /* isSimplified */ false);
     if (accountQualityDecision.isQualityAccount) {
       qualityFutureFollowList.push(account);
       await Api.followUser(client, account.username, /* skipNavigationToPage */ true);

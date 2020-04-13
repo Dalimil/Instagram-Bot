@@ -83,19 +83,23 @@ const Algorithm = {
       }
 
       // must have followers-per-post ratio below say 80 (e.g. account with 100 posts has max 8000 followers)
+      // 5 -> max 400
+      // 10 -> max 800
+      // 15 -> max 1200
       if (followers / numPosts > 80) {
         return `bad followers-per-post ratio: ${(followers / numPosts).toFixed(1)}`;
       }
 
-      // must have posted within the last 30 days
-      const severalDaysAgo = Date.now() - (1000 * 60 * 60 * 24 * 30);
+      // must have posted within the last 60 days
+      const severalDaysAgo = Date.now() - (1000 * 60 * 60 * 24 * 60);
       const latestPostTimestamp = posts[0].node.taken_at_timestamp * 1000;
       if (latestPostTimestamp < severalDaysAgo) {
         return 'latest post is too old';
       }
 
-      // must not have offensive words in bio
-      const cheapWords = ["click", "link", "webcam", "gain", "follow", "followers", "kik"];
+      // must not have offensive words in bio - instagram is getting better at removing inappropriate
+      // content, so this should not be an issue with public accounts anymore
+      const cheapWords = ["webcam", "gain", "follow"];
       const { biography } = userData;
       if (cheapWords.find(word => biography.includes(word))) {
         return 'has offensive bio';
