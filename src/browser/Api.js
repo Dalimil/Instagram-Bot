@@ -113,8 +113,15 @@ const Api = {
       if (!testData.data) {
         console.error('_sharedData was not defined on window and bot detected?: ', testData.botDetected);
         if (!!testData.botDetected) {
-          await waiting(9 * 60 * 1000); // wait 9 minutes (the bot has been detected)
-          await browserInstance.url(Url.getUserPageUrl(username)); // retry
+          await waiting(8 * 1000);
+          await browserInstance.url(Url.defaultUrl).execute(confuseAutomationDetection); // home page
+          await waiting(7 * 60 * 1000); // wait 7 minutes (the bot has been detected)
+          await browserInstance.url(Url.exploreUrl).execute(confuseAutomationDetection); // explore page
+          await waiting(60 * 1000); // wait an extra minute
+          // Retry
+          await browserInstance
+            .url(Url.getUserPageUrl(username))
+            .execute(confuseAutomationDetection);
         } else if (!!testData.invalidLink) {
           console.error('Invalid account username: ', username);
           return false;
@@ -325,7 +332,7 @@ const Api = {
       .click('a*=following')
       .waitForExist(listNodeSelector)
       .pause(getPauseMs(2000))
-      .timeouts('script', 600 * 1000) // 600s
+      .timeouts('script', 1200 * 1000) // 20 min
       .executeAsync(
         (listNodeSelector, done) => {
           // Manually scroll down to load the full list of accounts
@@ -335,7 +342,7 @@ const Api = {
           let previousListLength = 0;
           let terminationTask = null;
           const scrollingTask = setInterval(() => {
-            listNode.scrollBy(0, 100);
+            listNode.scrollBy(0, 150);
             const newList = getList();
             if (previousListLength === newList.length) {
               // same length, so initialize termination task, unless already (in that case do nothing)

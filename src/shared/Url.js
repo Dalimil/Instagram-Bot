@@ -5,6 +5,7 @@ const Url = {
   loginUrl: 'https://www.instagram.com/accounts/login/ajax/',
   logoutUrl: 'https://www.instagram.com/accounts/logout/',
   graphqlApiUrl: 'https://www.instagram.com/graphql/query/',
+  exploreUrl: 'https://www.instagram.com/explore/',
 
   getHashtagApiUrl: (hashtag) =>
     `https://www.instagram.com/explore/tags/${hashtag}/?__a=1`,

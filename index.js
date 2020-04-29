@@ -44,12 +44,12 @@ const TerminalBot = require('./src/terminal');
       // EXPERIMENT MODE
       const inputData = JSON.parse(require('fs').readFileSync('./tmp.json'))
         .data;
-      //await BrowserBot.runBrowseList(['pnwisbeautiful']);
-      const untrackedAccounts = await BrowserBot.runGetUntrackedFutureUnfollowAccounts(
-        "dali_mil",
-        inputData
-      );
-      console.log(untrackedAccounts);
+      await BrowserBot.runBrowseList(inputData); // ['pnwisbeautiful']);
+      // const untrackedAccounts = await BrowserBot.runGetUntrackedFutureUnfollowAccounts(
+      //   "dali_hiking",
+      //   inputData
+      // );
+      // console.log(untrackedAccounts);
       // await BrowserBot.runMassUnfollowFromList(inputData.slice(0, 30));
     } else {
       // STANDARD MODE (10-20% conversion rate)
