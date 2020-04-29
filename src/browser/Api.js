@@ -83,8 +83,7 @@ const Api = {
     }
   },
 
-  // Returns user info/details
-  async getUser(browserInstance, username) {
+  async verifyUserPageDataAccess(browserInstance, username) {
     const userDataTest = await browserInstance
       .url(Url.getUserPageUrl(username))
       .execute(confuseAutomationDetection)
@@ -92,7 +91,8 @@ const Api = {
       .executeAsync(done => {
         if (!window._sharedData) {
           done(JSON.stringify({
-            botDetected: document.documentElement.innerHTML.includes('wait a few minutes')
+            botDetected: document.documentElement.innerHTML.includes('wait a few minutes'),
+            invalidLink: document.documentElement.innerHTML.includes('may have been removed')
           }));
         } else {
           done(JSON.stringify({
@@ -115,12 +115,24 @@ const Api = {
         if (!!testData.botDetected) {
           await waiting(9 * 60 * 1000); // wait 9 minutes (the bot has been detected)
           await browserInstance.url(Url.getUserPageUrl(username)); // retry
+        } else if (!!testData.invalidLink) {
+          console.error('Invalid account username: ', username);
+          return false;
         } else {
           // Unknown error
           await browserInstance.saveScreenshot('./error_capture_sharedData_undefined.png');
+          return false;
         }
       }
     }
+    return true;
+  },
+
+  // Returns user info/details
+  async getUser(browserInstance, username) {
+    // Access page and verify data is present and bot not detected
+    await Api.verifyUserPageDataAccess(browserInstance, username);
+
     const userData = await browserInstance
       .executeAsync(
         (decycleFnString, done) => {
@@ -369,6 +381,13 @@ const Api = {
   },
 
   async unfollowUser(browserInstance, username) {
+    // Access page and verify data is present and bot not detected
+    const verificationSuccess = await Api.verifyUserPageDataAccess(browserInstance, username);
+    if (!verificationSuccess) {
+      console.error('Skipping unfollowing of a non-existent account', username);
+      return;
+    }
+
     let isFirstAttempt = true;
     do {
       console.info('Unfollowing', username, '...');
