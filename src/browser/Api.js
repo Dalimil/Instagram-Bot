@@ -360,7 +360,7 @@ const Api = {
     }
     await browserInstance
       .click(Selectors.followButton)
-      .waitForExist(Selectors.followingButton, 5000)
+      .waitForExist(Selectors.followingButton, 7000)
       .pause(getPauseMs(2000))
       .catch(e => {
         console.error('Error occurred when trying to follow', username, e);

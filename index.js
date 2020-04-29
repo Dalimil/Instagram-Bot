@@ -18,26 +18,22 @@ const TerminalBot = require('./src/terminal');
  * day you add one more to still look like your usual behavior to match behavior history.
  * Avoid regularities, don't follow 1 every hour, or don't follow 20 at 12pm exactly.
  * Task Scheduler should not start your task at 2pm exactly, but randomly between 1pm and 3pm
- * Way to ramp up - start increasing 1, 2, ..., 19 at 12:30pm. Then add three more triggers during
- * daytime hours (say 7:30am, 10:30am, 11pm) and slowly increase these from 1 to 19
- * You will get to 4*19*2 = 152 follows a day, which is good enough and I wouldn't push it more
+ * Way to ramp up - 4 triggers at 7am, 12pm, 6pm, 12am with random 10min start delay and 4 hour
+ * forced timeout. Start with 1, 2, 3 ..., 11. That's 11*2*4 per day => 88 follows per day
  * The unfollow cycles between your follow cycles are very important and if they don't introduce
  * the pauses, the 19*2 follow actions will get you blocked.
  */
 (async () => {
   try {
-    // Follow limit: between 100 up to max 500 per day
+    // Follow limit: around 100 per day ??
     // HARD LIMIT: 40 follows per hour!
-    // Unknown unfollow limit: about 50 per hour, but Instagram will force you to
-    //  space it out in that one hour (it pretends it allows, but in fact ignores actions over limit)
     // 7500 total following is the global MAX
-    // Max number of likes is 1.5x that amount
 
     const commandArg = process.argv[2];
     const skipFollow = commandArg === '--unfollow';
     const skipUnfollow = commandArg === '--follow';
     const isExperimentMode = commandArg === '--experiment';
-    const followNumberTarget = process.argv.includes('--lightweight') ? 7 : 8;
+    const followNumberTarget = process.argv.includes('--lightweight') ? 10 : 10;
 
     console.log('Started at', new Date().toLocaleString());
 
@@ -48,17 +44,17 @@ const TerminalBot = require('./src/terminal');
       // EXPERIMENT MODE
       const inputData = JSON.parse(require('fs').readFileSync('./tmp.json'))
         .data;
-      await BrowserBot.runBrowseList(inputData);
-      // const untrackedAccounts = await BrowserBot.runGetUntrackedFutureUnfollowAccounts(
-      //   "dali_mil",
-      //   inputData
-      // );
-      // console.log(untrackedAccounts);
+      //await BrowserBot.runBrowseList(inputData);
+      const untrackedAccounts = await BrowserBot.runGetUntrackedFutureUnfollowAccounts(
+        "dali_mil",
+        inputData
+      );
+      console.log(untrackedAccounts);
       // await BrowserBot.runMassUnfollowFromList(inputData.slice(0, 30));
     } else {
       // STANDARD MODE (10-20% conversion rate)
       if (!skipUnfollow) {
-        await BrowserBot.runMassUnfollow(Math.min(15, followNumberTarget));
+        await BrowserBot.runMassUnfollow(followNumberTarget);
       }
       if (!skipFollow) {
         // 'Follow by hashtag' follows feed likers (because these are active users)
@@ -67,7 +63,7 @@ const TerminalBot = require('./src/terminal');
         // await BrowserBot.runMain({ username: 'jordhammond' });
       }
       if (!skipUnfollow) {
-        await BrowserBot.runMassUnfollow(Math.min(15, followNumberTarget));
+        await BrowserBot.runMassUnfollow(followNumberTarget);
       }
       if (!skipFollow) {
         await BrowserBot.runMain({ hashtag: 'vancouver' }, followNumberTarget);
