@@ -134,7 +134,10 @@ exports.runMassUnfollow = async (unfollowLimit) => {
   console.info(`Accounts to be unfollowed: ${toUnfollow.length}`);
   for (const [index, account] of toUnfollow.entries()) {
     console.info(`Processing ${(index + 1)}/${toUnfollow.length}`);
-    await Api.unfollowUser(client, account.username);
+    const success = await Api.unfollowUser(client, account.username);
+    if (!success) {
+      Data.appendUserToBeUnfollowedById(account);
+    }
   };
   
   // Update storage

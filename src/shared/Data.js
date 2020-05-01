@@ -3,10 +3,11 @@ const fs = require('fs');
 const Data = {
   credentialsFile: './creds.json',
   cookieSessionFile: './session.json',
-  futureUnfollowListFile: './data/future-unfollow.json',
+  futureUnfollowListFile: './data/future-unfollow.json',  
   processedAccountsFile: './data/processed-accounts.json',
   qualityListCollectionFile: './data/quality-accounts-collection.json',
   blacklistedMediaPosts: './data/blacklisted-media.json',
+  unfollowByIdAccountsFile: './data/unfollow-by-id.json', // tracking future unfollow users who changed usernames
 
   getCredentials() {
     return JSON.parse(fs.readFileSync(Data.credentialsFile));
@@ -36,6 +37,10 @@ const Data = {
     fs.writeFileSync(Data.processedAccountsFile, JSON.stringify({ processed_accounts: data }));
   },
 
+  getUnfollowByIdAccountList() {
+    return JSON.parse(fs.readFileSync(Data.unfollowByIdAccountsFile)).future_unfollow_by_id;
+  },
+
   getBlacklistedMediaPosts() {
     return JSON.parse(fs.readFileSync(Data.blacklistedMediaPosts)).blacklisted_media;
   },
@@ -46,6 +51,15 @@ const Data = {
     fs.writeFileSync(
       Data.blacklistedMediaPosts,
       JSON.stringify({ blacklisted_media: newBlacklist }, null, 2),
+    );
+  },
+
+  appendUserToBeUnfollowedById(account) {
+    const currentUserIdFutureUnfollows = Data.getUnfollowByIdAccountList();
+    const newList = [...currentUserIdFutureUnfollows, { userId: account.userId }];
+    fs.writeFileSync(
+      Data.unfollowByIdAccountsFile,
+      JSON.stringify({ future_unfollow_by_id: newList }, null, 2),
     );
   },
 

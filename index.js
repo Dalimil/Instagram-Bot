@@ -33,7 +33,7 @@ const TerminalBot = require('./src/terminal');
     const skipFollow = commandArg === '--unfollow';
     const skipUnfollow = commandArg === '--follow';
     const isExperimentMode = commandArg === '--experiment';
-    const followNumberTarget = process.argv.includes('--lightweight') ? 10 : 10;
+    const followNumberTarget = process.argv.includes('--lightweight') ? 9 : 9;
 
     console.log('Started at', new Date().toLocaleString());
 

@@ -111,8 +111,10 @@ const Api = {
     } else {
       const testData = JSON.parse(userDataTest.value);
       if (!testData.data) {
-        console.error('_sharedData was not defined on window and bot detected?: ', testData.botDetected);
+        // _sharedData was not defined on the window
+        console.log('User page not accessible.');
         if (!!testData.botDetected) {
+          console.error('Bot detected! -- waiting and trying to recover...');
           await waiting(8 * 1000);
           await browserInstance.url(Url.defaultUrl).execute(confuseAutomationDetection); // home page
           await waiting(7 * 60 * 1000); // wait 7 minutes (the bot has been detected)
@@ -123,7 +125,7 @@ const Api = {
             .url(Url.getUserPageUrl(username))
             .execute(confuseAutomationDetection);
         } else if (!!testData.invalidLink) {
-          console.error('Invalid account username: ', username);
+          console.log('Invalid account username: ', username);
           return false;
         } else {
           // Unknown error
@@ -392,40 +394,37 @@ const Api = {
     const verificationSuccess = await Api.verifyUserPageDataAccess(browserInstance, username);
     if (!verificationSuccess) {
       console.error('Skipping unfollowing of a non-existent account', username);
-      return;
+      return false;
     }
 
-    let isFirstAttempt = true;
-    do {
-      console.info('Unfollowing', username, '...');
-      if (isFirstAttempt) {
-        isFirstAttempt = false;
-      } else {
-        // Instagram is rate limiting us, we need to wait
-        await browserInstance.pause(5 * 60 * 1000); // 5min
-      }
-      await browserInstance
-        .url(Url.getUserPageUrl(username))
-        .execute(confuseAutomationDetection)
-        .click(Selectors.followingButton)
-        .waitForExist(Selectors.unfollowButton, 5000)
-        .pause(getPauseMs(4000))
-        .click(Selectors.unfollowButton)
-        .waitForExist(Selectors.followingButton, 5000, /* reverse */ true)
-        .pause(getPauseMs(4000))
-        .catch(err => {
-          console.info('Already unfollowed or an error.', username, err);
-          browserInstance.saveScreenshot('./error_capture_when_unfollowing.png');
-        });
-      // If we are doing too many unfollows in a row, Instagram pretends we unfollowed
-      //  the person but it switches back on refresh, so we need confirmation
-    } while (
+    console.info('Unfollowing', username, '...');
+    await browserInstance
+      .click(Selectors.followingButton) // click 'Following' to unfollow
+      .waitForExist(Selectors.unfollowButton, 5000)
+      .pause(getPauseMs(4000))
+      .click(Selectors.unfollowButton) // click 'Unfollow' inside the pop-up dialog
+      .waitForExist(Selectors.followingButton, 11000, /* reverse */ true)
+      .pause(getPauseMs(4000))
+      .catch(err => {
+        console.info('Already unfollowed or an error.', username, err);
+        browserInstance.saveScreenshot('./error_capture_when_unfollowing.png');
+      });
+
+    // If we are doing too many unfollows in a row, Instagram pretends we unfollowed
+    //  the person but it switches back on refresh, so we need confirmation
+    const success = !!(
       await browserInstance
         .url(Url.getUserPageUrl(username))
         .execute(confuseAutomationDetection)
         .isExisting(Selectors.followingButton)
-        .catch(() => true) // retry on error
+        .catch(() => false)
     );
+    if (success) {
+      return true;
+    }
+    // Instagram is likely rate limiting us, we should probably wait
+    await browserInstance.pause(5 * 60 * 1000); // 5min
+    return false;
   },
 
   // This function just takes the same amount of time it would normally take to
