@@ -397,34 +397,38 @@ const Api = {
       return false;
     }
 
-    console.info('Unfollowing', username, '...');
-    await browserInstance
-      .click(Selectors.followingButton) // click 'Following' to unfollow
-      .waitForExist(Selectors.unfollowButton, 5000)
-      .pause(getPauseMs(4000))
-      .click(Selectors.unfollowButton) // click 'Unfollow' inside the pop-up dialog
-      .waitForExist(Selectors.followingButton, 11000, /* reverse */ true)
-      .pause(getPauseMs(4000))
-      .catch(err => {
-        console.info('Already unfollowed or an error.', username, err);
-        browserInstance.saveScreenshot('./error_capture_when_unfollowing.png');
-      });
-
-    // If we are doing too many unfollows in a row, Instagram pretends we unfollowed
-    //  the person but it switches back on refresh, so we need confirmation
-    const success = !!(
+    const tryUnfollow = async () => {
+      console.info('Unfollowing', username, '...');
       await browserInstance
-        .url(Url.getUserPageUrl(username))
-        .execute(confuseAutomationDetection)
-        .isExisting(Selectors.followingButton)
-        .catch(() => false)
-    );
+        .click(Selectors.followingButton) // click 'Following' to unfollow
+        .waitForExist(Selectors.unfollowButton, 5000)
+        .pause(getPauseMs(4000))
+        .click(Selectors.unfollowButton) // click 'Unfollow' inside the pop-up dialog
+        .waitForExist(Selectors.followingButton, 11000, /* reverse */ true)
+        .pause(getPauseMs(8000))
+        .catch(err => {
+          console.info('Already unfollowed or an error.', username, err);
+          browserInstance.saveScreenshot('./error_capture_when_unfollowing.png');
+        });
+      // If we are doing too many unfollows in a row, Instagram pretends we unfollowed
+      //  the person but it switches back on refresh, so we need confirmation
+      return !!(
+        await browserInstance
+          .url(Url.getUserPageUrl(username))
+          .execute(confuseAutomationDetection)
+          .isExisting(Selectors.followButton)
+          .catch(() => false)
+      );
+    }
+    const success = await tryUnfollow();
     if (success) {
       return true;
     }
-    // Instagram is likely rate limiting us, we should probably wait
-    await browserInstance.pause(5 * 60 * 1000); // 5min
-    return false;
+    // Instagram is likely rate limiting us, we should wait
+    console.info('Unfollow not successful. Rate limiting suspected.')
+    await browserInstance.pause(5 * 60 * 1000); // 5 min
+    // We retry once
+    return (await tryUnfollow());
   },
 
   // This function just takes the same amount of time it would normally take to
