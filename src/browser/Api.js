@@ -12,7 +12,7 @@ const confuseAutomationDetection = () => {
   setInterval(falsifyWebdriver, 500);
 };
 const Selectors = {
-  followButton: 'button=Follow',
+  followButton: 'button*=Follow',
   followingButton: '[aria-label="Following"]',
   unfollowButton: 'button*=Unfollow'
 }
@@ -114,7 +114,7 @@ const Api = {
         // _sharedData was not defined on the window
         console.log('User page not accessible.');
         if (!!testData.botDetected) {
-          console.error('Bot detected! -- waiting and trying to recover...');
+          console.log('Bot detected! -- waiting and trying to recover...');
           await waiting(8 * 1000);
           await browserInstance.url(Url.defaultUrl).execute(confuseAutomationDetection); // home page
           await waiting(7 * 60 * 1000); // wait 7 minutes (the bot has been detected)
@@ -393,7 +393,7 @@ const Api = {
     // Access page and verify data is present and bot not detected
     const verificationSuccess = await Api.verifyUserPageDataAccess(browserInstance, username);
     if (!verificationSuccess) {
-      console.error('Skipping unfollowing of a non-existent account', username);
+      console.log('Skipping unfollowing of a non-existent account', username);
       return false;
     }
 
