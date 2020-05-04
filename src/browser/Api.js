@@ -431,6 +431,19 @@ const Api = {
     return (await tryUnfollow());
   },
 
+  async getUsernameFromUserId(userId) {
+    const requestPromise = require('request-promise');
+    return await requestPromise({
+        uri: `https://i.instagram.com/api/v1/users/${userId}/info/`,
+        headers: {
+            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_3 like Mac OS X) AppleWebKit/603.3.8 (KHTML, like Gecko) Mobile/14G60 Instagram 12.0.0.16.90 (iPhone9,4; iOS 10_3_3; en_US; en-US; scale=2.61; gamut=wide; 1080x1920)'
+        },
+        json: true
+    })
+    .then(response => response.user.username)
+    .catch(() => undefined); // fail this silently
+  },
+
   // This function just takes the same amount of time it would normally take to
   // perform a follow or unfollow action
   async waitPerUser(browserInstance, userCount) {

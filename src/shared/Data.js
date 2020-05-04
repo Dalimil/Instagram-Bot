@@ -56,7 +56,7 @@ const Data = {
 
   appendUserToBeUnfollowedById(account) {
     const currentUserIdFutureUnfollows = Data.getUnfollowByIdAccountList();
-    const newList = [...currentUserIdFutureUnfollows, { userId: account.userId }];
+    const newList = [...currentUserIdFutureUnfollows, account];
     fs.writeFileSync(
       Data.unfollowByIdAccountsFile,
       JSON.stringify({ future_unfollow_by_id: newList }, null, 2),
