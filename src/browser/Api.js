@@ -450,7 +450,7 @@ const Api = {
     await browserInstance
       .pause(getPauseMs(userCount * 20000))
       .catch(err => {
-        console.info('Error during unfollow users blank.');
+        console.info('Error during unfollow users blank.', err);
       });
   },
 };

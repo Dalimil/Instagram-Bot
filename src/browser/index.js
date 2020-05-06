@@ -113,6 +113,7 @@ exports.runMain = async (initialTarget, followRequestsCount = 40) => {
       }
     } else {
       console.log(`:> skipping ${account.username} (${accountQualityDecision.reason})`);
+      await Api.waitPerUser(client, 1);
     }
   }
 
@@ -137,7 +138,12 @@ exports.runMassUnfollow = async (unfollowLimit) => {
     const success = await Api.unfollowUser(client, account.username);
     if (!success) {
       const newUsername = await Api.getUsernameFromUserId(account.userId);
-      Data.appendUserToBeUnfollowedById({ ...account, username: newUsername });
+      console.log('New username: ', newUsername);
+      if (newUsername) {
+        await Api.unfollowUser(client, newUsername);
+      } else {
+        Data.appendUserToBeUnfollowedById({ ...account, username: newUsername });
+      }
     }
   };
   

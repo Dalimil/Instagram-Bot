@@ -19,6 +19,12 @@ unzip a.zip && sudo chown dalimilhajek:dalimilhajek .config && cd ./main-source/
 crontab -e
 36 8,13,17,22 * * * /home/dalimilhajek/main-source/start.sh
 
+# SERVING LOGS
+
 # Set up Nginx: (change config root to /home/dalimilhajek/served/;)
 sudo nano /etc/nginx/sites-available/default 
 sudo /etc/init.d/nginx start
+# ---- OR just expose ngrok
+cd ~/Downloads/ ; mkdir served ; cd served
+python -m SimpleHTTPServer 9191  2>&1 > tmp1.txt
+ngrok http 9191 2>&1 > tmp2.txt

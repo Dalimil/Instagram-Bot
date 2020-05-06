@@ -58,7 +58,7 @@ const TerminalBot = require('./src/terminal');
       }
       if (!skipFollow) {
         // 'Follow by hashtag' follows feed likers (because these are active users)
-        await BrowserBot.runMain({ hashtag: 'whistler' }, followNumberTarget);
+        await BrowserBot.runMain({ hashtag: 'edinburgh' }, followNumberTarget);
         // 'Follow by username' follows accounts following the given account
         // await BrowserBot.runMain({ username: 'jordhammond' });
       }
