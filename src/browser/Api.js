@@ -117,9 +117,9 @@ const Api = {
           console.log('Bot detected! -- waiting and trying to recover...');
           await waiting(8 * 1000);
           await browserInstance.url(Url.defaultUrl).execute(confuseAutomationDetection); // home page
-          await waiting(7 * 60 * 1000); // wait 7 minutes (the bot has been detected)
+          await waiting(9 * 60 * 1000); // wait 9 minutes (the bot has been detected)
           await browserInstance.url(Url.exploreUrl).execute(confuseAutomationDetection); // explore page
-          await waiting(60 * 1000); // wait an extra minute
+          await waiting(8 * 60 * 1000); // wait 8 more minutes
           // Retry
           await browserInstance
             .url(Url.getUserPageUrl(username))
@@ -381,7 +381,7 @@ const Api = {
     }
     await browserInstance
       .click(Selectors.followButton)
-      .waitForExist(Selectors.followingButton, 7000)
+      .waitForExist(Selectors.followingButton, 11000)
       .pause(getPauseMs(2000))
       .catch(e => {
         console.error('Error occurred when trying to follow', username, e);
@@ -398,7 +398,12 @@ const Api = {
     }
 
     const tryUnfollow = async () => {
-      console.info('Unfollowing', username, '...');
+      console.log('Unfollowing', username, '...');
+      const alreadyUnfollowed = await browserInstance.isExisting(Selectors.followButton).catch(() => false);
+      if (alreadyUnfollowed) {
+        console.info('Already unfollowed.');
+        return true;
+      }
       await browserInstance
         .click(Selectors.followingButton) // click 'Following' to unfollow
         .waitForExist(Selectors.unfollowButton, 5000)
@@ -407,7 +412,7 @@ const Api = {
         .waitForExist(Selectors.followingButton, 11000, /* reverse */ true)
         .pause(getPauseMs(8000))
         .catch(err => {
-          console.info('Already unfollowed or an error.', username, err);
+          console.info('Error when unfollowing.', username, err);
           browserInstance.saveScreenshot('./error_capture_when_unfollowing.png');
         });
       // If we are doing too many unfollows in a row, Instagram pretends we unfollowed

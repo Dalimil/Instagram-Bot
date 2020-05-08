@@ -66,7 +66,7 @@ const TerminalBot = require('./src/terminal');
         await BrowserBot.runMassUnfollow(followNumberTarget);
       }
       if (!skipFollow) {
-        await BrowserBot.runMain({ hashtag: 'vancouver' }, followNumberTarget);
+        await BrowserBot.runMain({ hashtag: 'calgary' }, followNumberTarget);
       }
     }
   } catch (e) {
