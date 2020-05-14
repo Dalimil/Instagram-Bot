@@ -26,5 +26,5 @@ sudo nano /etc/nginx/sites-available/default
 sudo /etc/init.d/nginx start
 # ---- OR just expose ngrok
 cd ~/Downloads/ ; mkdir served ; cd served
-python -m SimpleHTTPServer 9191  2>&1 > tmp1.txt
-ngrok http 9191 2>&1 > tmp2.txt
+python -m SimpleHTTPServer 9191
+ngrok http 9191

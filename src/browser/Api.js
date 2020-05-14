@@ -381,7 +381,7 @@ const Api = {
     }
     await browserInstance
       .click(Selectors.followButton)
-      .waitForExist(Selectors.followingButton, 11000)
+      .waitForExist(Selectors.followingButton, 20000)
       .pause(getPauseMs(2000))
       .catch(e => {
         console.error('Error occurred when trying to follow', username, e);
@@ -406,10 +406,10 @@ const Api = {
       }
       await browserInstance
         .click(Selectors.followingButton) // click 'Following' to unfollow
-        .waitForExist(Selectors.unfollowButton, 5000)
+        .waitForExist(Selectors.unfollowButton, 9000)
         .pause(getPauseMs(4000))
         .click(Selectors.unfollowButton) // click 'Unfollow' inside the pop-up dialog
-        .waitForExist(Selectors.followingButton, 11000, /* reverse */ true)
+        .waitForExist(Selectors.followingButton, 15000, /* reverse */ true)
         .pause(getPauseMs(8000))
         .catch(err => {
           console.info('Error when unfollowing.', username, err);
@@ -431,8 +431,11 @@ const Api = {
     }
     // Instagram is likely rate limiting us, we should wait
     console.info('Unfollow not successful. Rate limiting suspected.')
-    await browserInstance.pause(5 * 60 * 1000); // 5 min
     // We retry once
+    await browserInstance
+      .pause(14 * 60 * 1000) // wait 14 min
+      .url(Url.getUserPageUrl(username))
+      .execute(confuseAutomationDetection);
     return (await tryUnfollow());
   },
 

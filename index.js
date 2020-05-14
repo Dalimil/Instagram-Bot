@@ -22,6 +22,11 @@ const TerminalBot = require('./src/terminal');
  * forced timeout. Start with 1, 2, 3 ..., 11. That's 11*2*4 per day => 88 follows per day
  * The unfollow cycles between your follow cycles are very important and if they don't introduce
  * the pauses, the 19*2 follow actions will get you blocked.
+ * 
+ * Iterating through a lot of accounts (without (un)following) is now newly also considered bad
+ * by Instagram. So simply visiting a lot of /username pages will trigger bot detection. So the
+ * decision algorithm cannot be too strict. One could also try experimenting with a different
+ * user agent (mobile device?).
  */
 (async () => {
   try {

@@ -94,6 +94,8 @@ exports.runMain = async (initialTarget, followRequestsCount = 40) => {
   
   // Follow users (but make sure they are quality accounts first)
   const qualityFutureFollowList = [];
+  let skippedInARow = 0;
+  const maximumSkipInARow = 4;
   for (const [index, account] of futureFollowList.entries()) {
     const accountData = await Api.getUser(client, account.username);
     if (!accountData) {
@@ -101,7 +103,11 @@ exports.runMain = async (initialTarget, followRequestsCount = 40) => {
       continue;
     }
     const accountQualityDecision = Algorithm.decideAccountQuality(accountData, /* isSimplified */ false);
-    if (accountQualityDecision.isQualityAccount) {
+    if (accountQualityDecision.isQualityAccount || skippedInARow >= maximumSkipInARow) {
+      if (skippedInARow >= maximumSkipInARow) {
+        skippedInARow = 0;
+        console.log('Following anyway because too many accounts skipped in a row...');
+      }
       qualityFutureFollowList.push(account);
       await Api.followUser(client, account.username, /* skipNavigationToPage */ true);
 
@@ -113,6 +119,7 @@ exports.runMain = async (initialTarget, followRequestsCount = 40) => {
       }
     } else {
       console.log(`:> skipping ${account.username} (${accountQualityDecision.reason})`);
+      skippedInARow += 1;
       await Api.waitPerUser(client, 1);
     }
   }
