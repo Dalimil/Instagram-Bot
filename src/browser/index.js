@@ -1,10 +1,14 @@
 const selenium = require('selenium-standalone');
 const webdriverio = require('webdriverio');
+const isMobile = true;
 const client = webdriverio.remote({
   desiredCapabilities: {
     browserName: 'chrome',
     chromeOptions: {
-      args: (process.argv.includes('--headless') ? ['headless', 'disable-gpu', 'disable-sync', 'no-sandbox'] : []),
+      args: [
+        ...(isMobile ? ['user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_3 like Mac OS X) AppleWebKit/603.3.8 (KHTML, like Gecko) Mobile/14G60 Instagram 12.0.0.16.90 (iPhone9,4; iOS 10_3_3; en_US; en-US; scale=2.61; gamut=wide; 1080x1920)'] : []),
+        ...(process.argv.includes('--headless') ? ['headless', 'disable-gpu', 'disable-sync', 'no-sandbox'] : [])
+      ],
     },
   },
   /*
@@ -19,7 +23,6 @@ const client = webdriverio.remote({
 
 const Data = require('../shared/Data');
 const Algorithm = require('../shared/Algorithm');
-const Url = require('../shared/Url');
 
 const Api = require('./Api');
 // verified limit of maximum accounts one can follow in 1 hour
@@ -178,7 +181,7 @@ exports.runBrowseList = async (usernameList) => {
     // console.log('Data: ', data);
   }
   // Uncomment to pause after being done (debugging purposes)
-  // await Api.waitPerUser(client, 1000);
+  await Api.waitPerUser(client, 1000);
 };
 
 // Sometimes people get away from our list, (e.g. they change their username)
