@@ -167,6 +167,23 @@ const Api = {
     return JSON.parse(userData.value);
   },
 
+  // Same as getUser but instead of navigating to user instagram page it uses the API
+  async getUserViaApi(browserInstance, username) {
+    await browserInstance
+      .url(Url.getUsernameApiUrl(username))
+      .execute(confuseAutomationDetection)
+      .pause(getPauseMs(7000));
+    
+    const userDataRaw = await browserInstance.$('body').getText();
+    let userData = null; 
+    try {
+      userData = JSON.parse(userDataRaw);
+    } catch (err) {
+      console.error('Error in getUserViaApi: ', err);
+    }
+    return userData.graphql.user;
+  },
+
   // Returns a list of posts that have this hashtag
   async getHashtag(browserInstance, hashtag) {
     const hashtagData = await browserInstance
@@ -421,6 +438,7 @@ const Api = {
         await browserInstance
           .url(Url.getUserPageUrl(username))
           .execute(confuseAutomationDetection)
+          .pause(getPauseMs(4000))
           .isExisting(Selectors.followButton)
           .catch(() => false)
       );

@@ -1,6 +1,6 @@
 const selenium = require('selenium-standalone');
 const webdriverio = require('webdriverio');
-const isMobile = true;
+const isMobile = false;
 const client = webdriverio.remote({
   desiredCapabilities: {
     browserName: 'chrome',
@@ -100,7 +100,11 @@ exports.runMain = async (initialTarget, followRequestsCount = 40) => {
   let skippedInARow = 0;
   const maximumSkipInARow = 4;
   for (const [index, account] of futureFollowList.entries()) {
-    const accountData = await Api.getUser(client, account.username);
+    const getViaApi = (index + 1) % 9 === 0; // every 9th via API? 
+    const accountData = (getViaApi ?
+      await Api.getUserViaApi(client, account.username) :
+      await Api.getUser(client, account.username)
+    );
     if (!accountData) {
       console.log(`Error when retrieving account data for ${account.username}. Skipping.`);
       continue;
@@ -108,11 +112,11 @@ exports.runMain = async (initialTarget, followRequestsCount = 40) => {
     const accountQualityDecision = Algorithm.decideAccountQuality(accountData, /* isSimplified */ false);
     if (accountQualityDecision.isQualityAccount || skippedInARow >= maximumSkipInARow) {
       if (skippedInARow >= maximumSkipInARow) {
-        skippedInARow = 0;
-        console.log('Following anyway because too many accounts skipped in a row...');
+        console.log('Force following anyway because too many accounts skipped in a row...');
       }
+      skippedInARow = 0;
       qualityFutureFollowList.push(account);
-      await Api.followUser(client, account.username, /* skipNavigationToPage */ true);
+      await Api.followUser(client, account.username, /* skipNavigationToPage */ !getViaApi);
 
       // hourly follow limit reached? - stop now
       if (qualityFutureFollowList.length >= Math.min(followRequestsPerHourLimit - 2, followRequestsCount)) {
@@ -178,7 +182,8 @@ exports.runBrowseList = async (usernameList) => {
   console.info('Iterating a list of accounts...');
   for (const [index, username] of usernameList.entries()) {
     const data = await Api.getUser(client, username);
-    // console.log('Data: ', data);
+    // const data = await Algorithm.decideAccountQuality(await Api.getUserViaApi(client, username), /* isSimplified */ false);
+    console.log('Data: ', data);
   }
   // Uncomment to pause after being done (debugging purposes)
   await Api.waitPerUser(client, 1000);
