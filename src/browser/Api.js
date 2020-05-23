@@ -398,11 +398,26 @@ const Api = {
     }
     await browserInstance
       .click(Selectors.followButton)
-      .waitForExist(Selectors.followingButton, 20000)
+      .waitForExist(Selectors.followingButton, 10000)
       .pause(getPauseMs(2000))
       .catch(e => {
-        console.error('Error occurred when trying to follow', username, e);
-        browserInstance.saveScreenshot('./error_capture_when_following.png');
+        if (e.type == 'WaitUntilTimeoutError') {
+          console.info('Missing follow confirmation indicator for', username, ' - refreshing...');
+          const retrySuccess = await browserInstance
+            .url(Url.getUserPageUrl(username))
+            .execute(confuseAutomationDetection)
+            .pause(getPauseMs(5000))
+            .isExisting(Selectors.followingButton)
+            .catch(() => false);
+          if (retrySuccess) {
+            console.info('Confirmation success');
+          } else {
+            console.error('Tried refreshing without successful confirmation.', e);
+          }
+        } else {
+          console.error('Error occurred when trying to follow', username, e.message);
+          browserInstance.saveScreenshot('./error_capture_when_following.png');
+        }
       });
   },
 

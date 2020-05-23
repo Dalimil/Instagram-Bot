@@ -38,7 +38,7 @@ const TerminalBot = require('./src/terminal');
     const skipFollow = commandArg === '--unfollow';
     const skipUnfollow = commandArg === '--follow';
     const isExperimentMode = commandArg === '--experiment';
-    const followNumberTarget = process.argv.includes('--lightweight') ? 11 : 12;
+    const followNumberTarget = process.argv.includes('--lightweight') ? 12 : 13;
 
     console.log('Started at', new Date().toLocaleString());
 
@@ -63,7 +63,7 @@ const TerminalBot = require('./src/terminal');
       }
       if (!skipFollow) {
         // 'Follow by hashtag' follows feed likers (because these are active users)
-        await BrowserBot.runMain({ hashtag: 'edinburgh' }, followNumberTarget);
+        await BrowserBot.runMain({ hashtag: 'rome' }, followNumberTarget);
         // 'Follow by username' follows accounts following the given account
         // await BrowserBot.runMain({ username: 'jordhammond' });
       }
@@ -71,7 +71,7 @@ const TerminalBot = require('./src/terminal');
         await BrowserBot.runMassUnfollow(followNumberTarget);
       }
       if (!skipFollow) {
-        await BrowserBot.runMain({ hashtag: 'calgary' }, followNumberTarget);
+        await BrowserBot.runMain({ hashtag: 'banff' }, followNumberTarget);
       }
     }
   } catch (e) {
