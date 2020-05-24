@@ -100,7 +100,7 @@ exports.runMain = async (initialTarget, followRequestsCount = 40) => {
   let skippedInARow = 0;
   const maximumSkipInARow = 4;
   for (const [index, account] of futureFollowList.entries()) {
-    const getViaApi = (index + 1) % 6 === 0; // every 6th via API? 
+    const getViaApi = (index + 1) % 8 === 0; // every 8th via API? 
     if (getViaApi) {
       console.log('(using API:)');
     }
@@ -110,6 +110,7 @@ exports.runMain = async (initialTarget, followRequestsCount = 40) => {
     );
     if (!accountData) {
       console.log(`Error when retrieving account data for ${account.username}. Skipping.`);
+      await Api.waitPerUser(client, 2);
       continue;
     }
     const accountQualityDecision = Algorithm.decideAccountQuality(accountData, /* isSimplified */ false);

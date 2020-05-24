@@ -119,7 +119,7 @@ const Api = {
           await browserInstance.url(Url.defaultUrl).execute(confuseAutomationDetection); // home page
           await waiting(9 * 60 * 1000); // wait 9 minutes (the bot has been detected)
           await browserInstance.url(Url.exploreUrl).execute(confuseAutomationDetection); // explore page
-          await waiting(8 * 60 * 1000); // wait 8 more minutes
+          await waiting(11 * 60 * 1000); // wait 11 more minutes
           // Retry
           await browserInstance
             .url(Url.getUserPageUrl(username))
@@ -163,7 +163,7 @@ const Api = {
         console.error('Error in getUser: ', e);
         return { value: JSON.stringify(null) };
       });
-    await waiting(5000);
+    await waiting(6000);
     return JSON.parse(userData.value);
   },
 
@@ -177,11 +177,11 @@ const Api = {
     const userDataRaw = await browserInstance.$('body').getText();
     let userData = null; 
     try {
-      userData = JSON.parse(userDataRaw);
+      userData = JSON.parse(userDataRaw).graphql.user;
     } catch (err) {
       console.error('Error in getUserViaApi: ', err);
     }
-    return userData.graphql.user;
+    return userData;
   },
 
   // Returns a list of posts that have this hashtag
@@ -398,15 +398,15 @@ const Api = {
     }
     await browserInstance
       .click(Selectors.followButton)
-      .waitForExist(Selectors.followingButton, 10000)
-      .pause(getPauseMs(2000))
-      .catch(e => {
+      .waitForExist(Selectors.followingButton, 15000)
+      .pause(getPauseMs(5000))
+      .catch(async (e) => {
         if (e.type == 'WaitUntilTimeoutError') {
           console.info('Missing follow confirmation indicator for', username, ' - refreshing...');
           const retrySuccess = await browserInstance
             .url(Url.getUserPageUrl(username))
             .execute(confuseAutomationDetection)
-            .pause(getPauseMs(5000))
+            .pause(getPauseMs(8000))
             .isExisting(Selectors.followingButton)
             .catch(() => false);
           if (retrySuccess) {
@@ -439,7 +439,7 @@ const Api = {
       await browserInstance
         .click(Selectors.followingButton) // click 'Following' to unfollow
         .waitForExist(Selectors.unfollowButton, 9000)
-        .pause(getPauseMs(4000))
+        .pause(getPauseMs(5000))
         .click(Selectors.unfollowButton) // click 'Unfollow' inside the pop-up dialog
         .waitForExist(Selectors.followingButton, 15000, /* reverse */ true)
         .pause(getPauseMs(8000))
