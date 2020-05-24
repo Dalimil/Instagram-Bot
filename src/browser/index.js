@@ -100,7 +100,7 @@ exports.runMain = async (initialTarget, followRequestsCount = 40) => {
   let skippedInARow = 0;
   const maximumSkipInARow = 4;
   for (const [index, account] of futureFollowList.entries()) {
-    const getViaApi = (index + 1) % 8 === 0; // every 8th via API? 
+    const getViaApi = (index + 1) % 7 === 0; // every 7th via API? 
     if (getViaApi) {
       console.log('(using API:)');
     }

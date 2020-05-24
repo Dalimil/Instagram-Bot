@@ -172,7 +172,7 @@ const Api = {
     await browserInstance
       .url(Url.getUsernameApiUrl(username))
       .execute(confuseAutomationDetection)
-      .pause(getPauseMs(7000));
+      .pause(getPauseMs(8000));
     
     const userDataRaw = await browserInstance.$('body').getText();
     let userData = null; 
