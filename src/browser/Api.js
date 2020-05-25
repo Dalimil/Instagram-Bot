@@ -89,10 +89,11 @@ const Api = {
       .execute(confuseAutomationDetection)
       .pause(getPauseMs(10000))
       .executeAsync(done => {
-        if (!window._sharedData) {
+        if (!window._sharedData || window._sharedData.entry_data.HttpErrorPage) {
+          const innerHtml = document.documentElement.innerHTML;
           done(JSON.stringify({
-            botDetected: document.documentElement.innerHTML.includes('wait a few minutes'),
-            invalidLink: document.documentElement.innerHTML.includes('may have been removed')
+            botDetected: innerHtml.includes('wait a few minutes'),
+            invalidLink: innerHtml.includes('may have been removed') || !!window._sharedData.entry_data.HttpErrorPage
           }));
         } else {
           done(JSON.stringify({

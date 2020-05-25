@@ -116,7 +116,7 @@ exports.runMain = async (initialTarget, followRequestsCount = 40) => {
     const accountQualityDecision = Algorithm.decideAccountQuality(accountData, /* isSimplified */ false);
     if (accountQualityDecision.isQualityAccount || skippedInARow >= maximumSkipInARow) {
       if (skippedInARow >= maximumSkipInARow) {
-        console.log('Force following anyway because too many accounts skipped in a row...');
+        console.log('(Force following anyway - too many skipped...)');
       }
       skippedInARow = 0;
       qualityFutureFollowList.push(account);
