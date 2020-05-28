@@ -93,7 +93,8 @@ const Api = {
           const innerHtml = document.documentElement.innerHTML;
           done(JSON.stringify({
             botDetected: innerHtml.includes('wait a few minutes'),
-            invalidLink: innerHtml.includes('may have been removed') || !!window._sharedData.entry_data.HttpErrorPage
+            invalidLink: innerHtml.includes('may have been removed') ||
+              (window._sharedData && !!window._sharedData.entry_data.HttpErrorPage)
           }));
         } else {
           done(JSON.stringify({

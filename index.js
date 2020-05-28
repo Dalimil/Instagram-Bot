@@ -63,7 +63,7 @@ const TerminalBot = require('./src/terminal');
       }
       if (!skipFollow) {
         // 'Follow by hashtag' follows feed likers (because these are active users)
-        await BrowserBot.runMain({ hashtag: 'rome' }, followNumberTarget);
+        await BrowserBot.runMain({ hashtag: 'venice' }, followNumberTarget);
         // 'Follow by username' follows accounts following the given account
         // await BrowserBot.runMain({ username: 'jordhammond' });
       }
@@ -71,7 +71,7 @@ const TerminalBot = require('./src/terminal');
         await BrowserBot.runMassUnfollow(followNumberTarget);
       }
       if (!skipFollow) {
-        await BrowserBot.runMain({ hashtag: 'banff' }, followNumberTarget);
+        await BrowserBot.runMain({ hashtag: 'earthoutdoors' }, followNumberTarget);
       }
     }
   } catch (e) {
