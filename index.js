@@ -38,9 +38,16 @@ const TerminalBot = require('./src/terminal');
     const skipFollow = commandArg === '--unfollow';
     const skipUnfollow = commandArg === '--follow';
     const isExperimentMode = commandArg === '--experiment';
+    const isCompilationTest = commandArg === '--test';
     const followNumberTarget = process.argv.includes('--lightweight') ? 12 : 12;
 
     console.log('Started at', new Date().toLocaleString());
+    
+    if (isCompilationTest) {
+      // no-op
+      console.log("Node execution successful");
+      process.exit();
+    }
 
     // Browser (webdriver) version of the bot
     await BrowserBot.init();

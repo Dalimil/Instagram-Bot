@@ -9,7 +9,8 @@
     "start": "node index.js",
     "follow": "yarn start --follow",
     "unfollow": "yarn start --unfollow",
-    "experiment": "yarn start --experiment"
+    "experiment": "yarn start --experiment",
+    "test": "yarn start --test"
   },
   "dependencies": {
     "request": "^2.88.0",
