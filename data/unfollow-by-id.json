@@ -1,37 +1,4 @@
 {
   "future_unfollow_by_id": [
-    {
-      "userId": "12288274046",
-      "username": "kashmir.studios",
-      "timestamp": 1587933054102
-    },
-    {
-      "userId": "252236039",
-      "timestamp": 1588018972335
-    },
-    {
-      "userId": "2281757357",
-      "timestamp": 1588121380082
-    },
-    {
-      "userId": "4537475695",
-      "timestamp": 1588707851624
-    },
-    {
-      "userId": "33210637789",
-      "timestamp": 1588923142246
-    },
-    {
-      "userId": "10916387608",
-      "timestamp": 1589098714672
-    },
-    {
-      "userId": "12643825233",
-      "timestamp": 1589595393139
-    },
-    {
-      "userId": "1105324222",
-      "timestamp": 1589595393139
-    }
   ]
 }
