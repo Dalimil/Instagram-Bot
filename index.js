@@ -39,7 +39,8 @@ const TerminalBot = require('./src/terminal');
     const skipUnfollow = commandArg === '--follow';
     const isExperimentMode = commandArg === '--experiment';
     const isCompilationTest = commandArg === '--test';
-    const followNumberTarget = process.argv.includes('--lightweight') ? 12 : 12;
+    const followNumberTarget = process.argv.includes('--lightweight') ? 6 : 6;
+    const targetHashtags = ['venice', 'earthoutdoors', 'neverstopexploring', 'sheexplores'];
 
     console.log('Started at', new Date().toLocaleString());
     
@@ -65,20 +66,15 @@ const TerminalBot = require('./src/terminal');
       // await BrowserBot.runMassUnfollowFromList(inputData.slice(0, 30));
     } else {
       // STANDARD MODE (10-20% conversion rate)
-      if (!skipUnfollow) {
-        await BrowserBot.runMassUnfollow(followNumberTarget);
-      }
-      if (!skipFollow) {
-        // 'Follow by hashtag' follows feed likers (because these are active users)
-        await BrowserBot.runMain({ hashtag: 'venice' }, followNumberTarget);
-        // 'Follow by username' follows accounts following the given account
-        // await BrowserBot.runMain({ username: 'jordhammond' });
-      }
-      if (!skipUnfollow) {
-        await BrowserBot.runMassUnfollow(followNumberTarget);
-      }
-      if (!skipFollow) {
-        await BrowserBot.runMain({ hashtag: 'earthoutdoors' }, followNumberTarget);
+      for (const hashtag of targetHashtags) {
+        if (!skipUnfollow) {
+          await BrowserBot.runMassUnfollow(followNumberTarget);
+        }
+        if (!skipFollow) {
+          // 'Follow by hashtag' follows feed likers (because these are active users)
+          // 'Follow by user' is not recommended because it quickly runs into repetition
+          await BrowserBot.runMain({ hashtag }, followNumberTarget);
+        }
       }
     }
   } catch (e) {

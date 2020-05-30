@@ -121,7 +121,7 @@ const Api = {
           await browserInstance.url(Url.defaultUrl).execute(confuseAutomationDetection); // home page
           await waiting(9 * 60 * 1000); // wait 9 minutes (the bot has been detected)
           await browserInstance.url(Url.exploreUrl).execute(confuseAutomationDetection); // explore page
-          await waiting(11 * 60 * 1000); // wait 11 more minutes
+          await waiting(9 * 60 * 1000); // wait 9 more minutes
           // Retry
           await browserInstance
             .url(Url.getUserPageUrl(username))
@@ -181,7 +181,7 @@ const Api = {
     try {
       userData = JSON.parse(userDataRaw).graphql.user;
     } catch (err) {
-      console.error('Error in getUserViaApi: ', err);
+      console.error('Error in getUserViaApi: ', userDataRaw, err);
     }
     return userData;
   },
