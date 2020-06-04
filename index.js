@@ -39,7 +39,7 @@ const TerminalBot = require('./src/terminal');
     const skipUnfollow = commandArg === '--follow';
     const isExperimentMode = commandArg === '--experiment';
     const isCompilationTest = commandArg === '--test';
-    const followNumberTarget = process.argv.includes('--lightweight') ? 6 : 6;
+    const followNumberTarget = process.argv.includes('--lightweight') ? 6 : 6; // * 4 (the number of hashtags)
     const targetHashtags = ['venice', 'earthoutdoors', 'neverstopexploring', 'sheexplores'];
 
     console.log('Started at', new Date().toLocaleString());

@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Overview</title>
+        <style>
+            #status {
+                font-weight: bold;
+                font-family: Arial, Helvetica, sans-serif;
+            }
+            .finished {
+                color: #44cc44;
+            }
+            .running {
+                color: #FF9999;
+            }
+        </style>
+    </head>
+    <body>
+        <button onClick="getContent('log8.txt')">12pm, 12am</button> ...
+        <button onClick="getContent('log9.txt')">7am, 6pm</button><br>
+        <hr>
+        <main>
+            <div id="status"></div>
+            <code><pre id="main">Select a file...</pre></code>
+        </main>
+        <script>
+            function getContent(filename) {
+                const main = document.getElementById('main');
+                main.innerHTML = "loading...";
+                const status = document.getElementById('status');
+                status.innerHTML = "";
+                fetch(filename).then(r => r.text()).then(text => {
+                    main.innerHTML = text;
+                    let a = main.innerHTML.replace(/(\r\n|\n|\r)/gm, '\n').replace(/\n\n/g, '\n');
+                    a = a.substring(a.indexOf('Started at'))
+                    const finalText = a.substring(0, a.indexOf('Starting Selenium')) + a.substring(a.indexOf('Trying to restore'));
+                    main.innerHTML = finalText;
+                    window.a = finalText;
+
+                    // Status
+                    const finishedIndex = finalText.indexOf('Finished at');
+                    if (finishedIndex >= 0) {
+                        const finished = finalText.substring(finishedIndex);
+                        status.innerHTML = finished.substring(0, finished.indexOf('\n'));
+                        status.className = 'finished';
+                    } else {
+                        status.innerHTML = 'RUNNING (Followed ' + [...s.matchAll(/Following /g)].length + ')';
+                        status.className = 'running';
+                    }
+                });
+            }
+        </script>
+    </body>
+</html>
