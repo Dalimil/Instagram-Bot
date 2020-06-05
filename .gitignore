@@ -69,3 +69,4 @@ creds.json
 session.json
 
 tmp.json
+served/*.txt

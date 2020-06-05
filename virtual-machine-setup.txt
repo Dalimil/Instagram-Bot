@@ -25,6 +25,5 @@ crontab -e
 sudo nano /etc/nginx/sites-available/default 
 sudo /etc/init.d/nginx start
 # ---- OR just expose ngrok
-cd ~/Downloads/ ; mkdir served ; cd served
-python -m SimpleHTTPServer 9191
-ngrok http 9191
+cd ~/Downloads/Instagram-Pics/served ; python -m SimpleHTTPServer 9191
+cd ~/Downloads ; ./ngrok.exe http 9191

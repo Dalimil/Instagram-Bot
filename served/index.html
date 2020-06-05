@@ -5,15 +5,22 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Overview</title>
         <style>
-            #status {
+            #status, #errors {
                 font-weight: bold;
                 font-family: Arial, Helvetica, sans-serif;
+            }
+            #errors {
+                font-style: italic;
+                font-size: 0.9em;
             }
             .finished {
                 color: #44cc44;
             }
             .running {
-                color: #FF9999;
+                color: rgb(255, 134, 77);
+            }
+            .error {
+                color: #FF3333;
             }
         </style>
     </head>
@@ -23,14 +30,17 @@
         <hr>
         <main>
             <div id="status"></div>
+            <div id="errors"></div>
             <code><pre id="main">Select a file...</pre></code>
         </main>
         <script>
             function getContent(filename) {
                 const main = document.getElementById('main');
-                main.innerHTML = "loading...";
                 const status = document.getElementById('status');
+                const errors = document.getElementById('errors');
+                main.innerHTML = "loading...";
                 status.innerHTML = "";
+                errors.innerHTML = "";
                 fetch(filename).then(r => r.text()).then(text => {
                     main.innerHTML = text;
                     let a = main.innerHTML.replace(/(\r\n|\n|\r)/gm, '\n').replace(/\n\n/g, '\n');
@@ -46,8 +56,20 @@
                         status.innerHTML = finished.substring(0, finished.indexOf('\n'));
                         status.className = 'finished';
                     } else {
-                        status.innerHTML = 'RUNNING (Followed ' + [...s.matchAll(/Following /g)].length + ')';
+                        status.innerHTML = 'RUNNING ' + ([...finalText.matchAll(/Following /g)].length*100/24.0).toFixed(1) + '%';
                         status.className = 'running';
+                    }
+
+                    // Errors
+                    const botDetected = finalText.indexOf('Bot detected') >= 0 ||
+                        finalText.indexOf('Rate limiting suspected') >= 0 ||
+                        finalText.indexOf('Error') >= 0;
+                    if (botDetected) {
+                        errors.innerHTML = 'Errors Detected!';
+                        errors.className = 'error';
+                    } else {
+                        errors.innerHTML = 'Clean run';
+                        errors.className = 'finished';
                     }
                 });
             }
