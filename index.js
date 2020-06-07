@@ -13,20 +13,14 @@ const TerminalBot = require('./src/terminal');
  * With each new session you need to slowly ramp up again I believe.
  * 
  * The machine learning to detect bots on Instagram servers is looking at user behavior.
- * Any unusual behavior gets blocked. If you suddenly start following 100 accounts every day,
- * you get blocked. Instead you need to start with 1 every day, then 2, then maybe every other
- * day you add one more to still look like your usual behavior to match behavior history.
- * Avoid regularities, don't follow 1 every hour, or don't follow 20 at 12pm exactly.
+ * Any unusual behavior gets blocked. You need to slowly ramp up follow rates.
  * Task Scheduler should not start your task at 2pm exactly, but randomly between 1pm and 3pm
  * Way to ramp up - 4 triggers at 7am, 12pm, 6pm, 12am with random 10min start delay and 4 hour
- * forced timeout. Start with 1, 2, 3 ..., 11. That's 11*2*4 per day => 88 follows per day
- * The unfollow cycles between your follow cycles are very important and if they don't introduce
- * the pauses, the 19*2 follow actions will get you blocked.
+ * forced timeout.
  * 
  * Iterating through a lot of accounts (without (un)following) is now newly also considered bad
  * by Instagram. So simply visiting a lot of /username pages will trigger bot detection. So the
- * decision algorithm cannot be too strict. One could also try experimenting with a different
- * user agent (mobile device?).
+ * decision algorithm cannot be too strict.
  */
 (async () => {
   try {

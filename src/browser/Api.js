@@ -7,6 +7,7 @@ const waiting = (ms) => new Promise(resolve => setTimeout(resolve, getPauseMs(ms
 const confuseAutomationDetection = () => {
   const falsifyWebdriver = () => {
     Object.defineProperty(navigator, 'webdriver', {value: false, configurable: true});
+    Object.defineProperty(navigator, 'plugins', [1, 2, 3, 4, 5]);
   };
   falsifyWebdriver();
   setInterval(falsifyWebdriver, 500);
@@ -395,8 +396,7 @@ const Api = {
       await browserInstance
         .url(Url.getUserPageUrl(username))
         .execute(confuseAutomationDetection)
-        .pause(getPauseMs(2000))
-        .execute(confuseAutomationDetection);
+        .pause(getPauseMs(2000));
     }
     await browserInstance
       .click(Selectors.followButton)
