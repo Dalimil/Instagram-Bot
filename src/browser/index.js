@@ -75,6 +75,15 @@ exports.runFollowStrategy = async (targetHashtags, followRequestsCount = 40) => 
     followedSoFar += 1;
   }
 
+  /**
+   * IMPLEMENTATION
+- Instead of API get, just open media, open media likes popup and follow fifty people in a row from the direct buttons. Can be even private. Because they liked a recent photo. And that is good enough measure of them being engaged. But their account ideally has following bigger than followers.
+- Like random stuff in my feed. That's not liked already
+- Add bot navigate keystroke search
+- Detect Action Blocked alert always after an action. And click OK when it appears. 
+- Watch stories, but only one or two, it's also an action, scroll down, like?
+   */
+
   const alreadyProcessed = new Set(Data.getProcessedAccountsList());
 
   
