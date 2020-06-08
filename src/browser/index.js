@@ -56,10 +56,36 @@ exports.end = async () => {
   }
 };
 
-// We'll get larger amount of followers first, many will be skipped
-
-exports.runMain = async (initialTarget, followRequestsCount = 40) => {
+/**
+ * FOLLOW CYCLE STRATEGY
+ * To follow ~40ppl from various sources:
+ * ->home->browse & like some
+ * ->search->big page->recent post->10-15people
+ * ->home->browse & like some
+ * ->search for another big hashtag page ->recent post-> 10-15 people
+ * ...etc. until 40-50 total (should get ~20% conversion or more)
+ * This shouldn't be super slow because as a user you wouldn't be slow either.
+ * Don't mix with unfollow - that's not human natural.
+ */
+exports.runFollowStrategy = async (targetHashtags, followRequestsCount = 40) => {
   console.info(new Date().toLocaleString(), 'Executing main follow algorithm...');
+  let followedSoFar = 0;
+
+  while (followedSoFar < followRequestsCount) {
+    followedSoFar += 1;
+  }
+
+  const alreadyProcessed = new Set(Data.getProcessedAccountsList());
+
+  
+  console.info(`Initial target is a hashtag: ${initialTarget.hashtag}`);
+
+  // Update storage
+};
+
+// We'll get larger amount of followers first, many will be skipped
+exports.runLegacyFollowStrategy = async (initialTarget, followRequestsCount = 40) => {
+  console.info(new Date().toLocaleString(), 'Executing legacy main follow algorithm...');
 
   const numUsersToProcess = followRequestsCount * 4;
   const alreadyProcessed = new Set(Data.getProcessedAccountsList());
@@ -93,7 +119,7 @@ exports.runMain = async (initialTarget, followRequestsCount = 40) => {
   let skippedInARow = 0;
   const maximumSkipInARow = 4;
   for (const [index, account] of futureFollowList.entries()) {
-    const getViaApi = (index + 1) % 12 === 0; // every 7th via API? 
+    const getViaApi = (index + 1) % 12 === 0; // every 12th via API? 
     if (getViaApi) {
       console.log('(using API:)');
     }
@@ -136,8 +162,27 @@ exports.runMain = async (initialTarget, followRequestsCount = 40) => {
   console.info('Total followed: ', qualityFutureFollowList.length);
 };
 
-exports.runMassUnfollow = async (unfollowLimit) => {
-  console.info(new Date().toLocaleString(), 'Executing mass unfollow...');
+/**
+ * UNFOLLOW CYCLE STRATEGY
+ * 40/50 per hour directly from the profile page. Count same as follow action (same limits)
+ * Maybe 4x per day (same as follow cycles)
+ */
+exports.runMassUnfollowStrategy = async (unfollowLimit) => {
+  console.info(new Date().toLocaleString(), 'Executing mass unfollow algorithm...');
+
+  const { toKeep, toUnfollow } = Algorithm.getCurrentUnfollowLists(unfollowLimit);
+
+  // Unfollow
+  console.info(`Accounts to be unfollowed: ${toUnfollow.length}`);
+  // TODO:
+  // go to user page, click following, click each button next to the people I'm following
+  
+  // Update storage
+  Data.storeFutureUnfollowList(toKeep);
+};
+
+exports.runLegacyMassUnfollowStrategy = async (unfollowLimit) => {
+  console.info(new Date().toLocaleString(), 'Executing legacy mass unfollow algorithm...');
   await Api.waitPerUser(client, 20); // pause for safety
 
   const { toKeep, toUnfollow } = Algorithm.getCurrentUnfollowLists(unfollowLimit);

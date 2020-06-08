@@ -1,5 +1,5 @@
 const BrowserBot = require('./src/browser');
-const TerminalBot = require('./src/terminal');
+// const TerminalBot = require('./src/terminal');
 // Note: terminal version of the bot is currently broken due to security challenge issues
 
 // Usage: yarn start [(--follow | --unfollow | --experiment)] [--lightweight] [--headless]
@@ -7,34 +7,47 @@ const TerminalBot = require('./src/terminal');
 //  'yarn start --lightweight --headless' etc.
 
 /**
- * When something throws an error or you get blocked, wipe session and login again.
- * It looks at session history to suspect a bot. So when you wipe the session and try to restart
- * at previous rate, it will break again, because this new session is not trusted.
- * With each new session you need to slowly ramp up again I believe.
+ * When something throws an error or you get blocked, wipe session and wait 2 days.
  * 
  * The machine learning to detect bots on Instagram servers is looking at user behavior.
  * Any unusual behavior gets blocked. You need to slowly ramp up follow rates.
+ * STRATEGY
+ * Imitate human behaviour in your timezone.
+ * Every 7th day or so have a day of rest (nothing on Sunday?)
+ * Following without looking and scrolling gets you blocked. Avoid repeating same action.
+ * Simply iterating (without follow/unfollow) through a lot of account is also detectable and blockable.
+ * Focus on recently posted (last 1h ideally) and don't follow the same number of people every time.
+ * Keep < 100 actions/hour (any action)
+ * 
+ * RAMP UP:
+ * Day 1-7: Follow 2-3/h (increase next day), like some, rest few hours and repeat (4x?),
+ *    (up to 20/day for first week)
+ * Day 7-30: Follow 22-30/h and up to 150/day
+ * Day 30+: Follow 40/h and up to 250/day
+ * 
  * Task Scheduler should not start your task at 2pm exactly, but randomly between 1pm and 3pm
- * Way to ramp up - 4 triggers at 7am, 12pm, 6pm, 12am with random 10min start delay and 4 hour
+ * Way to ramp up - 4 triggers at 7am, 12pm, 6pm, 12am with random 30min start delay and 4 hour
  * forced timeout.
  * 
- * Iterating through a lot of accounts (without (un)following) is now newly also considered bad
- * by Instagram. So simply visiting a lot of /username pages will trigger bot detection. So the
- * decision algorithm cannot be too strict.
  */
 (async () => {
   try {
-    // Follow limit: around 100 per day ??
-    // HARD LIMIT: 40 follows per hour!
-    // 7500 total following is the global MAX
-
     const commandArg = process.argv[2];
-    const skipFollow = commandArg === '--unfollow';
-    const skipUnfollow = commandArg === '--follow';
+    const unfollowMode = commandArg === '--unfollow';
+    const followMode = commandArg === '--follow' || !unfollowMode; // follow is the default mode
     const isExperimentMode = commandArg === '--experiment';
     const isCompilationTest = commandArg === '--test';
-    const followNumberTarget = process.argv.includes('--lightweight') ? 4 : 4; // * 4 (the number of hashtags)
-    const targetHashtags = ['venice', 'earthoutdoors', 'neverstopexploring', 'sheexplores'];
+    const followNumberTarget = 
+      (process.argv.includes('--lightweight') ? 4 : 4) +
+      (Math.floor(Math.random()*3)-1) // -1/0/+1
+    ;
+    // One could also follow posts of pages but hashtag feeds seem to have more recent posts
+    const targetHashtags = [
+      'venice', 'banff', 'vancouver', 'earthoutdoors',
+      'neverstopexploring', 'sheexplores', 'travel', 'neverstopexploring',
+      'stayandwander', 'awesomeearth', 'beautifuldestinations', 'ourplanetdaily',
+      'liveoutdoors', 'modernoutdoors', 'earthpix', 'voyaged', 'adventure'
+    ];
 
     console.log('Started at', new Date().toLocaleString());
     
@@ -58,18 +71,10 @@ const TerminalBot = require('./src/terminal');
       // );
       // console.log(untrackedAccounts);
       // await BrowserBot.runMassUnfollowFromList(inputData.slice(0, 30));
-    } else {
-      // STANDARD MODE (10-20% conversion rate)
-      for (const hashtag of targetHashtags) {
-        if (!skipUnfollow) {
-          await BrowserBot.runMassUnfollow(followNumberTarget);
-        }
-        if (!skipFollow) {
-          // 'Follow by hashtag' follows feed likers (because these are active users)
-          // 'Follow by user' is not recommended because it quickly runs into repetition
-          await BrowserBot.runMain({ hashtag }, followNumberTarget);
-        }
-      }
+    } else if (followMode) {
+      await BrowserBot.runFollowStrategy(targetHashtags, followNumberTarget);
+    } else if (unfollowMode) {
+      await BrowserBot.runMassUnfollow(followNumberTarget);
     }
   } catch (e) {
     console.error('------------- Terminated with an error -----------');
