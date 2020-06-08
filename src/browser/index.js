@@ -16,6 +16,7 @@ const client = webdriverio.remote({
 
 const Data = require('../shared/Data');
 const Algorithm = require('../shared/Algorithm');
+const Random = require('../shared/Random');
 
 const Api = require('./Api');
 // verified limit of maximum accounts one can follow in 1 hour
@@ -72,14 +73,22 @@ exports.runFollowStrategy = async (targetHashtags, followRequestsCount = 40) => 
   let followedSoFar = 0;
 
   while (followedSoFar < followRequestsCount) {
-    followedSoFar += 1;
+    await Api.browseHomeFeed(client, 60);
+
+    const hashtag = Random.pickArrayElement(targetHashtags);
+    await Api.navigateToRecentHashtagPost(client, hashtag);
+
+    const remainingToFollow = followRequestsCount - followedSoFar;
+    const toFollowNext = Math.min(remainingToFollow, Random.integerInRangeInclusive(5, 7)); // 5+(0/1/2)
+    followedSoFar += await Api.followAccountsFromPostLikers(client, toFollowNext);
+
+    await Api.browseExploreFeed(client, 20);
   }
 
   /**
    * IMPLEMENTATION
 - Instead of API get, just open media, open media likes popup and follow fifty people in a row from the direct buttons. Can be even private. Because they liked a recent photo. And that is good enough measure of them being engaged. But their account ideally has following bigger than followers.
 - Like random stuff in my feed. That's not liked already
-- Add bot navigate keystroke search
 - Detect Action Blocked alert always after an action. And click OK when it appears. 
 - Watch stories, but only one or two, it's also an action, scroll down, like?
    */

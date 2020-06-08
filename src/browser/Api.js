@@ -1,8 +1,9 @@
 const Url = require('../shared/Url');
 const Data = require('../shared/Data');
 const Utils = require('../shared/Utils');
+const Random = require('../shared/Random');
 
-const getPauseMs = (ms) => (ms * 0.7) + (0.3 * ms * Math.random() * 2);
+const getPauseMs = Random.getPause;
 const waiting = (ms) => new Promise(resolve => setTimeout(resolve, getPauseMs(ms)));
 const confuseAutomationDetection = () => {
   const falsifyWebdriver = () => {
@@ -15,7 +16,9 @@ const confuseAutomationDetection = () => {
 const Selectors = {
   followButton: 'button*=Follow',
   followingButton: '[aria-label="Following"]',
-  unfollowButton: 'button*=Unfollow'
+  unfollowButton: 'button*=Unfollow',
+  notificationPromptButton: 'button=Not Now',
+  searchInput: 'input[placeholder=Search]'
 }
 
 const Api = {
@@ -62,6 +65,10 @@ const Api = {
     } else {
       console.info('Already logged in');
     }
+    const isNotificationPrompt = await browserInstance.isClickable(Selectors.notificationPromptButton);
+    if (isNotificationPrompt) {
+      await browserInstance.click(Selectors.notificationPromptButton);
+    }
   },
 
   async logout(browserInstance, force = false) {
@@ -82,6 +89,74 @@ const Api = {
       await browserInstance
         .url('https://example.com');
     }
+  },
+
+  async browseHomeFeed(browserInstance, durationSeconds) {
+    console.info('Starting home feed browse...');
+
+    // load home page
+    await browserInstance
+      .url(Url.defaultUrl)
+      .execute(confuseAutomationDetection)
+      .pause(getPauseMs(3000));
+
+    // load one story
+    console.info('Done browsing');
+  },
+
+  async browseExploreFeed(browserInstance, durationSeconds) {
+    console.info('Starting explore feed browse...');
+
+    await browserInstance
+      .url(Url.exploreUrl)
+      .execute(confuseAutomationDetection)
+      .pause(getPauseMs(3000));
+
+    console.info('Done browsing');
+  },
+
+  async likeMedia(browserInstance, media) {
+    // todo
+  },
+
+  async navigateToRecentHashtagPost(browserInstance, hashtag) {
+    console.info('Navigating to', hashtag, 'using search...');
+    await browserInstance
+        .click(Selectors.searchInput)
+        .keys(['#', ...hashtag.split('')])
+        .pause(getPauseMs(5000)) // wait for search results to load
+        .catch(e => {
+          console.info('Could not type in search box', e);
+        })
+        .click(`a[href="/explore/tags/${hashtag}`)
+        .catch(async e => {
+          console.info('Could not click search result', e);
+          await browserInstance.url(Url.getHashtagUrl(hashtag));
+        })
+        .execute(confuseAutomationDetection);
+
+    // Now we are at the hashtag explore page
+    const recentPosts = [...(await browserInstance.$('a[href^="/p/"]'))].slice(0, 3);
+    const targetPost = Random.pickArrayElement(recentPosts);
+
+    await targetPost.scrollIntoView();
+    await targetPost.click();
+    await browserInstance.pause(getPauseMs(5000));
+    console.info('Hashtag post opened');
+  },
+
+  async followAccountsFromPostLikers(browserInstance, accountsToFollow) {
+    console.info('Opening list of post likers');
+    await browserInstance
+      .click('button*=others')
+      .pause(getPauseMs(5000));
+      
+    // Now we see list of users who liked it
+    //const acountsToFollow
+    //console.info('likers');
+    // todo
+    
+    //return numberFollowed;
   },
 
   async verifyUserPageDataAccess(browserInstance, username) {

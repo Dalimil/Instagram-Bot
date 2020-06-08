@@ -7,6 +7,9 @@ const Url = {
   graphqlApiUrl: 'https://www.instagram.com/graphql/query/',
   exploreUrl: 'https://www.instagram.com/explore/',
 
+  getHashtagUrl: (hashtag) =>
+    `https://www.instagram.com/explore/tags/${hashtag}/`,
+
   getHashtagApiUrl: (hashtag) =>
     `https://www.instagram.com/explore/tags/${hashtag}/?__a=1`,
 

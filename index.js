@@ -1,4 +1,5 @@
 const BrowserBot = require('./src/browser');
+const Random = require('./src/shared/Random');
 // const TerminalBot = require('./src/terminal');
 // Note: terminal version of the bot is currently broken due to security challenge issues
 
@@ -39,7 +40,7 @@ const BrowserBot = require('./src/browser');
     const isCompilationTest = commandArg === '--test';
     const followNumberTarget = 
       (process.argv.includes('--lightweight') ? 4 : 4) +
-      (Math.floor(Math.random()*3)-1) // -1/0/+1
+      Random.integerInRangeInclusive(-1, 1);
     ;
     // One could also follow posts of pages but hashtag feeds seem to have more recent posts
     const targetHashtags = [
