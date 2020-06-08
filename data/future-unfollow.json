@@ -1,26 +1,6 @@
 {
   "future_unfollow": [
     {
-      "userId": "529610521",
-      "username": "giuliojm",
-      "timestamp": 1590804685125
-    },
-    {
-      "userId": "5326857851",
-      "username": "morgerdan",
-      "timestamp": 1590804685125
-    },
-    {
-      "userId": "17420109068",
-      "username": "pj_creative_captures",
-      "timestamp": 1590804685125
-    },
-    {
-      "userId": "403430791",
-      "username": "daniel.eiermann",
-      "timestamp": 1590804685125
-    },
-    {
       "userId": "10740483396",
       "username": "wodizzz",
       "timestamp": 1590804685125
@@ -3704,6 +3684,26 @@
       "userId": "8023045120",
       "username": "kan_tak_nak",
       "timestamp": 1591502010746
+    },
+    {
+      "userId": "2204878083",
+      "username": "mapax1",
+      "timestamp": 1591543198904
+    },
+    {
+      "userId": "1560722445",
+      "username": "viaggiatore_del_tempo",
+      "timestamp": 1591543198904
+    },
+    {
+      "userId": "32798519151",
+      "username": "_lobography_",
+      "timestamp": 1591543198904
+    },
+    {
+      "userId": "293395769",
+      "username": "mich.puppin",
+      "timestamp": 1591543198904
     }
   ]
 }
