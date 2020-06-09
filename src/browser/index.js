@@ -69,7 +69,7 @@ exports.end = async () => {
  * Don't mix with unfollow - that's not human natural.
  */
 exports.runFollowStrategy = async (targetHashtags, followRequestsCount = 40) => {
-  console.info(new Date().toLocaleString(), 'Executing main follow algorithm...');
+  console.info(new Date().toLocaleString(), 'Executing main follow algorithm with followRequestCount:', followRequestsCount);
   let followedSoFar = 0;
 
   while (followedSoFar < followRequestsCount) {
@@ -85,20 +85,8 @@ exports.runFollowStrategy = async (targetHashtags, followRequestsCount = 40) => 
     await Api.browseExploreFeed(client, 20);
   }
 
-  /**
-   * IMPLEMENTATION
-- Instead of API get, just open media, open media likes popup and follow fifty people in a row from the direct buttons. Can be even private. Because they liked a recent photo. And that is good enough measure of them being engaged. But their account ideally has following bigger than followers.
-- Like random stuff in my feed. That's not liked already
-- Detect Action Blocked alert always after an action. And click OK when it appears. 
-- Watch stories, but only one or two, it's also an action, scroll down, like?
-   */
-
-  const alreadyProcessed = new Set(Data.getProcessedAccountsList());
-
-  
-  console.info(`Initial target is a hashtag: ${initialTarget.hashtag}`);
-
   // Update storage
+  console.info(new Date().toLocaleString(), 'Completed main follow algorithm...');
 };
 
 // We'll get larger amount of followers first, many will be skipped
@@ -197,6 +185,8 @@ exports.runMassUnfollowStrategy = async (unfollowLimit) => {
   
   // Update storage
   Data.storeFutureUnfollowList(toKeep);
+
+  console.info(new Date().toLocaleString(), 'Completed mass unfollow algorithm.');
 };
 
 exports.runLegacyMassUnfollowStrategy = async (unfollowLimit) => {

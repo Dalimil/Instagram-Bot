@@ -3,6 +3,7 @@ const Data = require('../shared/Data');
 const Utils = require('../shared/Utils');
 const Random = require('../shared/Random');
 
+const isBrowseOnlyMode = process.argv.includes('--browseOnly');
 const getPauseMs = Random.getPause;
 const waiting = (ms) => new Promise(resolve => setTimeout(resolve, getPauseMs(ms)));
 const confuseAutomationDetection = () => {
@@ -121,7 +122,9 @@ const Api = {
       for (const heartButton of hearts) {
         await heartButton.scrollIntoView(Random.getScrollIntoViewParams());
         if (Random.coinToss(40)) {
-          await heartButton.click();
+          if (!isBrowseOnlyMode) {
+            await heartButton.click();
+          }
           await waiting(getPauseMs(4000));
           await Api.verifyActionBlocked();
           timeSpent += 4;
@@ -141,6 +144,7 @@ const Api = {
   },
 
   async browseStories(browserInstance) {
+    // Remember that watching a story also counts as an action
     try {
       const stories = [...browserInstance.$$(Selectors.storyButton)];
       if (stories.length > 10) {
@@ -233,18 +237,27 @@ const Api = {
     console.info('Hashtag post opened');
   },
 
+  /** Makes the assumption that the post page popup is already opened */
   async followAccountsFromPostLikers(browserInstance, accountsToFollow) {
     console.info('Opening list of post likers');
     await browserInstance
       .click('button*=others')
       .pause(getPauseMs(5000));
       
-    // Now we see list of users who liked it
+    // Now we see list of users who liked it - it is a recent photo so these users are 'engaged'
     //const acountsToFollow
     //console.info('likers');
     // todo
     
-    //return numberFollowed;
+    const alreadyProcessed = new Set(Data.getProcessedAccountsList());
+  // Update storage
+  //Data.persistNewlyProcessedAndFollowed(futureFollowList, qualityFutureFollowList);
+    let numberFollowed = 0;
+
+    if (isBrowseOnlyMode) {
+      return 8; // just approximate number to progress the program
+    }
+    return numberFollowed;
   },
 
   async verifyUserPageDataAccess(browserInstance, username) {
