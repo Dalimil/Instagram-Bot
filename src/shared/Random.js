@@ -21,6 +21,10 @@ const Random = {
         return (ms * 0.7) + (0.3 * ms * Math.random() * 2);
     },
 
+    waitingMs(ms) {
+        return new Promise(resolve => setTimeout(resolve, Random.getPause(ms)));
+    },
+
     incrementNumber(value, minIncrement, maxIncrement) {
         return value + Random.integerInRangeInclusive(minIncrement, maxIncrement);
     },

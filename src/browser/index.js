@@ -1,24 +1,13 @@
 const selenium = require('selenium-standalone');
 const webdriverio = require('webdriverio');
-const isMobile = true;
-const client = webdriverio.remote({
-  desiredCapabilities: {
-    browserName: 'chrome',
-    newCommandTimeout: 300,
-    chromeOptions: {
-      args: [
-        ...(isMobile ? ['user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_3 like Mac OS X) AppleWebKit/603.3.8 (KHTML, like Gecko) Mobile/14G60 Instagram 12.0.0.16.90 (iPhone9,4; iOS 10_3_3; en_US; en-US; scale=2.61; gamut=wide; 1080x1920)'] : []),
-        ...(process.argv.includes('--headless') ? ['headless', 'disable-gpu', 'disable-sync', 'no-sandbox'] : [])
-      ],
-    },
-  }
-});
-
 const Data = require('../shared/Data');
 const Algorithm = require('../shared/Algorithm');
 const Random = require('../shared/Random');
-
 const Api = require('./Api');
+const config = require('./config');
+
+let client = null;
+
 // verified limit of maximum accounts one can follow in 1 hour
 const followRequestsPerHourLimit = 40;
 let seleniumProcess = null;
@@ -39,17 +28,18 @@ exports.init = async () => {
       resolve(child);
     });
   });
-  
-  console.info('Selenium process started.');
-  console.info('Browser in headless mode?', process.argv.includes('--headless'));
+  console.info('Selenium process started. Starting WebDriver.IO');
+  client = await webdriverio.remote(config.webdriverBrowserConfig);
+  console.info('Webdriver.IO started and client initialized.');
+  console.info('Browser in headless mode?', config.isHeadless);
 
-  await client.init();
-  await Api.login(client, Data.getCredentials());
+  Api.setBrowserInstance(client);
+  await Api.login(Data.getCredentials());
 };
 
 exports.end = async () => {
-  await Api.logout(client);
-  await client.end();
+  await Api.logout();
+  await client.deleteSession();
 
   if (seleniumProcess) {
     console.info('Terminating selenium process...');
@@ -73,16 +63,16 @@ exports.runFollowStrategy = async (targetHashtags, followRequestsCount = 40) => 
   let followedSoFar = 0;
 
   while (followedSoFar < followRequestsCount) {
-    await Api.browseHomeFeed(client, 60);
+    await Api.browseHomeFeed(60);
 
-    const hashtag = Random.pickArrayElement(targetHashtags);
-    await Api.navigateToRecentHashtagPost(client, hashtag);
+    // const hashtag = Random.pickArrayElement(targetHashtags);
+    // await Api.navigateToRecentHashtagPost(hashtag);
 
-    const remainingToFollow = followRequestsCount - followedSoFar;
-    const toFollowNext = Math.min(remainingToFollow, Random.integerInRangeInclusive(5, 7)); // 5+(0/1/2)
-    followedSoFar += await Api.followAccountsFromPostLikers(client, toFollowNext);
+    // const remainingToFollow = followRequestsCount - followedSoFar;
+    // const toFollowNext = Math.min(remainingToFollow, Random.integerInRangeInclusive(5, 7)); // 5+(0/1/2)
+    // followedSoFar += await Api.followAccountsFromPostLikers(toFollowNext);
 
-    await Api.browseExploreFeed(client, 20);
+    // await Api.browseExploreFeed(20);
   }
 
   // Update storage
@@ -100,20 +90,20 @@ exports.runLegacyFollowStrategy = async (initialTarget, followRequestsCount = 40
   if (initialTarget.username) {
     console.info(`Initial target is a user: ${initialTarget.username}`);
     // Get target user id
-    const targetUserId = (await Api.getUser(client, initialTarget.username)).id;
+    const targetUserId = (await Api.getUser(initialTarget.username)).id;
     console.info('Target user id:', targetUserId);
-    futureFollowList = await Api.getUserFollowersFirstN(client, targetUserId,
+    futureFollowList = await Api.getUserFollowersFirstN(targetUserId,
       numUsersToProcess, alreadyProcessed);
   } else if (initialTarget.hashtag) {
     console.info(`Initial target is a hashtag: ${initialTarget.hashtag}`);
     // Get hashtag media feed
-    const hashtagApiData = await Api.getHashtag(client, initialTarget.hashtag);
+    const hashtagApiData = await Api.getHashtag(initialTarget.hashtag);
     const hashtagTopPosts = [
       ...hashtagApiData.edge_hashtag_to_top_posts.edges,
       ...hashtagApiData.edge_hashtag_to_media.edges,
     ].filter(x => x.node.edge_liked_by.count > 50);
 
-    futureFollowList = await Api.getMediaLikersFromPosts(client,
+    futureFollowList = await Api.getMediaLikersFromPosts(
       hashtagTopPosts.map(post => post.node.shortcode), numUsersToProcess, alreadyProcessed);
   } else {
     console.error('Invalid initial target. Aborting...');
@@ -130,12 +120,12 @@ exports.runLegacyFollowStrategy = async (initialTarget, followRequestsCount = 40
       console.log('(using API:)');
     }
     const accountData = (getViaApi ?
-      await Api.getUserViaApi(client, account.username) :
-      await Api.getUser(client, account.username)
+      await Api.getUserViaApi(account.username) :
+      await Api.getUser(account.username)
     );
     if (!accountData) {
       console.log(`Error when retrieving account data for ${account.username}. Skipping.`);
-      await Api.waitPerUser(client, 2);
+      await Api.waitPerUser(2);
       continue;
     }
     const accountQualityDecision = Algorithm.decideAccountQuality(accountData, /* isSimplified */ false);
@@ -145,7 +135,7 @@ exports.runLegacyFollowStrategy = async (initialTarget, followRequestsCount = 40
       }
       skippedInARow = 0;
       qualityFutureFollowList.push(account);
-      await Api.followUser(client, account.username, /* skipNavigationToPage */ !getViaApi);
+      await Api.followUser(account.username, /* skipNavigationToPage */ !getViaApi);
 
       // hourly follow limit reached? - stop now
       if (qualityFutureFollowList.length >= Math.min(followRequestsPerHourLimit - 2, followRequestsCount)) {
@@ -156,7 +146,7 @@ exports.runLegacyFollowStrategy = async (initialTarget, followRequestsCount = 40
     } else {
       console.log(`:> skipping ${account.username} (${accountQualityDecision.reason})`);
       skippedInARow += 1;
-      await Api.waitPerUser(client, 1);
+      await Api.waitPerUser(1);
     }
   }
 
@@ -191,7 +181,7 @@ exports.runMassUnfollowStrategy = async (unfollowLimit) => {
 
 exports.runLegacyMassUnfollowStrategy = async (unfollowLimit) => {
   console.info(new Date().toLocaleString(), 'Executing legacy mass unfollow algorithm...');
-  await Api.waitPerUser(client, 20); // pause for safety
+  await Api.waitPerUser(20); // pause for safety
 
   const { toKeep, toUnfollow } = Algorithm.getCurrentUnfollowLists(unfollowLimit);
 
@@ -199,12 +189,12 @@ exports.runLegacyMassUnfollowStrategy = async (unfollowLimit) => {
   console.info(`Accounts to be unfollowed: ${toUnfollow.length}`);
   for (const [index, account] of toUnfollow.entries()) {
     console.info(`Processing ${(index + 1)}/${toUnfollow.length}`);
-    const success = await Api.unfollowUser(client, account.username);
+    const success = await Api.unfollowUser(account.username);
     if (!success) {
       const newUsername = await Api.getUsernameFromUserId(account.userId);
       console.log('New username: ', newUsername);
       if (newUsername) {
-        await Api.unfollowUser(client, newUsername);
+        await Api.unfollowUser(newUsername);
       } else {
         Data.appendUserToBeUnfollowedById({ ...account, username: newUsername });
       }
@@ -214,7 +204,7 @@ exports.runLegacyMassUnfollowStrategy = async (unfollowLimit) => {
   // Update storage
   Data.storeFutureUnfollowList(toKeep);
 
-  await Api.waitPerUser(client, 20 + Math.max(0, unfollowLimit - toUnfollow.length));
+  await Api.waitPerUser(20 + Math.max(0, unfollowLimit - toUnfollow.length));
 };
 
 // Unfollow based on a provided list
@@ -223,7 +213,7 @@ exports.runMassUnfollowFromList = async (usernamesToUnfollow) => {
   console.info(`Accounts to be unfollowed: ${usernamesToUnfollow.length}`);
   for (const [index, username] of usernamesToUnfollow.entries()) {
     console.info(`Processing ${(index + 1)}/${usernamesToUnfollow.length}`);
-    await Api.unfollowUser(client, username);
+    await Api.unfollowUser(username);
   };
 };
 
@@ -231,12 +221,12 @@ exports.runMassUnfollowFromList = async (usernamesToUnfollow) => {
 exports.runBrowseList = async (usernameList) => {
   console.info('Iterating a list of accounts...');
   for (const [index, username] of usernameList.entries()) {
-    const data = await Api.getUser(client, username);
-    // const data = await Algorithm.decideAccountQuality(await Api.getUserViaApi(client, username), /* isSimplified */ false);
+    const data = await Api.getUser(username);
+    // const data = await Algorithm.decideAccountQuality(await Api.getUserViaApi(username), /* isSimplified */ false);
     console.log('Data: ', data);
   }
   // Uncomment to pause after being done (debugging purposes)
-  await Api.waitPerUser(client, 1000);
+  await Api.waitPerUser(1000);
 };
 
 // Sometimes people get away from our list, (e.g. they change their username)
@@ -244,7 +234,7 @@ exports.runBrowseList = async (usernameList) => {
 // following list (the list of usernames that I actually want to follow) and also
 // subtracts the accounts that are actually tracked
 exports.runGetUntrackedFutureUnfollowAccounts = async (username, fixedFollowingList) => {
-  const followingList = await Api.getUserFollowing(client, username);
+  const followingList = await Api.getUserFollowing(username);
   const currentUnfollowList = Data.getFutureUnfollowList().map(acc => acc.username);
   const untrackedFutureUnfollows = followingList.filter(x =>
     !fixedFollowingList.includes(x) && !currentUnfollowList.includes(x)

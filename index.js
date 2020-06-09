@@ -1,7 +1,5 @@
 const BrowserBot = require('./src/browser');
 const Random = require('./src/shared/Random');
-// const TerminalBot = require('./src/terminal');
-// Note: terminal version of the bot is currently broken due to security challenge issues
 
 // Usage: yarn start [(--follow | --unfollow | --experiment)] [--lightweight] [--headless]
 //  or simply 'yarn start', 'yarn follow', 'yarn unfollow', 'yarn experiment',
