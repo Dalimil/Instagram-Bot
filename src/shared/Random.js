@@ -23,6 +23,17 @@ const Random = {
 
     incrementNumber(value, minIncrement, maxIncrement) {
         return value + Random.integerInRangeInclusive(minIncrement, maxIncrement);
+    },
+    
+    coinToss(percentNeededForSuccess = 50) {
+        // If the coin toss generates number less than the percentage, it's a success
+        return Math.random() < (percentNeededForSuccess / 100);
+    },
+
+    getScrollIntoViewParams() {
+        const verticalOptions = ["center", "center", "center", "top", "top", "end", "nearest"];
+        const verticalOption = Random.pickArrayElement(verticalOptions);
+        return { behavior: "smooth", block: verticalOption };
     }
 };
 

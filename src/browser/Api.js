@@ -18,7 +18,12 @@ const Selectors = {
   followingButton: '[aria-label="Following"]',
   unfollowButton: 'button*=Unfollow',
   notificationPromptButton: 'button=Not Now',
-  searchInput: 'input[placeholder=Search]'
+  searchInput: 'input[placeholder=Search]',
+  storyButton: 'button.OE3OK',
+  storyCloseButton: 'button.-jHC6',
+  postHeartButton: '.fr66n:not(.FY9nT) button.wpO6b',
+  commentHeartButton: ':not(.FY9nT) button.wpO6b.ZQScA',
+  explorePagePostLink: 'a[href^="/p/"]'
 }
 
 const Api = {
@@ -92,7 +97,9 @@ const Api = {
   },
 
   async browseHomeFeed(browserInstance, durationSeconds) {
-    console.info('Starting home feed browse...');
+    console.info(new Date().toLocaleString(), 'Starting home feed browse...');
+    const startTimeMs = Date.now(); 
+    let timeSpent = 0;
 
     // load home page
     await browserInstance
@@ -100,23 +107,104 @@ const Api = {
       .execute(confuseAutomationDetection)
       .pause(getPauseMs(3000));
 
-    // load one story
-    console.info('Done browsing');
+    // load a few stories
+    const success = await Api.browseStories(browserInstance);
+    timeSpent = success ? 20 : 10;
+
+    // Scroll down and like
+    try {
+      const postHearts = [...browserInstance.$$(Selectors.postHeartButton)];
+      const commentHearts = [...browserInstance.$$(Selectors.commentHeartButton)];
+      const hearts = postHearts.concat(commentHearts);
+      console.info('Hearts available:', hearts.length);
+  
+      for (const heartButton of hearts) {
+        await heartButton.scrollIntoView(Random.getScrollIntoViewParams());
+        if (Random.coinToss(40)) {
+          await heartButton.click();
+          await waiting(getPauseMs(4000));
+          await Api.verifyActionBlocked();
+          timeSpent += 4;
+        }
+        await waiting(getPauseMs(3000));
+        timeSpent += 3;
+        if (timeSpent > durationSeconds) {
+          break; // end
+        }
+      }
+    } catch (e) {
+      console.info('Error occurred when liking home feed', e);
+      await browserInstance.saveScreenshot('./error_home_feed_browse.png');
+    }
+    const endTimeMs = Date.now();
+    console.info('Done browsing. Time spent:', Math.round((endTimeMs - startTimeMs)/1000));
+  },
+
+  async browseStories(browserInstance) {
+    try {
+      const stories = [...browserInstance.$$(Selectors.storyButton)];
+      if (stories.length > 10) {
+        const story = stories[Random.integerInRange(8, 10)];
+        await story.click();
+        await waiting(getPauseMs(15000));
+        await browserInstance.click(Selectors.storyCloseButton);
+      }
+      return true;
+    } catch (e) {
+      console.info('Failed loading stories', e);
+      await browserInstance.saveScreenshot('./error_stories_browse.png');
+
+      // reset
+      await browserInstance
+        .url(Url.defaultUrl)
+        .execute(confuseAutomationDetection)
+        .pause(getPauseMs(3000)); 
+      return false;
+    }
   },
 
   async browseExploreFeed(browserInstance, durationSeconds) {
-    console.info('Starting explore feed browse...');
+    console.info(new Date().toLocaleString(), 'Starting explore feed browse...');
+    const startTimeMs = Date.now(); 
 
     await browserInstance
       .url(Url.exploreUrl)
       .execute(confuseAutomationDetection)
-      .pause(getPauseMs(3000));
+      .pause(getPauseMs(6000));
 
-    console.info('Done browsing');
+    let timeSpent = 7;
+    const postLinks = [...browserInstance.$$(Selectors.explorePagePostLink)];
+    for (const postLink of postLinks) {
+      await postLink.scrollIntoView(Random.getScrollIntoViewParams());
+      await waiting(getPauseMs(2000));
+      timeSpent += 2;
+      if (timeSpent > durationSeconds) {
+        break;
+      }
+    }
+    const endTimeMs = Date.now();
+    console.info('Done browsing. Time spent:', Math.round((endTimeMs - startTimeMs)/1000));
   },
 
-  async likeMedia(browserInstance, media) {
-    // todo
+  async verifyActionBlocked(browserInstance) {
+    const isActionBlocked = (
+      await browserInstance.isExisting('*=Action Blocked') ||
+      await browserInstance.isExisting('*=Temporarily Blocked')
+    );
+    if (isActionBlocked) {
+      // First try to click the OK buttons
+      const okButtonSelector = '=OK';
+      const ignoreButtonSelector = '=Ignore';
+      if (await browserInstance.isClickable(okButtonSelector)) {
+        await browserInstance.click(okButtonSelector);
+      } else if (await browserInstance.isClickable(ignoreButtonSelector)) {
+        await browserInstance.click(ignoreButtonSelector);
+      }
+      // Log, pause, throw
+      await browserInstance.saveScreenshot('./error_action_blocked.png');
+      await waiting(getPauseMs(30 * 60 * 1000)); // 30 minutes
+      throw new Error('Action Blocked');
+    }
   },
 
   async navigateToRecentHashtagPost(browserInstance, hashtag) {
@@ -136,7 +224,7 @@ const Api = {
         .execute(confuseAutomationDetection);
 
     // Now we are at the hashtag explore page
-    const recentPosts = [...(await browserInstance.$('a[href^="/p/"]'))].slice(0, 3);
+    const recentPosts = [...(await browserInstance.$(Selectors.explorePagePostLink))].slice(0, 3);
     const targetPost = Random.pickArrayElement(recentPosts);
 
     await targetPost.scrollIntoView();
