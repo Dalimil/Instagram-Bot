@@ -23,7 +23,7 @@ exports.init = async () => {
         return reject(error);
       }
       child.stderr.on('data', data => {
-        console.log(data.toString());
+        console.info('>>>', data.toString());
       });
       resolve(child);
     });
@@ -63,19 +63,17 @@ exports.runFollowStrategy = async (targetHashtags, followRequestsCount = 40) => 
   let followedSoFar = 0;
 
   while (followedSoFar < followRequestsCount) {
-    await Api.browseHomeFeed(60);
+    // await Api.browseHomeFeed(/* durationSeconds */ 90);
 
-    // const hashtag = Random.pickArrayElement(targetHashtags);
-    // await Api.navigateToRecentHashtagPost(hashtag);
+    const hashtag = Random.pickArrayElement(targetHashtags);
+    await Api.navigateToRecentHashtagPost(hashtag);
 
-    // const remainingToFollow = followRequestsCount - followedSoFar;
-    // const toFollowNext = Math.min(remainingToFollow, Random.integerInRangeInclusive(5, 7)); // 5+(0/1/2)
-    // followedSoFar += await Api.followAccountsFromPostLikers(toFollowNext);
+    const remainingToFollow = followRequestsCount - followedSoFar;
+    const toFollowNext = Math.min(remainingToFollow, Random.integerInRangeInclusive(5, 7)); // 5+(0/1/2)
+    followedSoFar += await Api.followAccountsFromPostLikers(toFollowNext);
 
-    // await Api.browseExploreFeed(20);
+    await Api.browseExploreFeed(/* durationSeconds */ 30);
   }
-
-  // Update storage
   console.info(new Date().toLocaleString(), 'Completed main follow algorithm...');
 };
 

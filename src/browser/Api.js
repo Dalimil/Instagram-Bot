@@ -17,7 +17,9 @@ const Selectors = {
   storyCloseButton: 'button.-jHC6',
   postHeartButton: '.fr66n:not(.FY9nT) button.wpO6b',
   commentHeartButton: ':not(.FY9nT) button.wpO6b.ZQScA',
-  explorePagePostLink: 'a[href^="/p/"]'
+  explorePagePostLink: 'a[href^="/p/"]',
+  pageContainer: '#react-root > section',
+  pageArticles: '#react-root > section article'
 };
 
 // We initialize this via API and use as a global
@@ -30,13 +32,17 @@ const Api = {
 
   async navigate(url, waitTimeMs = 3000) {
     await browser.url(url);
+    await Api.afterNavigate(waitTimeMs);
+  },
+
+  async afterNavigate(waitTimeMs) {
     await browser.execute(() => {
       const falsifyWebdriver = () => {
         Object.defineProperty(navigator, 'webdriver', {value: false, configurable: true});
         Object.defineProperty(navigator, 'plugins', [1, 2, 3, 4, 5]);
       };
       falsifyWebdriver();
-      setInterval(falsifyWebdriver, 500);
+      setInterval(falsifyWebdriver, 1000);
     });
     await waiting(waitTimeMs);
   },
@@ -56,7 +62,7 @@ const Api = {
       console.info('Logging in', credentials.username, '...');
       const userNameField = await browser.$('[name=username]');
       await userNameField.click();
-      await browser.keys(credentials.username);
+      await Api.typeKeys(credentials.username.split(''));
       await waiting(7000);
       const logInButton = await browser.$('button=Log In');
       await logInButton.click();
@@ -81,18 +87,19 @@ const Api = {
 
   async dismissHomePageNotifications() {
     const notificationPromptButton = await browser.$(Selectors.notificationPromptButton);
-    if (!!notificationPromptButton) {
+    if (!notificationPromptButton.error) { // or check .elementId missing, or check .error
       console.info('Dismissing notification prompt.');
       await notificationPromptButton.click();
     }
     const homeScreenPromptButton = await browser.$(Selectors.homeScreenPromptButton);
-    if (homeScreenPromptButton) {
+    if (!homeScreenPromptButton.error) {
       console.info('Dismissing home page prompt.');
       await homeScreenPromptButton.click();
     }
     // Dismiss any remaining notification
     await waiting(2000);
-    await browser.click('body');
+    const body = await browser.$('body');
+    await body.click();
   },
 
   async logout(force = false) {
@@ -110,6 +117,55 @@ const Api = {
     }
   },
 
+  /**
+   * Soft option is for scrolling posts by post.
+   * Without it it just moves the entire page to scroll bottom.
+   */
+  async scrollPageDown(soft = false) {
+    console.info('Scrolling down... Soft:', soft);
+    if (soft) {
+      await browser.setTimeout({ 'script': 10 * 60 * 1000 }); // 10 minutes
+      await browser.executeAsync(
+        (elementsSelector, done) => {
+          const getList = () => [...document.querySelectorAll(elementsSelector)];
+          let listIndex = 0;
+          let scrollTicks = 6;
+
+          let scrollingTask = setInterval(() => {
+            const newList = getList();
+            scrollTicks -= 1;
+            if (listIndex >= newList.length || scrollTicks <= 0) {
+              if (scrollingTask !== null) {
+                clearInterval(scrollingTask);
+                scrollingTask = null;
+                done();
+              } else {
+                return;
+              }
+            }
+            const nextElement = newList[listIndex];
+            listIndex += 1;
+            nextElement.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+          }, 2000);
+        },
+        Selectors.pageArticles
+      );
+    } else {
+      const pageContainer = await browser.$(Selectors.pageContainer);
+      await pageContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      await waiting(3000);
+      await pageContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      await waiting(5000);
+    }
+  },
+
+  async typeKeys(characters) {
+    for (const character of characters) {
+      await browser.keys(character);
+      await waiting(300);
+    }
+  },
+
   async browseHomeFeed(durationSeconds) {
     console.info(new Date().toLocaleString(), 'Starting home feed browse...');
     const startTimeMs = Date.now(); 
@@ -120,10 +176,19 @@ const Api = {
     await Api.dismissHomePageNotifications();
 
     // load a few stories
-    const success = await Api.browseStories();
-    timeSpent = success ? 20 : 10;
+    if (Random.coinToss(70)) {
+      const storiesDuration = Random.integerInRange(15, 25);
+      const success = await Api.browseStories(storiesDuration);
+      timeSpent = success ? storiesDuration : 5;
+    } else {
+      console.info('Skipping stories this time (random).')
+    }
 
-    // Scroll down and like
+    // Pre-load by scrolling
+    await Api.scrollPageDown(/* soft */ true);
+    timeSpent += 10;
+
+    // Scroll down and like. Up to ~35s has passed at this point
     try {
       const postHearts = await browser.$$(Selectors.postHeartButton);
       const commentHearts = await browser.$$(Selectors.commentHeartButton);
@@ -133,16 +198,19 @@ const Api = {
       const hearts = postHearts.concat(commentHearts);
       for (const heartButton of hearts) {
         await heartButton.scrollIntoView(Random.getScrollIntoViewParams());
-        if (Random.coinToss(40)) {
+        if (Random.coinToss(30)) {
+          console.info('Liking a post');
           if (!config.isBrowseOnlyMode) {
             await heartButton.click();
           }
           await waiting(4000);
           await Api.verifyActionBlocked();
           timeSpent += 4;
+        } else {
+          console.info('Not liking the post');
         }
-        await waiting(3000);
-        timeSpent += 3;
+        await waiting(4000);
+        timeSpent += 4;
         if (timeSpent > durationSeconds) {
           break; // end
         }
@@ -155,7 +223,7 @@ const Api = {
     console.info('Done browsing. Time spent:', Math.round((endTimeMs - startTimeMs)/1000), 'seconds');
   },
 
-  async browseStories() {
+  async browseStories(durationSeconds) {
     if (config.isMobile) {
       return false; // mobile version has no stories
     }
@@ -167,7 +235,7 @@ const Api = {
       if (stories.length > 10) {
         const story = stories[Random.integerInRange(8, 10)];
         await story.click();
-        await waiting(15000);
+        await waiting(durationSeconds * 1000);
         const storyCloseButton = await browser.$(Selectors.storyCloseButton);
         await storyCloseButton.click();
       }
@@ -189,8 +257,12 @@ const Api = {
     const startTimeMs = Date.now(); 
 
     await Api.navigate(Url.exploreUrl, 6000);
-
     let timeSpent = 7;
+
+    // Pre-load by scrolling
+    await Api.scrollPageDown();
+    timeSpent += 10;
+
     const postLinks = await browser.$$(Selectors.explorePagePostLink);
     for (const postLink of postLinks) {
       await postLink.scrollIntoView(Random.getScrollIntoViewParams());
@@ -205,10 +277,10 @@ const Api = {
   },
 
   async verifyActionBlocked() {
-    const isActionBlocked = (
-      await browser.isExisting('*=Action Blocked') ||
-      await browser.isExisting('*=Temporarily Blocked')
-    );
+    const actionBlockedPopup = await browser.$('*=Action Blocked');
+    const actionBlockedTempPopup = await browser.$('*=Temporarily Blocked');
+    // one of them successfully found?
+    const isActionBlocked = !actionBlockedPopup.error || !actionBlockedTempPopup.error;
     if (isActionBlocked) {
       // First try to click the OK buttons
       const okButton = await browser.$('=OK');
@@ -231,26 +303,25 @@ const Api = {
       // For mobile web the search is only in explore page
       await Api.navigate(Url.exploreUrl, 6000);
     }
-    await browser
-      .click(Selectors.searchInput)
-      .catch(e => {
-        console.info('Could not type in search box', e);
-      });
-    await browser.keys(['#', ...hashtag.split('')]);
+    const searchInput = await browser.$(Selectors.searchInput);
+    await searchInput.click();
+    await waiting(2000);
+    await Api.typeKeys(['#', ...hashtag.split('')]);
     await waiting(5000);
-    const searchResult = browser.$(`a[href="/explore/tags/${hashtag}`);
-    if (searchResult) {
+    const searchResult = await browser.$(`a[href="/explore/tags/${hashtag}/"]`);
+    if (await searchResult.isExisting()) {
       await searchResult.click();
+      await Api.afterNavigate(8000);
     } else {
       console.info('Could not click search result', e);
       await Api.navigate(Url.getHashtagUrl(hashtag));
     }
 
     // Now we are at the hashtag explore page
-    const recentPosts = [...(await browser.$(Selectors.explorePagePostLink))].slice(0, 3);
+    const recentPosts = (await browser.$$(Selectors.explorePagePostLink)).slice(0, 3);
     const targetPost = Random.pickArrayElement(recentPosts);
 
-    await targetPost.scrollIntoView(); // fix this and the click
+    await targetPost.scrollIntoView(Random.getScrollIntoViewParams());
     await targetPost.click();
     await waiting(5000);
     console.info('Hashtag post opened');
@@ -534,7 +605,7 @@ const Api = {
     const listNodeSelector = '.isgrP';
     await browser.waitForExist(listNodeSelector);
     await waiting(2000);
-    await browser.timeouts('script', 1200 * 1000); // 20 min
+    await browser.setTimeout({ 'script': 20 * 60 * 1000 }); // 20 minutes
     const followingList = await browser
       .executeAsync(
         (listNodeSelector, done) => {
@@ -545,7 +616,7 @@ const Api = {
           let previousListLength = 0;
           let terminationTask = null;
           const scrollingTask = setInterval(() => {
-            listNode.scrollBy(0, Random.integerInRange(150, 200));
+            listNode.scrollBy({ left: 0, top: 150, behavior: 'smooth' });
             const newList = getList();
             if (previousListLength === newList.length) {
               // same length, so initialize termination task, unless already (in that case do nothing)
@@ -584,7 +655,8 @@ const Api = {
         if (e.type == 'WaitUntilTimeoutError') {
           console.info('Missing follow confirmation indicator for', username, ' - refreshing...');
           await Api.navigate(Url.getUserPageUrl(username), 8000);
-          const retrySuccess = await browser.isExisting(Selectors.followingButton).catch(() => false);
+          const followingButton = await browser.$(Selectors.followingButton);
+          const retrySuccess = await followingButton.isExisting();
           if (retrySuccess) {
             console.info('Confirmation success');
           } else {
@@ -608,7 +680,8 @@ const Api = {
 
     const tryUnfollow = async () => {
       console.log('Unfollowing', username, '...');
-      const alreadyUnfollowed = await browser.isExisting(Selectors.followButton).catch(() => false);
+      const followButton = await browser.$(Selectors.followButton);
+      const alreadyUnfollowed = await followButton.isExisting();
       if (alreadyUnfollowed) {
         console.info('Already unfollowed.');
         return true;
@@ -631,7 +704,8 @@ const Api = {
       //  the person but it switches back on refresh, so we need confirmation
       
       await Api.navigate(Url.getUserPageUrl(username));
-      return !!(await browser.isExisting(Selectors.followButton).catch(() => false));
+      const followButton = await browser.$(Selectors.followButton);
+      return (await followButton.isExisting());
     }
     const success = await tryUnfollow();
     if (success) {

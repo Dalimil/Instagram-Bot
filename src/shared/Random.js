@@ -31,13 +31,13 @@ const Random = {
     
     coinToss(percentNeededForSuccess = 50) {
         // If the coin toss generates number less than the percentage, it's a success
-        return Math.random() < (percentNeededForSuccess / 100);
+        return Math.random() < (percentNeededForSuccess / 100.0);
     },
 
     getScrollIntoViewParams() {
-        const verticalOptions = ["center", "center", "center", "top", "top", "end", "nearest"];
+        const verticalOptions = ['center', 'center', 'center', 'start', 'start', 'end', 'nearest'];
         const verticalOption = Random.pickArrayElement(verticalOptions);
-        return { behavior: "smooth", block: verticalOption };
+        return { behavior: 'smooth', block: verticalOption };
     }
 };
 
