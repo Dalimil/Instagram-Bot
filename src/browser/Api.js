@@ -190,14 +190,11 @@ const Api = {
 
     // Scroll down and like. Up to ~45s has passed at this point
     try {
-      const postHearts = await browser.$$(Selectors.postHeartButton);
-      const commentHearts = await browser.$$(Selectors.commentHeartButton);
-      console.info('Post hearts:', postHearts.length);
-      console.info('Comment hearts:', commentHearts.length);
-
-      const hearts = postHearts.concat(commentHearts);
-      for (const heartButton of hearts) {
+      const postAndCommentHearts = await browser.$$(Selectors.postHeartButton + ',' + Selectors.commentHeartButton);
+      console.info('Post and Comment hearts:', postAndCommentHearts.length);
+      for (const heartButton of postAndCommentHearts) {
         await heartButton.scrollIntoView(Random.getScrollIntoViewParams());
+        await waiting(2000);
         if (Random.coinToss(40)) {
           console.info('Liking a post');
           if (!config.isBrowseOnlyMode) {
@@ -209,7 +206,7 @@ const Api = {
         } else {
           console.info('Not liking the post');
         }
-        await waiting(4000);
+        await waiting(2000);
         timeSpent += 4;
         if (timeSpent > durationSeconds) {
           break; // end
@@ -253,7 +250,7 @@ const Api = {
   },
 
   async browseExploreFeed(durationSeconds) {
-    console.info(new Date().toLocaleString(), 'Starting explore feed browse...');
+    console.info(new Date().toLocaleString(), 'Starting explore feed browse for...', durationSeconds, 'seconds');
     const startTimeMs = Date.now(); 
 
     await Api.navigate(Url.exploreUrl, 6000);
@@ -274,15 +271,17 @@ const Api = {
           await waiting(5000);
           if (Random.coinToss(90)) {
             console.info('Liking post in explore page...');
-            if (!config.isBrowseOnlyMode) {
-              const heartButton = await browser.$(Selectors.postHeartButton);
-              if (await heartButton.isExisting()) {
-                console.info('Clicking heart button');
+            const heartButton = await browser.$(Selectors.postHeartButton);
+            if (heartButton.error) {
+              console.info('It has already been liked before.');
+            } else {
+              console.info('Clicking heart button.');
+              if (!config.isBrowseOnlyMode) {
                 await heartButton.click();
               }
+              await waiting(4000);
+              await Api.verifyActionBlocked();
             }
-            await waiting(4000);
-            await Api.verifyActionBlocked();
           }
           break;
         }
@@ -412,7 +411,7 @@ const Api = {
     if (!config.isBrowseOnlyMode) {
       Data.persistNewlyProcessedAndFollowed(followedSoFar, followedSoFar, /* modern */ true);
     }
-    console.log(JSON.stringify(followedSoFar, null, 2));
+    console.log('Followed accounts:', JSON.stringify(followedSoFar, null, 2));
     return followedSoFar;
   },
 

@@ -12,7 +12,7 @@ let client = null;
 const followRequestsPerHourLimit = 40;
 let seleniumProcess = null;
 
-exports.init = async () => {
+exports.init = async (login = true) => {
   console.info('Starting Selenium process...');
   seleniumProcess = await new Promise((resolve, reject) => {
     selenium.start({
@@ -34,11 +34,15 @@ exports.init = async () => {
   console.info('Browser in headless mode?', config.isHeadless);
 
   Api.setBrowserInstance(client);
-  await Api.login(Data.getCredentials());
+  if (login) {
+    await Api.login(Data.getCredentials());
+  }
 };
 
-exports.end = async () => {
-  await Api.logout();
+exports.end = async (logout = true) => {
+  if (logout) {
+    await Api.logout();
+  }
   await client.deleteSession();
 
   if (seleniumProcess) {
@@ -249,4 +253,49 @@ exports.runGetUntrackedFutureUnfollowAccounts = async (username, fixedFollowingL
 exports.takeErrorScreenshot = async () => {
   console.info('Saving error screenshot...');
   await client.saveScreenshot(`./error_termination_${Random.integerInRange(11111, 99999)}.png`);
+  await Api.waitPerUser(1);
+};
+
+
+// Try to query some divs in example.com
+const runExperimentExample = async () => {
+  await Api.navigate('https://example.com');
+  await client.execute(() => {
+    setInterval(() => {
+      const div1 = document.createElement('div');
+      const div2 = document.createElement('div');
+      div1.className = 'aaa';
+      div1.textContent = 'Hello again';
+      div1.onclick = function() { this.className = 'ccc'; };
+      div2.className = 'bbb';
+      div2.textContent = 'Hi';
+      document.body.appendChild(div1);
+      document.body.appendChild(div2);
+    }, 1000);
+  });
+  await Api.waitPerUser(0.4);
+  const divs1 = await client.$$('.undefined');
+  const divs2 = await client.$$('.bbb,:not(.ccc).aaa.aaa');
+  const divs = divs1.concat(divs2);
+  for (const div of divs) {
+    console.log('found', div.elementId, divs.length);
+    await div.scrollIntoView({ behavior: 'smooth' });
+    await div.click();
+    await Api.waitPerUser(0.1);
+  }
+}
+
+exports.setUpExperiment = async () => {
+  // await Api.login(Data.getCredentials());
+  // const inputData = JSON.parse(require('fs').readFileSync('./tmp.json'))
+  //   .data;
+  // await exports.runBrowseList(inputData); // ['pnwisbeautiful']);
+  // const untrackedAccounts = await exports.runGetUntrackedFutureUnfollowAccounts(
+  //   "dali_hiking",
+  //   inputData
+  // );
+  // console.log(untrackedAccounts);
+  // await exports.runMassUnfollowFromList(inputData.slice(0, 30));
+  
+  await runExperimentExample();
 };

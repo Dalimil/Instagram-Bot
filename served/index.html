@@ -25,8 +25,9 @@
         </style>
     </head>
     <body>
-        <button onClick="getContent('log8.txt')">12pm, 12am</button> ...
-        <button onClick="getContent('log9.txt')">7am, 6pm</button><br>
+        <button onClick="getContent('log8.txt')">7:10am, 3:10pm, 10:50pm</button> ...
+        <button onClick="getContent('log9.txt')">11:05am, 7:05pm</button> ...
+        <button onClick="getWebdriverLogs('wdio.log')">webdriver.log</button><br>
         <hr>
         <main>
             <div id="status"></div>
@@ -34,6 +35,20 @@
             <code><pre id="main">Select a file...</pre></code>
         </main>
         <script>
+            function getWebdriverLogs(filename) {
+                const main = document.getElementById('main');
+                const status = document.getElementById('status');
+                const errors = document.getElementById('errors');
+                main.innerHTML = "loading...";
+                status.innerHTML = "";
+                errors.innerHTML = "";
+                fetch(filename).then(r => r.text()).then(text => {
+                    main.innerHTML = text;
+                    const finalText = main.innerHTML.replace(/(\r\n|\n|\r)/gm, '\n').replace(/\n\n/g, '\n');
+                    main.innerHTML = finalText;
+                    window.a = finalText;
+                });
+            }
             function getContent(filename) {
                 const main = document.getElementById('main');
                 const status = document.getElementById('status');

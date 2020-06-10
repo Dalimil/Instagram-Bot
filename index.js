@@ -30,26 +30,26 @@ const Random = require('./src/shared/Random');
  * 
  */
 (async () => {
-  try {
-    const commandArg = process.argv[2];
-    const unfollowMode = commandArg === '--unfollow';
-    const followMode = commandArg === '--follow' || !unfollowMode; // follow is the default mode
-    const isExperimentMode = commandArg === '--experiment';
-    const isCompilationTest = commandArg === '--test';
-    const followNumberTarget = 
-      (process.argv.includes('--lightweight') ? 4 : 4) +
-      Random.integerInRangeInclusive(-1, 1);
-    ;
-    // One could also follow posts of pages but hashtag feeds seem to have more recent posts
-    const targetHashtags = [
-      'venice', 'banff', 'earthoutdoors',
-      'neverstopexploring', 'sheexplores', 'travel', 'neverstopexploring',
-      'stayandwander', 'awesomeearth', 'beautifuldestinations', 'ourplanetdaily',
-      'liveoutdoors', 'modernoutdoors', 'earthpix', 'voyaged', 'adventure'
-    ];
+  const commandArg = process.argv[2];
+  const unfollowMode = commandArg === '--unfollow';
+  const followMode = commandArg === '--follow' || !unfollowMode; // follow is the default mode
+  const isExperimentMode = commandArg === '--experiment';
+  const isCompilationTest = commandArg === '--test';
+  const followNumberTarget = 
+    (process.argv.includes('--lightweight') ? 5 : 5) +
+    Random.integerInRangeInclusive(-1, 1);
+  ;
+  // One could also follow posts of pages but hashtag feeds seem to have more recent posts
+  const targetHashtags = [
+    'venice', 'banff', 'earthoutdoors',
+    'neverstopexploring', 'sheexplores', 'travel', 'neverstopexploring',
+    'stayandwander', 'awesomeearth', 'beautifuldestinations', 'ourplanetdaily',
+    'liveoutdoors', 'modernoutdoors', 'earthpix', 'voyaged', 'adventure'
+  ];
 
+  try {
     console.log('Started at', new Date().toLocaleString());
-    
+
     if (isCompilationTest) {
       // no-op
       console.log("Node execution successful");
@@ -57,20 +57,10 @@ const Random = require('./src/shared/Random');
       process.exit();
     }
 
-    // Browser (webdriver) version of the bot
-    await BrowserBot.init();
-
+    await BrowserBot.init(/* login */ !isExperimentMode);
     if (isExperimentMode) {
       // EXPERIMENT MODE
-      const inputData = JSON.parse(require('fs').readFileSync('./tmp.json'))
-        .data;
-      await BrowserBot.runBrowseList(inputData); // ['pnwisbeautiful']);
-      // const untrackedAccounts = await BrowserBot.runGetUntrackedFutureUnfollowAccounts(
-      //   "dali_hiking",
-      //   inputData
-      // );
-      // console.log(untrackedAccounts);
-      // await BrowserBot.runMassUnfollowFromList(inputData.slice(0, 30));
+      await BrowserBot.setUpExperiment();
     } else if (followMode) {
       await BrowserBot.runFollowStrategy(targetHashtags, followNumberTarget);
     } else if (unfollowMode) {
@@ -82,7 +72,7 @@ const Random = require('./src/shared/Random');
     await BrowserBot.takeErrorScreenshot();
   } finally {
     // No matter what error is thrown, we should terminate the processes correctly
-    await BrowserBot.end();
+    await BrowserBot.end(/* logout */ !isExperimentMode);
     console.log('Finished at', new Date().toLocaleString());
     // Force terminate (because selenium subprocess kill is buggy)
     setTimeout(() => {
