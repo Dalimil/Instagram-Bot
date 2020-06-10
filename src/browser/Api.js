@@ -169,7 +169,7 @@ const Api = {
   async browseHomeFeed(durationSeconds) {
     console.info(new Date().toLocaleString(), 'Starting home feed browse...');
     const startTimeMs = Date.now(); 
-    let timeSpent = 0;
+    let timeSpent = 10;
 
     // load home page
     await Api.navigate(Url.defaultUrl, 10 * 1000);
@@ -179,7 +179,7 @@ const Api = {
     if (Random.coinToss(70)) {
       const storiesDuration = Random.integerInRange(15, 25);
       const success = await Api.browseStories(storiesDuration);
-      timeSpent = success ? storiesDuration : 5;
+      timeSpent += success ? storiesDuration : 5;
     } else {
       console.info('Skipping stories this time (random).')
     }

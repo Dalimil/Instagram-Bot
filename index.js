@@ -19,14 +19,14 @@ const Random = require('./src/shared/Random');
  * Keep < 100 actions/hour (any action)
  * 
  * RAMP UP:
- * Day 1-7: Follow 2-3/h (increase next day), like some, rest few hours and repeat (4x?),
+ * Day 1-7: Follow 2-3/h (increase next day), like some, rest few hours and repeat (5x?),
  *    (up to 20/day for first week)
  * Day 7-30: Follow 22-30/h and up to 150/day
  * Day 30+: Follow 40/h and up to 250/day
  * 
  * Task Scheduler should not start your task at 2pm exactly, but randomly between 1pm and 3pm
- * Way to ramp up - 4 triggers at 7am, 12pm, 6pm, 12am with random 30min start delay and 4 hour
- * forced timeout.
+ * Way to ramp up - 5 triggers at 7am, 11am, 3pm, 7pm 11pm with random 30min start delay and 4 hour
+ * forced timeout with a weekly omission on Sunday.
  * 
  */
 (async () => {
