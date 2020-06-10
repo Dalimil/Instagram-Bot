@@ -257,20 +257,38 @@ const Api = {
     const startTimeMs = Date.now(); 
 
     await Api.navigate(Url.exploreUrl, 6000);
-    let timeSpent = 7;
+    let timeSpent = 10;
 
     // Pre-load by scrolling
     await Api.scrollPageDown();
     timeSpent += 10;
 
-    const postLinks = await browser.$$(Selectors.explorePagePostLink);
-    for (const postLink of postLinks) {
-      await postLink.scrollIntoView(Random.getScrollIntoViewParams());
-      await waiting(2000);
-      timeSpent += 2;
-      if (timeSpent > durationSeconds) {
-        break;
+    try {
+      const postLinks = await browser.$$(Selectors.explorePagePostLink);
+      for (const postLink of postLinks) {
+        await postLink.scrollIntoView(Random.getScrollIntoViewParams());
+        await waiting(2000);
+        timeSpent += 2;
+        if (timeSpent > durationSeconds) {
+          await postLink.click();
+          await waiting(5000);
+          if (Random.coinToss(90)) {
+            console.info('Liking post in explore page...');
+            if (!config.isBrowseOnlyMode) {
+              const heartButton = await browser.$(Selectors.postHeartButton);
+              if (await heartButton.isExisting()) {
+                await heartButton.click();
+              }
+            }
+            await waiting(4000);
+            await Api.verifyActionBlocked();
+          }
+          break;
+        }
       }
+    } catch (e) {
+      console.info('Error occurred when browsing explore feed', e);
+      await browser.saveScreenshot('./error_explore_feed_browse.png');
     }
     const endTimeMs = Date.now();
     console.info('Done browsing. Time spent:', Math.round((endTimeMs - startTimeMs)/1000));
@@ -282,6 +300,7 @@ const Api = {
     // one of them successfully found?
     const isActionBlocked = !actionBlockedPopup.error || !actionBlockedTempPopup.error;
     if (isActionBlocked) {
+      console.info(new Date().toLocaleString(), 'Error. Action Blocked. Bot Detected.');
       // First try to click the OK buttons
       const okButton = await browser.$('=OK');
       const ignoreButton = await browser.$('=Ignore');
@@ -292,7 +311,7 @@ const Api = {
       }
       // Log, pause, throw
       await browser.saveScreenshot('./error_action_blocked.png');
-      await waiting(30 * 60 * 1000); // 30 minutes
+      await waiting(40 * 60 * 1000); // 40 minutes
       throw new Error('Action Blocked');
     }
   },
@@ -303,20 +322,25 @@ const Api = {
       // For mobile web the search is only in explore page
       await Api.navigate(Url.exploreUrl, 6000);
     }
-    const searchInput = await browser.$(Selectors.searchInput);
-    await searchInput.click();
-    await waiting(2000);
-    await Api.typeKeys(['#', ...hashtag.split('')]);
-    await waiting(5000);
-    const searchResult = await browser.$(`a[href="/explore/tags/${hashtag}/"]`);
-    if (await searchResult.isExisting()) {
-      await searchResult.click();
-      await Api.afterNavigate(8000);
-    } else {
-      console.info('Could not click search result', e);
-      await Api.navigate(Url.getHashtagUrl(hashtag));
+    try {
+      const searchInput = await browser.$(Selectors.searchInput);
+      await searchInput.click();
+      await waiting(2000);
+      await Api.typeKeys(['#', ...hashtag.split('')]);
+      await waiting(5000);
+      const searchResult = await browser.$(`a[href="/explore/tags/${hashtag}/"]`);
+      if (await searchResult.isExisting()) {
+        await searchResult.click();
+        await Api.afterNavigate(8000);
+      } else {
+        console.info('Could not click search result', e);
+        await Api.navigate(Url.getHashtagUrl(hashtag));
+      }
+    } catch (e) {
+      console.info('Error occurred when navigating to hashtag', e);
+      await browser.saveScreenshot('./error_hashtag_navigation.png');
     }
-
+    
     // Now we are at the hashtag explore page
     const recentPosts = (await browser.$$(Selectors.explorePagePostLink)).slice(0, 3);
     const targetPost = Random.pickArrayElement(recentPosts);
@@ -328,26 +352,74 @@ const Api = {
   },
 
   /** Makes the assumption that the post page popup is already opened */
-  async followAccountsFromPostLikers(accountsToFollow) {
+  async followAccountsFromPostLikers(numAccountsToFollow) {
     console.info('Opening list of post likers');
     const otherLikersButtonLink = await browser.$('button*=others');
     await otherLikersButtonLink.click();
     await waiting(5000);
 
+    const alreadyProcessed = new Set(Data.getProcessedAccountsList(/* modern */ true));
     // Now we see list of users who liked it - it is a recent photo so these users are 'engaged'
-    //const acountsToFollow
-    //console.info('likers');
-    // todo
-    
-    const alreadyProcessed = new Set(Data.getProcessedAccountsList());
-  // Update storage
-  //Data.persistNewlyProcessedAndFollowed(futureFollowList, qualityFutureFollowList);
-    let numberFollowed = 0;
+    const getLikers = async () => await browser.$$('.XfCBB'); // or .HVWg4 ?
+    let likerIndex = 1; // let's always skip the first one    
+    let followedSoFar = []; 
+    do {
+      const likers = await getLikers();
+      if (likerIndex >= likers.length) {
+        console.info('List exhausted');
+        break;
+      }
+      const liker = likers[likerIndex];
+      likerIndex += 1;
+      await liker.scrollIntoView(Random.getScrollIntoViewParams());
+      await waiting(3000);
 
-    if (config.isBrowseOnlyMode) {
-      return 8; // just approximate number to progress the program
+      try {
+        // Now look at this user
+        const username = await (await liker.$('a[title]')).getAttribute('title');
+        const actionButton = await liker.$('button');
+        const actionButtonText = await actionButton.getText();
+        if (actionButtonText !== 'Follow') {
+          console.info('Already following', username);
+          continue;
+        }
+        if (alreadyProcessed.has(username)) {
+          console.info('Already processed', username);
+          continue;
+        }
+        if (Random.coinToss(40)) {
+          console.info('Following', username);
+          if (!config.isBrowseOnlyMode) {
+            await actionButton.click();
+          }
+          await waiting(4000);
+          await Api.verifyActionBlocked();
+          followedSoFar.push({
+            id: null,
+            username
+          });
+        } else {
+          console.info('Randomly skipping', username);
+        }
+      } catch (e) {
+        console.info('Error occurred when looking at a liker in the list', e);
+        await browser.saveScreenshot('./error_post_likers_user_processing.png');
+      }
+    } while (followedSoFar.length < numAccountsToFollow);
+    
+    // Update storage
+    if (!config.isBrowseOnlyMode) {
+      Data.persistNewlyProcessedAndFollowed(followedSoFar, followedSoFar, /* modern */ true);
     }
-    return numberFollowed;
+    return followedSoFar;
+  },
+
+  async visitUserFeed(username) {
+    await Api.navigate(Url.getUserPageUrl(username), 6000);
+    await Api.scrollPageDown();
+    // TODO: we can like one or two posts in the future
+    // - BUT careful - they can be a  PRIVATE profile in the requested state!
+    await waiting(5000);
   },
 
   async verifyUserPageDataAccess(username) {

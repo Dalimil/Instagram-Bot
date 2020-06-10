@@ -78,6 +78,7 @@ const Random = require('./src/shared/Random');
   } catch (e) {
     console.error('------------- Terminated with an error -----------');
     console.error(e);
+    await BrowserBot.takeErrorScreenshot();
   } finally {
     // No matter what error is thrown, we should terminate the processes correctly
     await BrowserBot.end();

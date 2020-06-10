@@ -4,7 +4,8 @@ const Data = {
   credentialsFile: './creds.json',
   cookieSessionFile: './session.json',
   futureUnfollowListFile: './data/future-unfollow.json',  
-  processedAccountsFile: './data/processed-accounts.json',
+  processedAccountsLegacyFile: './data/processed-accounts.json',
+  processedAccountsModernFile: './data/processed-accounts-modern.json',
   qualityListCollectionFile: './data/quality-accounts-collection.json',
   blacklistedMediaPosts: './data/blacklisted-media.json',
   unfollowByIdAccountsFile: './data/unfollow-by-id.json', // tracking future unfollow users who changed usernames
@@ -29,12 +30,17 @@ const Data = {
     fs.writeFileSync(Data.futureUnfollowListFile, JSON.stringify({ future_unfollow: data }, null, 2));
   },
 
-  getProcessedAccountsList() {
-    return JSON.parse(fs.readFileSync(Data.processedAccountsFile)).processed_accounts;
+  /* Modern is the new one where we only use usernames, not ids */
+  getProcessedAccountsList(modern = false) {
+    return JSON.parse(fs.readFileSync(modern ? Data.processedAccountsModernFile : Data.processedAccountsLegacyFile))
+      .processed_accounts;
   },
 
-  storeProcessedAccountsList(data) {
-    fs.writeFileSync(Data.processedAccountsFile, JSON.stringify({ processed_accounts: data }));
+  storeProcessedAccountsList(data, modern = false) {
+    fs.writeFileSync(
+      modern ? Data.processedAccountsModernFile : Data.processedAccountsLegacyFile,
+      JSON.stringify({ processed_accounts: data })
+    );
   },
 
   getUnfollowByIdAccountList() {
@@ -63,15 +69,18 @@ const Data = {
     );
   },
 
-  persistNewlyProcessedAndFollowed(newlyProcessed, newlyFollowed) {
+  persistNewlyProcessedAndFollowed(newlyProcessed, newlyFollowed, modern = false) {
     const timestamp = Date.now();
 
     // Store in 'processed' so we don't process them in the future
-    Data.storeProcessedAccountsList([
-      ...Data.getProcessedAccountsList(),
-      ...newlyProcessed.map(acc => acc.id),
-    ]);
-    // Store in 'unfollow' so that we unfollow them after 3 days
+    Data.storeProcessedAccountsList(
+      [
+        ...Data.getProcessedAccountsList(modern),
+        ...newlyProcessed.map(acc => modern ? acc.username : acc.id),
+      ],
+      modern
+    );
+    // Store in 'unfollow' so that we unfollow them after 7 days or so
     Data.storeFutureUnfollowList([
       ...Data.getFutureUnfollowList(),
       ...newlyFollowed.map(({ id, username }) => ({ userId: id, username, timestamp })),

@@ -63,16 +63,19 @@ exports.runFollowStrategy = async (targetHashtags, followRequestsCount = 40) => 
   let followedSoFar = 0;
 
   while (followedSoFar < followRequestsCount) {
-    // await Api.browseHomeFeed(/* durationSeconds */ 90);
+    // await Api.browseHomeFeed(/* durationSeconds */ Random.integerInRangeInclusive(80, 100));
 
     const hashtag = Random.pickArrayElement(targetHashtags);
     await Api.navigateToRecentHashtagPost(hashtag);
 
     const remainingToFollow = followRequestsCount - followedSoFar;
-    const toFollowNext = Math.min(remainingToFollow, Random.integerInRangeInclusive(5, 7)); // 5+(0/1/2)
-    followedSoFar += await Api.followAccountsFromPostLikers(toFollowNext);
+    const toFollowNext = Math.min(remainingToFollow, Random.integerInRangeInclusive(5, 7));
+    const accountsFollowed = await Api.followAccountsFromPostLikers(toFollowNext);
+    followedSoFar += accountsFollowed.length;
+    // Pick one, and visit their profile for a little bit
+    await Api.visitUserFeed(Random.pickArrayElement(accountsFollowed).username);
 
-    await Api.browseExploreFeed(/* durationSeconds */ 30);
+    await Api.browseExploreFeed(/* durationSeconds */ Random.integerInRangeInclusive(25, 35));
   }
   console.info(new Date().toLocaleString(), 'Completed main follow algorithm...');
 };
@@ -241,4 +244,9 @@ exports.runGetUntrackedFutureUnfollowAccounts = async (username, fixedFollowingL
   console.log(JSON.stringify(untrackedFutureUnfollows, null, 2));
   console.log('Accounts untracked:', untrackedFutureUnfollows.length);
   return untrackedFutureUnfollows;
+};
+
+exports.takeErrorScreenshot = async () => {
+  console.info('Saving error screenshot...');
+  await client.saveScreenshot(`./error_termination_${Random.integerInRange(11111, 99999)}.png`);
 };
