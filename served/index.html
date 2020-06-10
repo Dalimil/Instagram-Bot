@@ -71,7 +71,7 @@
                         status.innerHTML = finished.substring(0, finished.indexOf('\n'));
                         status.className = 'finished';
                     } else {
-                        status.innerHTML = 'RUNNING ' + ([...finalText.matchAll(/Following /g)].length*100/24.0).toFixed(1) + '%';
+                        status.innerHTML = 'RUNNING ' + ([...finalText.matchAll(/Following /g)].length).toFixed(0) + ' accounts';
                         status.className = 'running';
                     }
 
