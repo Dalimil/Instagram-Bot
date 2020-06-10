@@ -411,6 +411,7 @@ const Api = {
     if (!config.isBrowseOnlyMode) {
       Data.persistNewlyProcessedAndFollowed(followedSoFar, followedSoFar, /* modern */ true);
     }
+    console.log(JSON.stringify(followedSoFar, null, 2));
     return followedSoFar;
   },
 

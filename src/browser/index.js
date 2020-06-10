@@ -63,7 +63,7 @@ exports.runFollowStrategy = async (targetHashtags, followRequestsCount = 40) => 
   let followedSoFar = 0;
 
   while (followedSoFar < followRequestsCount) {
-    // await Api.browseHomeFeed(/* durationSeconds */ Random.integerInRangeInclusive(80, 100));
+    await Api.browseHomeFeed(/* durationSeconds */ Random.integerInRangeInclusive(80, 100));
 
     const hashtag = Random.pickArrayElement(targetHashtags);
     await Api.navigateToRecentHashtagPost(hashtag);
