@@ -42,7 +42,7 @@ const Random = require('./src/shared/Random');
     ;
     // One could also follow posts of pages but hashtag feeds seem to have more recent posts
     const targetHashtags = [
-      'venice', 'banff', 'vancouver', 'earthoutdoors',
+      'venice', 'banff', 'earthoutdoors',
       'neverstopexploring', 'sheexplores', 'travel', 'neverstopexploring',
       'stayandwander', 'awesomeearth', 'beautifuldestinations', 'ourplanetdaily',
       'liveoutdoors', 'modernoutdoors', 'earthpix', 'voyaged', 'adventure'
@@ -53,6 +53,7 @@ const Random = require('./src/shared/Random');
     if (isCompilationTest) {
       // no-op
       console.log("Node execution successful");
+      console.log('Coin tosses:', Array(10).fill().map(() => Random.coinToss(50)));
       process.exit();
     }
 

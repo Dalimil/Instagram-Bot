@@ -167,13 +167,13 @@ const Api = {
   },
 
   async browseHomeFeed(durationSeconds) {
-    console.info(new Date().toLocaleString(), 'Starting home feed browse...');
-    const startTimeMs = Date.now(); 
-    let timeSpent = 10;
+    console.info(new Date().toLocaleString(), 'Starting home feed browse for...', durationSeconds, 'seconds');
+    const startTimeMs = Date.now();
 
     // load home page
     await Api.navigate(Url.defaultUrl, 10 * 1000);
     await Api.dismissHomePageNotifications();
+    let timeSpent = 10;
 
     // load a few stories
     if (Random.coinToss(70)) {
@@ -188,7 +188,7 @@ const Api = {
     await Api.scrollPageDown(/* soft */ true);
     timeSpent += 10;
 
-    // Scroll down and like. Up to ~35s has passed at this point
+    // Scroll down and like. Up to ~45s has passed at this point
     try {
       const postHearts = await browser.$$(Selectors.postHeartButton);
       const commentHearts = await browser.$$(Selectors.commentHeartButton);
@@ -198,7 +198,7 @@ const Api = {
       const hearts = postHearts.concat(commentHearts);
       for (const heartButton of hearts) {
         await heartButton.scrollIntoView(Random.getScrollIntoViewParams());
-        if (Random.coinToss(30)) {
+        if (Random.coinToss(40)) {
           console.info('Liking a post');
           if (!config.isBrowseOnlyMode) {
             await heartButton.click();
@@ -277,6 +277,7 @@ const Api = {
             if (!config.isBrowseOnlyMode) {
               const heartButton = await browser.$(Selectors.postHeartButton);
               if (await heartButton.isExisting()) {
+                console.info('Clicking heart button');
                 await heartButton.click();
               }
             }
