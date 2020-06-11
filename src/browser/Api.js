@@ -129,7 +129,7 @@ const Api = {
         (elementsSelector, done) => {
           const getList = () => [...document.querySelectorAll(elementsSelector)];
           let listIndex = 0;
-          let scrollTicks = 6;
+          let scrollTicks = 5;
 
           let scrollingTask = setInterval(() => {
             const newList = getList();
@@ -153,8 +153,8 @@ const Api = {
     } else {
       const pageContainer = await browser.$(Selectors.pageContainer);
       await pageContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
-      await waiting(3000);
-      await pageContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      // await waiting(3000);
+      // await pageContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
       await waiting(5000);
     }
   },
@@ -190,33 +190,43 @@ const Api = {
     timeSpent += 10;
 
     // Scroll down and like. Up to ~45s has passed at this point
-    try {
-      const postAndCommentHearts = await browser.$$(Selectors.postHeartButton + ',' + Selectors.commentHeartButton);
-      console.info('Post and Comment hearts:', postAndCommentHearts.length);
-      for (const heartButton of postAndCommentHearts) {
+    const getPostAndCommentHearts = () => browser.$$(Selectors.postHeartButton + ',' + Selectors.commentHeartButton);
+    let heartIndex = 0; 
+    do {
+      const hearts = await getPostAndCommentHearts();
+      console.info('Post and Comment hearts:', hearts.length);
+      console.info('Heart index:', heartIndex);
+
+      if (heartIndex >= hearts.length) {
+        console.info('List exhausted');
+        break;
+      }
+      const heartButton = hearts[heartIndex];
+      heartIndex += 1;
+      try {
+        // scroll to it first
         await heartButton.scrollIntoView(Random.getScrollIntoViewParams());
         await waiting(2000);
         if (Random.coinToss(40)) {
-          console.info('Liking a post');
+          console.info('Liking the post/comment heart');
           if (!config.isBrowseOnlyMode) {
             await heartButton.click();
           }
           await waiting(4000);
           await Api.verifyActionBlocked();
-          timeSpent += 4;
+          timeSpent += 6;
         } else {
-          console.info('Not liking the post');
+          console.info('Not liking the post/comment heart');
         }
         await waiting(2000);
         timeSpent += 4;
-        if (timeSpent > durationSeconds) {
-          break; // end
-        }
+      } catch (e) {
+        console.info('Error occurred when liking home feed', e);
+        await browser.saveScreenshot('./error_home_feed_browse.png');
+        break;
       }
-    } catch (e) {
-      console.info('Error occurred when liking home feed', e);
-      await browser.saveScreenshot('./error_home_feed_browse.png');
-    }
+    } while(timeSpent < durationSeconds);
+    
     const endTimeMs = Date.now();
     console.info('Done browsing. Time spent:', Math.round((endTimeMs - startTimeMs)/1000), 'seconds');
   },
@@ -362,7 +372,7 @@ const Api = {
 
     const alreadyProcessed = new Set(Data.getProcessedAccountsList(/* modern */ true));
     // Now we see list of users who liked it - it is a recent photo so these users are 'engaged'
-    const getLikers = async () => await browser.$$('.XfCBB'); // or .HVWg4 ?
+    const getLikers = () => browser.$$('.XfCBB'); // or .HVWg4 ?
     let likerIndex = 1; // let's always skip the first one    
     let followedSoFar = []; 
     do {
@@ -406,6 +416,7 @@ const Api = {
       } catch (e) {
         console.info('Error occurred when looking at a liker in the list', e);
         await browser.saveScreenshot('./error_post_likers_user_processing.png');
+        break;
       }
     } while (followedSoFar.length < numAccountsToFollow);
     
