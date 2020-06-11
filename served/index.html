@@ -25,8 +25,8 @@
         </style>
     </head>
     <body>
-        <button onClick="getContent('log8.txt')">7:10am, 3:10pm, 10:50pm</button> ...
-        <button onClick="getContent('log9.txt')">11:05am, 7:05pm</button> ...
+        <button onClick="getContent('log8.txt')">7:10 - 15:10 - 22:50</button> ...
+        <button onClick="getContent('log9.txt')">11:05 - 19:05</button> ...
         <button onClick="getWebdriverLogs('wdio.log')">webdriver.log</button><br>
         <hr>
         <main>
@@ -56,7 +56,7 @@
                 main.innerHTML = "loading...";
                 status.innerHTML = "";
                 errors.innerHTML = "";
-                fetch(filename).then(r => r.text()).then(text => {
+                fetch(filename + '?v=' + Math.random()).then(r => r.text()).then(text => {
                     main.innerHTML = text;
                     let a = main.innerHTML.replace(/(\r\n|\n|\r)/gm, '\n').replace(/\n\n/g, '\n');
                     a = a.substring(a.indexOf('Started at'))

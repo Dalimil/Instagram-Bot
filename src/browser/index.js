@@ -63,7 +63,8 @@ exports.end = async (logout = true) => {
  * Don't mix with unfollow - that's not human natural.
  */
 exports.runFollowStrategy = async (targetHashtags, followRequestsCount = 40) => {
-  console.info(new Date().toLocaleString(), 'Executing main follow algorithm with followRequestCount:', followRequestsCount);
+  console.info(new Date().toLocaleString(), 'Executing main follow algorithm...');
+  console.info('Target number of Follows:', followRequestsCount);
   let followedSoFar = 0;
 
   while (followedSoFar < followRequestsCount) {
@@ -244,8 +245,8 @@ exports.runGetUntrackedFutureUnfollowAccounts = async (username, fixedFollowingL
   const untrackedFutureUnfollows = followingList.filter(x =>
     !fixedFollowingList.includes(x) && !currentUnfollowList.includes(x)
   );
-  console.log(JSON.stringify(followingList, null, 2));
-  console.log(JSON.stringify(untrackedFutureUnfollows, null, 2));
+  console.log('Following list:', JSON.stringify(followingList, null, 2));
+  console.log('UntrackedFutureUnfollows', JSON.stringify(untrackedFutureUnfollows, null, 2));
   console.log('Accounts untracked:', untrackedFutureUnfollows.length);
   return untrackedFutureUnfollows;
 };
@@ -287,14 +288,12 @@ const runExperimentExample = async () => {
 
 exports.setUpExperiment = async () => {
   // await Api.login(Data.getCredentials());
-  // const inputData = JSON.parse(require('fs').readFileSync('./tmp.json'))
-  //   .data;
+  // const inputData = JSON.parse(require('fs').readFileSync('./tmp.json')).data;
   // await exports.runBrowseList(inputData); // ['pnwisbeautiful']);
   // const untrackedAccounts = await exports.runGetUntrackedFutureUnfollowAccounts(
   //   "dali_hiking",
   //   inputData
   // );
-  // console.log(untrackedAccounts);
   // await exports.runMassUnfollowFromList(inputData.slice(0, 30));
   
   await runExperimentExample();

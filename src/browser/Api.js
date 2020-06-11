@@ -167,7 +167,8 @@ const Api = {
   },
 
   async browseHomeFeed(durationSeconds) {
-    console.info(new Date().toLocaleString(), 'Starting home feed browse for...', durationSeconds, 'seconds');
+    console.info(new Date().toLocaleString(), 'Starting home feed browse...');
+    console.info('Target is:', durationSeconds, 'seconds');
     const startTimeMs = Date.now();
 
     // load home page
@@ -250,7 +251,8 @@ const Api = {
   },
 
   async browseExploreFeed(durationSeconds) {
-    console.info(new Date().toLocaleString(), 'Starting explore feed browse for...', durationSeconds, 'seconds');
+    console.info(new Date().toLocaleString(), 'Starting explore feed browse...');
+    console.info('Target is:', durationSeconds, 'seconds');
     const startTimeMs = Date.now(); 
 
     await Api.navigate(Url.exploreUrl, 6000);
