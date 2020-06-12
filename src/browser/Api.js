@@ -122,7 +122,7 @@ const Api = {
    * Without it it just moves the entire page to scroll bottom.
    */
   async scrollPageDown(soft = false) {
-    console.info('Scrolling down... Soft:', soft);
+    console.info('Scrolling down... (soft:', soft, ')');
     if (soft) {
       await browser.setTimeout({ 'script': 10 * 60 * 1000 }); // 10 minutes
       await browser.executeAsync(
@@ -194,8 +194,7 @@ const Api = {
     let heartIndex = 0; 
     do {
       const hearts = await getPostAndCommentHearts();
-      console.info('Post and Comment hearts:', hearts.length);
-      console.info('Heart index:', heartIndex);
+      console.info('Heart index:', heartIndex, '/', hearts.length);
 
       if (heartIndex >= hearts.length) {
         console.info('List exhausted');
@@ -208,7 +207,7 @@ const Api = {
         await heartButton.scrollIntoView(Random.getScrollIntoViewParams());
         await waiting(2000);
         if (Random.coinToss(40)) {
-          console.info('Liking the post/comment heart');
+          console.info('Liking the post/comment heart...');
           if (!config.isBrowseOnlyMode) {
             await heartButton.click();
           }
@@ -216,7 +215,7 @@ const Api = {
           await Api.verifyActionBlocked();
           timeSpent += 6;
         } else {
-          console.info('Not liking the post/comment heart');
+          console.info('Skipping...');
         }
         await waiting(2000);
         timeSpent += 4;
@@ -262,7 +261,7 @@ const Api = {
 
   async browseExploreFeed(durationSeconds) {
     console.info(new Date().toLocaleString(), 'Starting explore feed browse...');
-    console.info('Target is:', durationSeconds, 'seconds');
+    console.info('Browse target time is:', durationSeconds, 'seconds');
     const startTimeMs = Date.now(); 
 
     await Api.navigate(Url.exploreUrl, 6000);
@@ -365,7 +364,7 @@ const Api = {
 
   /** Makes the assumption that the post page popup is already opened */
   async followAccountsFromPostLikers(numAccountsToFollow) {
-    console.info('Opening list of post likers');
+    console.info('Opening list of likers - follow target count:', numAccountsToFollow);
     const otherLikersButtonLink = await browser.$('button*=others');
     await otherLikersButtonLink.click();
     await waiting(5000);
@@ -400,7 +399,7 @@ const Api = {
           continue;
         }
         if (Random.coinToss(40)) {
-          console.info('Following', username);
+          console.info('Following', username, '...');
           if (!config.isBrowseOnlyMode) {
             await actionButton.click();
           }
@@ -411,7 +410,7 @@ const Api = {
             username
           });
         } else {
-          console.info('Randomly skipping', username);
+          console.info(':> skipping', username);
         }
       } catch (e) {
         console.info('Error occurred when looking at a liker in the list', e);
@@ -424,16 +423,21 @@ const Api = {
     if (!config.isBrowseOnlyMode) {
       Data.persistNewlyProcessedAndFollowed(followedSoFar, followedSoFar, /* modern */ true);
     }
-    console.log('Followed accounts:', JSON.stringify(followedSoFar, null, 2));
+    console.log('Followed accounts:', followedSoFar.length, JSON.stringify(followedSoFar, null, 2));
     return followedSoFar;
   },
 
-  async visitUserFeed(username) {
+  async visitUserFeed(username, interactWithPosts = false) {
+    console.info('Visiting user feed of', username, '...');
     await Api.navigate(Url.getUserPageUrl(username), 6000);
     await Api.scrollPageDown();
-    // TODO: we can like one or two posts in the future
-    // - BUT careful - they can be a  PRIVATE profile in the requested state!
     await waiting(5000);
+
+    if (interactWithPosts) {
+      // TODO: we can like one or two posts in the future
+      // - BUT careful - they can be a  PRIVATE profile in the requested state!
+    }
+    console.info('Done browsing user feed');
   },
 
   async verifyUserPageDataAccess(username) {
@@ -682,7 +686,17 @@ const Api = {
     return accounts.slice(0, numAccounts);
   },
 
-  async getUserFollowing(username) {
+  async unfollowUsersFromPersonalProfilePage(list) {
+    // TODO: click following, click each button next to the people I'm following
+
+    // also consider: it's going to be really hard getting to the ones that were followed 8 days ago, because
+    // they are buried down in the list - maybe we should instead just try to unfollow everyone
+    // that is on the future unfollow list - no matter the age
+
+    // Also, to keep the balance, we might need to run this for an entire week
+  },
+
+  async getUserFollowingList(username) {
     console.info('Retrieving user following list...');
     
     await Api.navigate(Url.getUserPageUrl(username));

@@ -81,6 +81,7 @@ exports.runFollowStrategy = async (targetHashtags, followRequestsCount = 40) => 
     await Api.visitUserFeed(Random.pickArrayElement(accountsFollowed).username);
 
     await Api.browseExploreFeed(/* durationSeconds */ Random.integerInRangeInclusive(25, 35));
+    console.info(''); // blank line
   }
   console.info(new Date().toLocaleString(), 'Completed main follow algorithm...');
 };
@@ -176,11 +177,19 @@ exports.runMassUnfollowStrategy = async (unfollowLimit) => {
 
   // Unfollow
   console.info(`Accounts to be unfollowed: ${toUnfollow.length}`);
-  // TODO:
-  // go to user page, click following, click each button next to the people I'm following
-  
-  // Update storage
-  Data.storeFutureUnfollowList(toKeep);
+  if (toUnfollow >= 0) {
+    console.info('First browsing a little...');
+    await Api.browseHomeFeed(/* durationSeconds */ Random.integerInRangeInclusive(50, 70));
+
+    const myUsername = Data.getCredentials().username;
+    await Api.visitUserFeed(myUsername, /* interactWithPosts */ false);
+    await Api.unfollowUsersFromPersonalProfilePage(toUnfollow);
+    
+    // Update storage
+    Data.storeFutureUnfollowList(toKeep);
+  } else {
+    console.info('Nobody to unfollow. Aborting...');
+  }
 
   console.info(new Date().toLocaleString(), 'Completed mass unfollow algorithm.');
 };
@@ -196,7 +205,7 @@ exports.runLegacyMassUnfollowStrategy = async (unfollowLimit) => {
   for (const [index, account] of toUnfollow.entries()) {
     console.info(`Processing ${(index + 1)}/${toUnfollow.length}`);
     const success = await Api.unfollowUser(account.username);
-    if (!success) {
+    if (!success && account.userId) {
       const newUsername = await Api.getUsernameFromUserId(account.userId);
       console.log('New username: ', newUsername);
       if (newUsername) {
@@ -240,7 +249,7 @@ exports.runBrowseList = async (usernameList) => {
 // following list (the list of usernames that I actually want to follow) and also
 // subtracts the accounts that are actually tracked
 exports.runGetUntrackedFutureUnfollowAccounts = async (username, fixedFollowingList) => {
-  const followingList = await Api.getUserFollowing(username);
+  const followingList = await Api.getUserFollowingList(username);
   const currentUnfollowList = Data.getFutureUnfollowList().map(acc => acc.username);
   const untrackedFutureUnfollows = followingList.filter(x =>
     !fixedFollowingList.includes(x) && !currentUnfollowList.includes(x)
