@@ -36,15 +36,15 @@ const Random = require('./src/shared/Random');
   const isExperimentMode = commandArg === '--experiment';
   const isCompilationTest = commandArg === '--test';
   const followNumberTarget = 
-    (process.argv.includes('--lightweight') ? 19 : 19) +
-    Random.integerInRangeInclusive(-2, 2);
+    (process.argv.includes('--lightweight') ? 23 : 23) +
+    Random.integerInRangeInclusive(-3, 3);
   ;
   // One could also follow posts of pages but hashtag feeds seem to have more recent posts
   const targetHashtags = [
-    'venice', 'banff', 'earthoutdoors',
-    'neverstopexploring', 'sheexplores', 'travel', 'neverstopexploring',
+    'venice', 'earthoutdoors',
+    'neverstopexploring', 'sheexplores', 'neverstopexploring',
     'stayandwander', 'awesomeearth', 'beautifuldestinations', 'ourplanetdaily',
-    'liveoutdoors', 'modernoutdoors', 'earthpix', 'voyaged', 'adventure'
+    'liveoutdoors', 'modernoutdoors', 'earthpix', 'voyaged'
   ];
 
   try {
