@@ -366,14 +366,15 @@ const Api = {
   async followAccountsFromPostLikers(numAccountsToFollow) {
     console.info('Opening list of likers - follow target count:', numAccountsToFollow);
     const otherLikersButtonLink = await browser.$('button*=others');
+    await otherLikersButtonLink.waitForExist({ timeout: 30000 }); // wait 30s for this if needed
     await otherLikersButtonLink.click();
-    await waiting(5000);
+    await waiting(8000);
 
     const alreadyProcessed = new Set(Data.getProcessedAccountsList(/* modern */ true));
     // Now we see list of users who liked it - it is a recent photo so these users are 'engaged'
     const getLikers = () => browser.$$('.XfCBB'); // or .HVWg4 ?
     let likerIndex = 1; // let's always skip the first one    
-    let followedSoFar = []; 
+    let followedSoFar = [];
     do {
       const likers = await getLikers();
       if (likerIndex >= likers.length) {
