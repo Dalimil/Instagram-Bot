@@ -177,7 +177,7 @@ const Api = {
     let timeSpent = 10;
 
     // load a few stories
-    if (Random.coinToss(70)) {
+    if (Random.coinToss(60)) {
       const storiesDuration = Random.integerInRange(15, 25);
       const success = await Api.browseStories(storiesDuration);
       timeSpent += success ? storiesDuration : 5;
@@ -198,6 +198,13 @@ const Api = {
 
       if (heartIndex >= hearts.length) {
         console.info('List exhausted');
+        if (hearts.length === 0) {
+          console.info('Error: Something went wrong and no hearts were found.');
+          await browser.saveScreenshot('./error_no_hearts_found.png');
+          // reset
+          await Api.navigate(Url.defaultUrl, 10 * 1000);
+          await Api.dismissHomePageNotifications();
+        }
         break;
       }
       const heartButton = hearts[heartIndex];
@@ -245,6 +252,9 @@ const Api = {
         await waiting(durationSeconds * 1000);
         const storyCloseButton = await browser.$(Selectors.storyCloseButton);
         await storyCloseButton.click();
+        // Check if stories closed correctly -  wait for the button to not exist
+        await waiting(1000);
+        await storyCloseButton.waitForExist({ timeout: 20000, reverse: true });
       }
     } catch (e) {
       console.info('Failed loading stories', e);
@@ -353,8 +363,18 @@ const Api = {
     }
     
     // Now we are at the hashtag explore page
-    const recentPosts = (await browser.$$(Selectors.explorePagePostLink)).slice(0, 3);
-    const targetPost = Random.pickArrayElement(recentPosts);
+    console.info('Finding a post that is not a video');
+    const recentPosts = (await browser.$$(Selectors.explorePagePostLink)).slice(0, 6);
+    const recentImagePosts = [];
+    for (const recentPost of recentPosts) {
+      const isVideo = await recentPost.$('[aria-label=Video]');
+      if (isVideo.error) {
+        // not a video
+        recentImagePosts.push(recentPost);
+      }
+    }
+    console.info('Found', recentImagePosts.length, 'non video posts');
+    const targetPost = Random.pickArrayElement(recentImagePosts);
 
     await targetPost.scrollIntoView(Random.getScrollIntoViewParams());
     await targetPost.click();
@@ -704,7 +724,7 @@ const Api = {
     const followingButton = await browser.$('a*=following');
     await followingButton.click();
     const listNodeSelector = '.isgrP';
-    await browser.waitForExist(listNodeSelector);
+    await browser.waitForExist(listNodeSelector); // todo error: run function on selector
     await waiting(2000);
     await browser.setTimeout({ 'script': 20 * 60 * 1000 }); // 20 minutes
     const followingList = await browser
@@ -751,7 +771,7 @@ const Api = {
     const followButton = await browser.$(Selectors.followButton);
     await followButton.click();
     await browser
-      .waitForExist(Selectors.followingButton, 15000)
+      .waitForExist(Selectors.followingButton, 15000) // todo error: run function on selector
       .catch(async (e) => {
         if (e.type == 'WaitUntilTimeoutError') {
           console.info('Missing follow confirmation indicator for', username, ' - refreshing...');
@@ -790,12 +810,12 @@ const Api = {
       try {
         const followingButton = await browser.$(Selectors.followingButton);
         await followingButton.click(); // click 'Following' to unfollow
-        await browser.waitForExist(Selectors.unfollowButton, 9000);
+        await browser.waitForExist(Selectors.unfollowButton, 9000); //  todo error: run function on selector
         await waiting(5000);
 
         const unfollowButton = await browser.$(Selectors.unfollowButton);
         await unfollowButton.click(); // click 'Unfollow' inside the pop-up dialog
-        await browser.waitForExist(Selectors.followingButton, 15000, /* reverse */ true);
+        await browser.waitForExist(Selectors.followingButton, 15000, /* reverse */ true); //  todo error: run function on selector
         await waiting(8000);
       } catch (err) {
         console.info('Error when unfollowing.', username, err);
