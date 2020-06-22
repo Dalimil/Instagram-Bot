@@ -251,13 +251,14 @@ const Api = {
         await story.click();
         await waiting(durationSeconds * 1000);
         const storyCloseButton = await browser.$(Selectors.storyCloseButton);
+        await storyCloseButton.waitForClickable({ timeout: 8000 });
         await storyCloseButton.click();
         // Check if stories closed correctly -  wait for the button to not exist
         await waiting(1000);
         await storyCloseButton.waitForExist({ timeout: 20000, reverse: true });
       }
     } catch (e) {
-      console.info('Failed loading stories', e);
+      console.info('Error: Failed loading stories', e);
       await browser.saveScreenshot('./error_stories_browse.png');
 
       // reset

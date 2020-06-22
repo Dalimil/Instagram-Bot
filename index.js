@@ -36,7 +36,7 @@ const Random = require('./src/shared/Random');
   const isExperimentMode = commandArg === '--experiment';
   const isCompilationTest = commandArg === '--test';
   const followNumberTarget = 
-    (process.argv.includes('--lightweight') ? 26 : 26) +
+    (process.argv.includes('--lightweight') ? 30 : 30) +
     Random.integerInRangeInclusive(-3, 3);
   ;
   // One could also follow posts of pages but hashtag feeds seem to have more recent posts
