@@ -76,9 +76,11 @@ exports.runFollowStrategy = async (targetHashtags, followRequestsCount = 40) => 
     const remainingToFollow = followRequestsCount - followedSoFar;
     const toFollowNext = Math.min(remainingToFollow, Random.integerInRangeInclusive(5, 7));
     const accountsFollowed = await Api.followAccountsFromPostLikers(toFollowNext);
-    followedSoFar += accountsFollowed.length;
-    // Pick one, and visit their profile for a little bit
-    await Api.visitUserFeed(Random.pickArrayElement(accountsFollowed).username);
+    if (accountsFollowed.length > 0) {
+      followedSoFar += accountsFollowed.length;
+      // Pick one, and visit their profile for a little bit
+      await Api.visitUserFeed(Random.pickArrayElement(accountsFollowed).username);
+    }
 
     await Api.browseExploreFeed(/* durationSeconds */ Random.integerInRangeInclusive(25, 35));
     console.info(''); // blank line
