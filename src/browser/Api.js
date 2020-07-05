@@ -804,9 +804,15 @@ const Api = {
           console.info('Unfollowing', username, '...');
           if (!config.isBrowseOnlyMode) {
             await actionButton.click();
+            await waiting(4000);
+            await Api.verifyActionBlocked();
+
+            const unfollowButton = await browser.$(Selectors.unfollowButton);
+            await unfollowButton.waitForClickable({ timeout: 8000 });
+            await unfollowButton.click();
+            await waiting(4000);
+            await Api.verifyActionBlocked();
           }
-          await waiting(4000);
-          await Api.verifyActionBlocked();
           unfollowedSoFar.push(username);
         } else {
           // 15% account skip chance
