@@ -161,6 +161,19 @@ const Api = {
     }
   },
 
+  async scrollPageToTop() {
+    const pageContainer = await browser.$(Selectors.pageContainer);
+    await pageContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    await waiting(3000);
+
+    // Try again using window instead
+    await browser.executeAsync(done => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      done();
+    });
+    await waiting(3000);
+  },
+
   async typeKeys(characters) {
     for (const character of characters) {
       await browser.keys(character);
@@ -717,16 +730,10 @@ const Api = {
 
     const myUsername = Data.getCredentials().username;
     await Api.visitUserFeed(myUsername, /* interactWithPosts */ false);
-    
-    // Scroll to top
-    await browser.executeAsync(done => {
-      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-      done();
-    });
+    await Api.scrollPageToTop();
+
     // First get the button leading to the list of people I'm following
     const followingButton = await browser.$(Selectors.followingListButton);
-    await followingButton.scrollIntoView(Random.getScrollIntoViewParams());
-    await waiting(2000);
     await followingButton.click();
     await waiting(8000);
 
@@ -753,6 +760,10 @@ const Api = {
       const followingList = await getFollowing();
       if (listIndex >= followingList.length) {
         console.info('List exhausted');
+        if (followingList.length === 0) {
+          console.info('List with accounts not loaded.');
+          await browser.saveScreenshot('./error_following_list_not_loaded.png');
+        }
         if (listIndex < 10) {
           console.info('Suspiciously short list, trying to force scroll...');
           await browser.executeAsync(done => {
