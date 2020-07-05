@@ -380,6 +380,7 @@ const Api = {
     const targetPost = Random.pickArrayElement(recentImagePosts);
 
     await targetPost.scrollIntoView(Random.getScrollIntoViewParams());
+    await waiting(2000);
     await targetPost.click();
     await waiting(5000);
     console.info('Hashtag post opened');
@@ -710,16 +711,22 @@ const Api = {
     return accounts.slice(0, numAccounts);
   },
 
-
+  /** Opens the popup with following list on your profile page */
   async openMyProfileFollowingList() {
     console.info('Navigating to personal profile page...');
 
     const myUsername = Data.getCredentials().username;
     await Api.visitUserFeed(myUsername, /* interactWithPosts */ false);
     
+    // Scroll to top
+    await browser.executeAsync(done => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      done();
+    });
     // First get the button leading to the list of people I'm following
     const followingButton = await browser.$(Selectors.followingListButton);
     await followingButton.scrollIntoView(Random.getScrollIntoViewParams());
+    await waiting(2000);
     await followingButton.click();
     await waiting(8000);
 

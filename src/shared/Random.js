@@ -35,7 +35,7 @@ const Random = {
     },
 
     getScrollIntoViewParams() {
-        const verticalOptions = ['center', 'center', 'center', 'start', 'start', 'end', 'nearest'];
+        const verticalOptions = ['center', 'center', 'center', 'center', 'start', 'start', 'start', 'end', 'nearest'];
         const verticalOption = Random.pickArrayElement(verticalOptions);
         return { behavior: 'smooth', block: verticalOption };
     }
