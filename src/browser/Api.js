@@ -11,7 +11,7 @@ const Selectors = {
   followingButton: '[aria-label="Following"]',
   unfollowButton: 'button*=Unfollow',
   followingListButton: 'a*=following',
-  accountInAccountList:  '.XfCBB', // or .HVWg4 ?
+  accountInAccountList: '.XfCBB', // or .HVWg4 ?
   notificationPromptButton: 'button=Not Now',
   homeScreenPromptButton: 'button=Cancel',
   searchInput: 'input[placeholder=Search]',
@@ -739,13 +739,23 @@ const Api = {
     const getFollowing = () => browser.$$(Selectors.accountInAccountList);
     let listIndex = 1; // let's always skip the first one
     const unfollowedSoFar = [];
-    const unfollowListSet = new Set(unfollowList.map(acc => acc.account));
+    const unfollowListSet = new Set(unfollowList.map(acc => acc.username));
     const permanentFollowingList = new Set(Data.getPermanentFollowingList());
     const notTracked = [];
     do {
       const followingList = await getFollowing();
       if (listIndex >= followingList.length) {
         console.info('List exhausted');
+        if (listIndex < 10) {
+          console.info('Suspiciously short list, trying to force scroll...');
+          await browser.executeAsync(done => {
+            const listNode = document.querySelector('.isgrP');
+            listNode.scrollBy({ left: 0, top: 400, behavior: 'smooth' });
+            done();
+          });
+          await waiting(9000);
+          continue;
+        }
         break;
       }
       const account = followingList[listIndex];
@@ -794,10 +804,11 @@ const Api = {
     console.log('Unfollowed accounts: ', unfollowedSoFar.length, JSON.stringify(unfollowedSoFar, null, 2));
     console.log('Not tracked:', notTracked.length, JSON.stringify(notTracked, null, 2))
 
-    const newUnfollowList = unfollowedSoFar.filter(acc => !unfollowedSoFar.includes(acc.username));
+    const newUnfollowList = unfollowList.filter(acc => !unfollowedSoFar.includes(acc.username));
     return newUnfollowList;
   },
 
+  /** DEPRECATED */
   async getUserFollowingList() {
     console.info('Retrieving user following list...');
     await Api.openMyProfileFollowingList();
