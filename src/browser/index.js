@@ -74,7 +74,7 @@ exports.runFollowStrategy = async (targetHashtags, followRequestsCount = 40) => 
     await Api.navigateToRecentHashtagPost(hashtag);
 
     const remainingToFollow = followRequestsCount - followedSoFar;
-    const toFollowNext = Math.min(remainingToFollow, Random.integerInRangeInclusive(5, 7));
+    const toFollowNext = Math.min(remainingToFollow, Random.integerInRangeInclusive(5, 8));
     const accountsFollowed = await Api.followAccountsFromPostLikers(toFollowNext);
     if (accountsFollowed.length > 0) {
       followedSoFar += accountsFollowed.length;
@@ -170,16 +170,18 @@ exports.runLegacyFollowStrategy = async (initialTarget, followRequestsCount = 40
 /**
  * UNFOLLOW CYCLE STRATEGY
  * 40/50 per hour directly from the profile page. Count same as follow action (same limits)
- * Maybe 4x per day (same as follow cycles)
+ * Maybe 5x per day (same as follow cycles).
+ * Since we have a few weeks of just follow followed by several weeks of just unfollow,
+ * we can simply unfollow everyone without time filtering.
  */
-exports.runMassUnfollowStrategy = async (unfollowLimit) => {
+exports.runUnfollowStrategy = async (unfollowRequestsCount = 40) => {
   console.info(new Date().toLocaleString(), 'Executing mass unfollow algorithm...');
 
-  const { toKeep, toUnfollow } = Algorithm.getCurrentUnfollowLists(unfollowLimit);
+  const unfollowList = Data.getFutureUnfollowList();
 
   // Unfollow
-  console.info(`Accounts to be unfollowed: ${toUnfollow.length}`);
-  if (toUnfollow >= 0) {
+  console.info(`Accounts to be unfollowed: ${unfollowList.length}`);
+  if (unfollowList.length >= 0) {
     console.info('First browsing a little...');
     await Api.browseHomeFeed(/* durationSeconds */ Random.integerInRangeInclusive(50, 70));
 
@@ -196,7 +198,7 @@ exports.runMassUnfollowStrategy = async (unfollowLimit) => {
   console.info(new Date().toLocaleString(), 'Completed mass unfollow algorithm.');
 };
 
-exports.runLegacyMassUnfollowStrategy = async (unfollowLimit) => {
+exports.runLegacyUnfollowStrategy = async (unfollowLimit) => {
   console.info(new Date().toLocaleString(), 'Executing legacy mass unfollow algorithm...');
   await Api.waitPerUser(20); // pause for safety
 

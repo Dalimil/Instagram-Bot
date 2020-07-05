@@ -25,7 +25,7 @@ const Random = require('./src/shared/Random');
  * Day 30+: Follow 40/h and up to 250/day
  * 
  * Task Scheduler should not start your task at 2pm exactly, but randomly between 1pm and 3pm
- * Way to ramp up - 5 triggers at 7am, 11am, 3pm, 7pm 11pm with random 30min start delay and 4 hour
+ * Way to ramp up - 5 triggers at 7am, 11am, 3pm, 7pm, 11pm with random 30min start delay and 4 hour
  * forced timeout with a weekly omission on Sunday.
  * 
  */
@@ -36,8 +36,8 @@ const Random = require('./src/shared/Random');
   const isExperimentMode = commandArg === '--experiment';
   const isCompilationTest = commandArg === '--test';
   const followNumberTarget = 
-    (process.argv.includes('--lightweight') ? 36 : 36) +
-    Random.integerInRangeInclusive(-3, 3);
+    (process.argv.includes('--lightweight') ? 40 : 40) +
+    Random.integerInRangeInclusive(-4, 4);
   ;
   // One could also follow posts of pages but hashtag feeds seem to have more recent posts
   const targetHashtags = [
@@ -64,7 +64,7 @@ const Random = require('./src/shared/Random');
     } else if (followMode) {
       await BrowserBot.runFollowStrategy(targetHashtags, followNumberTarget);
     } else if (unfollowMode) {
-      await BrowserBot.runMassUnfollow(followNumberTarget);
+      await BrowserBot.runUnfollowStrategy(followNumberTarget);
     }
   } catch (e) {
     console.error('------------- Terminated with an error -----------');
