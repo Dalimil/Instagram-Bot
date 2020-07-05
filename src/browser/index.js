@@ -175,27 +175,26 @@ exports.runLegacyFollowStrategy = async (initialTarget, followRequestsCount = 40
  * we can simply unfollow everyone without time filtering.
  */
 exports.runUnfollowStrategy = async (unfollowRequestsCount = 40) => {
-  console.info(new Date().toLocaleString(), 'Executing mass unfollow algorithm...');
+  console.info(new Date().toLocaleString(), 'Executing main unfollow algorithm...');
+  console.info('Target number of Unfollows:', unfollowRequestsCount);
 
   const unfollowList = Data.getFutureUnfollowList();
-
-  // Unfollow
   console.info(`Accounts to be unfollowed: ${unfollowList.length}`);
+
   if (unfollowList.length >= 0) {
     console.info('First browsing a little...');
     await Api.browseHomeFeed(/* durationSeconds */ Random.integerInRangeInclusive(50, 70));
 
-    const myUsername = Data.getCredentials().username;
-    await Api.visitUserFeed(myUsername, /* interactWithPosts */ false);
-    await Api.unfollowUsersFromPersonalProfilePage(toUnfollow);
-    
+    const updatedUnfollowList = await Api.unfollowUsersFromPersonalProfilePage(unfollowList, unfollowRequestsCount);  
     // Update storage
-    Data.storeFutureUnfollowList(toKeep);
+    Data.storeFutureUnfollowList(updatedUnfollowList);
   } else {
     console.info('Nobody to unfollow. Aborting...');
   }
 
-  console.info(new Date().toLocaleString(), 'Completed mass unfollow algorithm.');
+  await Api.browseExploreFeed(/* durationSeconds */ Random.integerInRangeInclusive(25, 35));
+
+  console.info(new Date().toLocaleString(), 'Completed main unfollow algorithm.');
 };
 
 exports.runLegacyUnfollowStrategy = async (unfollowLimit) => {
@@ -252,8 +251,8 @@ exports.runBrowseList = async (usernameList) => {
 // This function finds the full following list, and subtracts my fixed
 // following list (the list of usernames that I actually want to follow) and also
 // subtracts the accounts that are actually tracked
-exports.runGetUntrackedFutureUnfollowAccounts = async (username, fixedFollowingList) => {
-  const followingList = await Api.getUserFollowingList(username);
+exports.runGetUntrackedFutureUnfollowAccounts = async (fixedFollowingList) => {
+  const followingList = await Api.getUserFollowingList();
   const currentUnfollowList = Data.getFutureUnfollowList().map(acc => acc.username);
   const untrackedFutureUnfollows = followingList.filter(x =>
     !fixedFollowingList.includes(x) && !currentUnfollowList.includes(x)
@@ -304,7 +303,6 @@ exports.setUpExperiment = async () => {
   // const inputData = JSON.parse(require('fs').readFileSync('./tmp.json')).data;
   // await exports.runBrowseList(inputData); // ['pnwisbeautiful']);
   // const untrackedAccounts = await exports.runGetUntrackedFutureUnfollowAccounts(
-  //   "dali_hiking",
   //   inputData
   // );
   // await exports.runMassUnfollowFromList(inputData.slice(0, 30));

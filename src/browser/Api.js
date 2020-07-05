@@ -10,6 +10,8 @@ const Selectors = {
   followButton: 'button*=Follow',
   followingButton: '[aria-label="Following"]',
   unfollowButton: 'button*=Unfollow',
+  followingListButton: 'a*=following',
+  accountInAccountList:  '.XfCBB', // or .HVWg4 ?
   notificationPromptButton: 'button=Not Now',
   homeScreenPromptButton: 'button=Cancel',
   searchInput: 'input[placeholder=Search]',
@@ -393,7 +395,7 @@ const Api = {
 
     const alreadyProcessed = new Set(Data.getProcessedAccountsList(/* modern */ true));
     // Now we see list of users who liked it - it is a recent photo so these users are 'engaged'
-    const getLikers = () => browser.$$('.XfCBB'); // or .HVWg4 ?
+    const getLikers = () => browser.$$(Selectors.accountInAccountList);
     let likerIndex = 1; // let's always skip the first one    
     let followedSoFar = [];
     do {
@@ -708,22 +710,89 @@ const Api = {
     return accounts.slice(0, numAccounts);
   },
 
-  async unfollowUsersFromPersonalProfilePage(list) {
-    // TODO: click following, click each button next to the people I'm following
 
-    // also consider: it's going to be really hard getting to the ones that were followed 8 days ago, because
-    // they are buried down in the list - maybe we should instead just try to unfollow everyone
-    // that is on the future unfollow list - no matter the age
+  async openMyProfileFollowingList() {
+    console.info('Navigating to personal profile page...');
 
-    // Also, to keep the balance, we might need to run this for an entire week
+    const myUsername = Data.getCredentials().username;
+    await Api.visitUserFeed(myUsername, /* interactWithPosts */ false);
+    
+    // First get the button leading to the list of people I'm following
+    const followingButton = await browser.$(Selectors.followingListButton);
+    await followingButton.scrollIntoView(Random.getScrollIntoViewParams());
+    await followingButton.click();
+    await waiting(8000);
+
+    console.info('Personal following list opened.');
   },
 
-  async getUserFollowingList(username) {
+  // Unfollow profiles: click following, click each button next to the people I'm following.
+  // It would be really hard getting to the ones that were followed 8 days ago, because
+  // they are buried down in the list, so best to just unfollow everyone regardless of age
+  async unfollowUsersFromPersonalProfilePage(unfollowList, unfollowRequestsCount) {
+    console.info('Unfollowing from personal page...');
+
+    // Navigate to personal profile and open the list first
+    await Api.openMyProfileFollowingList();
+
+    console.info('Starting browsing profiles to unfollow...');
+    const getFollowing = () => browser.$$(Selectors.accountInAccountList);
+    let listIndex = 1; // let's always skip the first one
+    const unfollowedSoFar = [];
+    const unfollowListSet = new Set(unfollowList.map(acc => acc.account));
+    do {
+      const followingList = await getFollowing();
+      if (listIndex >= followingList.length) {
+        console.info('List exhausted');
+        break;
+      }
+      const account = followingList[listIndex];
+      listIndex += 1;
+      await account.scrollIntoView(Random.getScrollIntoViewParams());
+      await waiting(3000);
+
+      try {
+        // Now look at this user
+        const username = await (await account.$('a[title]')).getAttribute('title');
+        const actionButton = await account.$('button');
+        const actionButtonText = await actionButton.getText();
+        if (!unfollowListSet.has(username)) {
+          console.info('Not tracked: :>>', username, '<<:');
+          continue;
+        }
+        if (actionButtonText !== 'Following') {
+          console.info('Account in list but no valid unfollow button', username);
+          await browser.saveScreenshot('./error_following_list_invalid_button.png');
+          continue;
+        }
+        if (Random.coinToss(85)) {
+          console.info('Unfollowing', username, '...');
+          if (!config.isBrowseOnlyMode) {
+            await actionButton.click();
+          }
+          await waiting(4000);
+          await Api.verifyActionBlocked();
+          unfollowedSoFar.push(username);
+        } else {
+          // 15% account skip chance
+          console.info(':> skipping', username);
+        }
+      } catch (e) {
+        console.info('Error occurred when looking at user in the list', e);
+        await browser.saveScreenshot('./error_following_list_user_processing.png');
+        break;
+      }
+    } while (unfollowedSoFar.length < unfollowRequestsCount);
+
+    console.log('Unfollowed accounts: ', unfollowedSoFar.length, JSON.stringify(unfollowedSoFar, null, 2));
+    const newUnfollowList = unfollowedSoFar.filter(acc => !unfollowedSoFar.includes(acc.username));
+    return newUnfollowList;
+  },
+
+  async getUserFollowingList() {
     console.info('Retrieving user following list...');
-    
-    await Api.navigate(Url.getUserPageUrl(username));
-    const followingButton = await browser.$('a*=following');
-    await followingButton.click();
+    await Api.openMyProfileFollowingList();
+
     const listNodeSelector = '.isgrP';
     await browser.waitForExist(listNodeSelector); // todo error: run function on selector
     await waiting(2000);
