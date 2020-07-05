@@ -9,6 +9,7 @@ const Data = {
   qualityListCollectionFile: './data/quality-accounts-collection.json',
   blacklistedMediaPosts: './data/blacklisted-media.json',
   unfollowByIdAccountsFile: './data/unfollow-by-id.json', // tracking future unfollow users who changed usernames
+  permanentFollowingListFile: './data/backup/my-following.json',
 
   getCredentials() {
     return JSON.parse(fs.readFileSync(Data.credentialsFile));
@@ -28,6 +29,10 @@ const Data = {
 
   storeFutureUnfollowList(data) {
     fs.writeFileSync(Data.futureUnfollowListFile, JSON.stringify({ future_unfollow: data }, null, 2));
+  },
+
+  getPermanentFollowingList() {
+    return JSON.parse(fs.readFileSync(Data.permanentFollowingListFile)).permanent_following;
   },
 
   /* Modern is the new one where we only use usernames, not ids */

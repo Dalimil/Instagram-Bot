@@ -740,6 +740,8 @@ const Api = {
     let listIndex = 1; // let's always skip the first one
     const unfollowedSoFar = [];
     const unfollowListSet = new Set(unfollowList.map(acc => acc.account));
+    const permanentFollowingList = new Set(Data.getPermanentFollowingList());
+    const notTracked = [];
     do {
       const followingList = await getFollowing();
       if (listIndex >= followingList.length) {
@@ -756,8 +758,13 @@ const Api = {
         const username = await (await account.$('a[title]')).getAttribute('title');
         const actionButton = await account.$('button');
         const actionButtonText = await actionButton.getText();
+        if (permanentFollowingList.has(username)) {
+          console.info(':> skipping', username, '(permanently following)');
+          continue;
+        }
         if (!unfollowListSet.has(username)) {
           console.info('Not tracked: :>>', username, '<<:');
+          notTracked.push(username);
           continue;
         }
         if (actionButtonText !== 'Following') {
@@ -785,6 +792,8 @@ const Api = {
     } while (unfollowedSoFar.length < unfollowRequestsCount);
 
     console.log('Unfollowed accounts: ', unfollowedSoFar.length, JSON.stringify(unfollowedSoFar, null, 2));
+    console.log('Not tracked:', notTracked.length, JSON.stringify(notTracked, null, 2))
+
     const newUnfollowList = unfollowedSoFar.filter(acc => !unfollowedSoFar.includes(acc.username));
     return newUnfollowList;
   },
