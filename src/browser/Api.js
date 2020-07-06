@@ -11,7 +11,8 @@ const Selectors = {
   followingButton: '[aria-label="Following"]',
   unfollowButton: 'button*=Unfollow',
   followingListButton: 'a*=following',
-  accountInAccountList: '.XfCBB', // or .HVWg4 ?
+  accountInAccountList: '.XfCBB', // sometimes it changes after list extended
+  accountInLongAccountList: '.wo9IH', // only when opening and scrolling my 'following' list further
   notificationPromptButton: 'button=Not Now',
   homeScreenPromptButton: 'button=Cancel',
   searchInput: 'input[placeholder=Search]',
@@ -758,8 +759,9 @@ const Api = {
     const notTracked = [];
     do {
       listIndex += 1;
-      const account = await browser.executeAsync((accountSelector, index, done) => {
-        const account = document.querySelectorAll(accountSelector)[index];
+      const account = await browser.executeAsync((accountSelector, accountSelectorLong, index, done) => {
+        const account = document.querySelectorAll(accountSelectorLong)[index] ||
+          document.querySelectorAll(accountSelector)[index];
         if (account) {
           account.scrollIntoView({ behavior: "smooth" });
           const username = account.querySelector('a[title]').getAttribute('title');
@@ -768,7 +770,7 @@ const Api = {
         } else {
           done(null)
         }
-      }, Selectors.accountInAccountList, listIndex);
+      }, Selectors.accountInAccountList, Selectors.accountInLongAccountList, listIndex);
       await waiting(3000);
 
       if (!account) {
@@ -794,8 +796,9 @@ const Api = {
       }
       if (Random.coinToss(85)) {
         console.info('Unfollowing', username, '...');
-        const success = await browser.executeAsync((accountSelector, index, done) => {
-          const account = document.querySelectorAll(accountSelector)[index];
+        const success = await browser.executeAsync((accountSelector, accountSelectorLong, index, done) => {
+          const account = document.querySelectorAll(accountSelectorLong)[index] ||
+            document.querySelectorAll(accountSelector)[index];
           const actionButton = account && account.querySelector('button');
           if (actionButton) {
             actionButton.click();
@@ -803,7 +806,7 @@ const Api = {
           } else {
             done(false);
           }
-        }, Selectors.accountInAccountList, listIndex);
+        }, Selectors.accountInAccountList, Selectors.accountInLongAccountList, listIndex);
 
         if (success) {
           await waiting(4000);
@@ -816,7 +819,7 @@ const Api = {
           await Api.verifyActionBlocked();
           unfollowedSoFar.push(username);
         } else {
-          console.info('Error occurred when looking at user in the list', e);
+          console.info('Error occurred when looking at user in the list');
           await browser.saveScreenshot('./error_following_list_user_processing.png');
         }
       } else {
