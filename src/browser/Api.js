@@ -506,7 +506,7 @@ const Api = {
       await browser.saveScreenshot('./error_capture_userDataTest_null.png');
       await waiting(120 * 1000);
     } else {
-      const testData = JSON.parse(userDataTest.value);
+      const testData = JSON.parse(userDataTest);
       if (!testData.data) {
         // _sharedData was not defined on the window
         console.log('User page not accessible.');
@@ -556,10 +556,10 @@ const Api = {
         Utils.decycle.toString()
       ).catch((e) => {
         console.error('Error in getUser: ', e);
-        return { value: JSON.stringify(null) };
+        return JSON.stringify(null);
       });
     await waiting(6000);
-    return JSON.parse(userData.value);
+    return JSON.parse(userData);
   },
 
   // Same as getUser but instead of navigating to user instagram page it uses the API
@@ -588,7 +588,7 @@ const Api = {
         Url.getHashtagApiUrl(hashtag),
       );
     await waiting(3000);
-    return hashtagData.value;
+    return hashtagData;
   },
 
   // Generic method to get data from this specific API
@@ -610,7 +610,7 @@ const Api = {
         query,
       );
     await waiting(5000);
-    return data.value;
+    return data;
   },
 
   // Get username's followers (first few) - working with pagination
@@ -768,7 +768,7 @@ const Api = {
         } else {
           done(null)
         }
-      }, Selectors.accountInAccountList, listIndex).value;
+      }, Selectors.accountInAccountList, listIndex);
       await waiting(3000);
 
       if (!account) {
@@ -803,7 +803,7 @@ const Api = {
           } else {
             done(false);
           }
-        }, Selectors.accountInAccountList, listIndex).value;
+        }, Selectors.accountInAccountList, listIndex);
 
         if (success) {
           await waiting(4000);
@@ -873,7 +873,7 @@ const Api = {
         listNodeSelector
       );
     await waiting(3000);
-    return followingList.value;
+    return followingList;
   },
 
   /* POST api methods */
