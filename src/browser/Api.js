@@ -751,77 +751,77 @@ const Api = {
     await Api.openMyProfileFollowingList();
 
     console.info('Starting browsing profiles to unfollow...');
-    const getFollowing = () => browser.$$(Selectors.accountInAccountList);
-    let listIndex = 1; // let's always skip the first one
+    let listIndex = 0;
     const unfollowedSoFar = [];
     const unfollowListSet = new Set(unfollowList.map(acc => acc.username));
     const permanentFollowingList = new Set(Data.getPermanentFollowingList());
     const notTracked = [];
     do {
-      const followingList = await getFollowing();
-      if (listIndex >= followingList.length) {
-        console.info('List exhausted');
-        if (followingList.length === 0) {
-          console.info('List with accounts not loaded.');
-          await browser.saveScreenshot('./error_following_list_not_loaded.png');
-        } else if (listIndex < 10) {
-          console.info('Suspiciously short list, trying to force scroll...');
-          await browser.executeAsync(done => {
-            const listNode = document.querySelector('.isgrP');
-            listNode.scrollBy({ left: 0, top: 400, behavior: 'smooth' });
-            done();
-          });
-          await waiting(9000);
-          continue;
-        }
-        break;
-      }
-      const account = followingList[listIndex];
       listIndex += 1;
-      await account.scrollIntoView(Random.getScrollIntoViewParams());
+      const account = await browser.executeAsync((accountSelector, index, done) => {
+        const account = document.querySelectorAll(accountSelector)[index];
+        if (account) {
+          account.scrollIntoView({ behavior: "smooth" });
+          const username = account.querySelector('a[title]').getAttribute('title');
+          const actionButtonText = account.querySelector('button').textContent;
+          done({ username, actionButtonText });
+        } else {
+          done(null)
+        }
+      }, Selectors.accountInAccountList, listIndex).value;
       await waiting(3000);
 
-      try {
-        // Now look at this user
-        const username = await (await account.$('a[title]')).getAttribute('title');
-        const actionButton = await account.$('button');
-        const actionButtonText = await actionButton.getText();
-        if (permanentFollowingList.has(username)) {
-          console.info(':> skipping', username, '(permanently following)');
-          continue;
-        }
-        if (!unfollowListSet.has(username)) {
-          console.info('Not tracked: :>>', username, '<<:');
-          notTracked.push(username);
-          continue;
-        }
-        if (actionButtonText !== 'Following') {
-          console.info('Account in list but no valid unfollow button', username);
-          await browser.saveScreenshot('./error_following_list_invalid_button.png');
-          continue;
-        }
-        if (Random.coinToss(85)) {
-          console.info('Unfollowing', username, '...');
-          if ((await account.isExisting()) && (await actionButton.isExisting()) && !config.isBrowseOnlyMode) {
-            await actionButton.click();
-            await waiting(4000);
-            await Api.verifyActionBlocked();
-
-            const unfollowButton = await browser.$(Selectors.unfollowButton);
-            await unfollowButton.waitForClickable({ timeout: 8000 });
-            await unfollowButton.click();
-            await waiting(4000);
-            await Api.verifyActionBlocked();
+      if (!account) {
+        console.info('Account in list not found');
+        await browser.saveScreenshot('./error_following_list_account_index_not_found.png');
+        continue;
+      }
+      const { username, actionButtonText } = account;
+      // Now look at this user
+      if (permanentFollowingList.has(username)) {
+        console.info(':> skipping', username, '(permanently following)');
+        continue;
+      }
+      if (!unfollowListSet.has(username)) {
+        console.info('Not tracked: :>>', username, '<<:');
+        notTracked.push(username);
+        continue;
+      }
+      if (actionButtonText !== 'Following') {
+        console.info('Account in list but no valid unfollow button', username);
+        await browser.saveScreenshot('./error_following_list_invalid_button.png');
+        continue;
+      }
+      if (Random.coinToss(85)) {
+        console.info('Unfollowing', username, '...');
+        const success = await browser.executeAsync((accountSelector, index, done) => {
+          const account = document.querySelectorAll(accountSelector)[index];
+          const actionButton = account && account.querySelector('button');
+          if (actionButton) {
+            actionButton.click();
+            done(true);
+          } else {
+            done(false);
           }
+        }, Selectors.accountInAccountList, listIndex).value;
+
+        if (success) {
+          await waiting(4000);
+          await Api.verifyActionBlocked();
+
+          const unfollowButton = await browser.$(Selectors.unfollowButton);
+          await unfollowButton.waitForClickable({ timeout: 8000 });
+          await unfollowButton.click();
+          await waiting(4000);
+          await Api.verifyActionBlocked();
           unfollowedSoFar.push(username);
         } else {
-          // 15% account skip chance
-          console.info(':> skipping', username);
+          console.info('Error occurred when looking at user in the list', e);
+          await browser.saveScreenshot('./error_following_list_user_processing.png');
         }
-      } catch (e) {
-        console.info('Error occurred when looking at user in the list', e);
-        await browser.saveScreenshot('./error_following_list_user_processing.png');
-        break;
+      } else {
+        // 15% account skip chance
+        console.info(':> skipping', username);
       }
     } while (unfollowedSoFar.length < unfollowRequestsCount);
 
