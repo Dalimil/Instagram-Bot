@@ -465,11 +465,13 @@ const Api = {
     return followedSoFar;
   },
 
-  async visitUserFeed(username, interactWithPosts = false) {
+  async visitUserFeed(username, scrollDown = true, interactWithPosts = false) {
     console.info('Visiting user feed of', username, '...');
     await Api.navigate(Url.getUserPageUrl(username), 6000);
-    await Api.scrollPageDown();
-    await waiting(5000);
+    if (scrollDown) {
+      await Api.scrollPageDown();
+      await waiting(5000);
+    }
 
     if (interactWithPosts) {
       // TODO: we can like one or two posts in the future
@@ -729,8 +731,7 @@ const Api = {
     console.info('Navigating to personal profile page...');
 
     const myUsername = Data.getCredentials().username;
-    await Api.visitUserFeed(myUsername, /* interactWithPosts */ false);
-    await Api.scrollPageToTop();
+    await Api.visitUserFeed(myUsername, /* scrollDown */ false, /* interactWithPosts */ false);
 
     // First get the button leading to the list of people I'm following
     const followingButton = await browser.$(Selectors.followingListButton);
@@ -763,8 +764,7 @@ const Api = {
         if (followingList.length === 0) {
           console.info('List with accounts not loaded.');
           await browser.saveScreenshot('./error_following_list_not_loaded.png');
-        }
-        if (listIndex < 10) {
+        } else if (listIndex < 10) {
           console.info('Suspiciously short list, trying to force scroll...');
           await browser.executeAsync(done => {
             const listNode = document.querySelector('.isgrP');

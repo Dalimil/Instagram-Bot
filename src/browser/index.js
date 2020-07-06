@@ -178,19 +178,30 @@ exports.runUnfollowStrategy = async (unfollowRequestsCount = 40) => {
   console.info(new Date().toLocaleString(), 'Executing main unfollow algorithm...');
   console.info('Target number of Unfollows:', unfollowRequestsCount);
 
-  const unfollowList = Data.getFutureUnfollowList();
-  console.info(`Accounts to be unfollowed: ${unfollowList.length}`);
+  console.info('First browsing a little...');
+  await Api.browseHomeFeed(/* durationSeconds */ Random.integerInRangeInclusive(50, 70));
 
-  if (unfollowList.length >= 0) {
-    console.info('First browsing a little...');
-    await Api.browseHomeFeed(/* durationSeconds */ Random.integerInRangeInclusive(50, 70));
-
-    const updatedUnfollowList = await Api.unfollowUsersFromPersonalProfilePage(unfollowList, unfollowRequestsCount);  
-    // Update storage
-    Data.storeFutureUnfollowList(updatedUnfollowList);
-  } else {
-    console.info('Nobody to unfollow. Aborting...');
-  }
+  let accountsUnfollowed = 0;
+  do {
+    const unfollowList = Data.getFutureUnfollowList();
+    console.info(`Accounts to be unfollowed: ${unfollowList.length}`);
+    if (unfollowList.length >= 0) {
+      const updatedUnfollowList =
+        await Api.unfollowUsersFromPersonalProfilePage(unfollowList, unfollowRequestsCount - accountsUnfollowed);
+      // Update storage
+      Data.storeFutureUnfollowList(updatedUnfollowList);
+      
+      let unfollowedCount = unfollowList.length - updatedUnfollowList.length;
+      if (unfollowedCount <= 0) {
+        console.log('Error: something went wrong and it did not unfollow anybody');
+        break;
+      }
+      accountsUnfollowed += unfollowedCount;
+    } else {
+      console.info('Nobody to unfollow. Aborting...');
+      break;
+    }
+  } while (accountsUnfollowed < unfollowRequestsCount);
 
   await Api.browseExploreFeed(/* durationSeconds */ Random.integerInRangeInclusive(25, 35));
 
