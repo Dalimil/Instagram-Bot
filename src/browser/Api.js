@@ -802,7 +802,7 @@ const Api = {
         }
         if (Random.coinToss(85)) {
           console.info('Unfollowing', username, '...');
-          if (!config.isBrowseOnlyMode) {
+          if ((await account.isExisting()) && (await actionButton.isExisting()) && !config.isBrowseOnlyMode) {
             await actionButton.click();
             await waiting(4000);
             await Api.verifyActionBlocked();
