@@ -188,8 +188,8 @@ exports.runUnfollowStrategy = async (unfollowRequestsCount = 40) => {
     if (unfollowList.length >= 0) {
       const updatedUnfollowList =
         await Api.unfollowUsersFromPersonalProfilePage(unfollowList, unfollowRequestsCount - accountsUnfollowed);
-      // Update storage
-      Data.storeFutureUnfollowList(updatedUnfollowList);
+      // DO NOT Update storage - Because if Instagram FAKES unfollow, then we lose track
+      // Data.storeFutureUnfollowList(updatedUnfollowList);
       
       let unfollowedCount = unfollowList.length - updatedUnfollowList.length;
       if (unfollowedCount <= 0) {

@@ -773,7 +773,7 @@ const Api = {
           done(null)
         }
       }, Selectors.accountInAccountList, Selectors.accountInLongAccountList, listIndex);
-      await waiting(3000);
+      await waiting(4000);
 
       if (!account) {
         console.info('Account in list not found');
@@ -783,7 +783,7 @@ const Api = {
       const { username, actionButtonText } = account;
       // Now look at this user
       if (permanentFollowingList.has(username)) {
-        console.info(':> skipping', username, '(permanently following)');
+        console.info(':> PERMANENT - skipping', username);
         continue;
       }
       if (!unfollowListSet.has(username)) {
@@ -811,7 +811,7 @@ const Api = {
         }, Selectors.accountInAccountList, Selectors.accountInLongAccountList, listIndex);
 
         if (success) {
-          await waiting(4000);
+          await waiting(8000);
           await Api.verifyActionBlocked();
 
           const unfollowButton = await browser.$(Selectors.unfollowButton);
