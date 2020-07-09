@@ -229,7 +229,7 @@ const Api = {
         // scroll to it first
         await heartButton.scrollIntoView(Random.getScrollIntoViewParams());
         await waiting(2000);
-        if (Random.coinToss(40)) {
+        if (Random.coinToss(45)) {
           console.info('Liking the post/comment heart...');
           if (!config.isBrowseOnlyMode) {
             await heartButton.click();
@@ -737,7 +737,9 @@ const Api = {
     // First get the button leading to the list of people I'm following
     const followingButton = await browser.$(Selectors.followingListButton);
     await followingButton.click();
+    const peopleFollowing = await followingButton.getText();
     await waiting(8000);
+    console.log('People following:', peopleFollowing);
 
     console.info('Personal following list opened.');
   },
@@ -794,7 +796,7 @@ const Api = {
         await browser.saveScreenshot('./error_following_list_invalid_button.png');
         continue;
       }
-      if (Random.coinToss(85)) {
+      if (Random.coinToss(80)) {
         console.info('Unfollowing', username, '...');
         const success = await browser.executeAsync((accountSelector, accountSelectorLong, index, done) => {
           const account = document.querySelectorAll(accountSelectorLong)[index] ||
@@ -823,7 +825,7 @@ const Api = {
           await browser.saveScreenshot('./error_following_list_user_processing.png');
         }
       } else {
-        // 15% account skip chance
+        // 20% account skip chance
         console.info(':> skipping', username);
       }
     } while (unfollowedSoFar.length < unfollowRequestsCount);

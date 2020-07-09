@@ -179,7 +179,7 @@ exports.runUnfollowStrategy = async (unfollowRequestsCount = 40) => {
   console.info('Target number of Unfollows:', unfollowRequestsCount);
 
   console.info('First browsing a little...');
-  await Api.browseHomeFeed(/* durationSeconds */ Random.integerInRangeInclusive(50, 70));
+  await Api.browseHomeFeed(/* durationSeconds */ Random.integerInRangeInclusive(80, 100));
 
   let accountsUnfollowed = 0;
   do {
