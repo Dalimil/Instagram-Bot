@@ -833,8 +833,7 @@ const Api = {
     console.log('Unfollowed accounts: ', unfollowedSoFar.length, JSON.stringify(unfollowedSoFar, null, 2));
     console.log('Not tracked:', notTracked.length, JSON.stringify(notTracked, null, 2))
 
-    const newUnfollowList = unfollowList.filter(acc => !unfollowedSoFar.includes(acc.username));
-    return newUnfollowList;
+    return unfollowedSoFar.length;
   },
 
   /** DEPRECATED */

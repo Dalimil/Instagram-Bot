@@ -173,34 +173,37 @@ exports.runLegacyFollowStrategy = async (initialTarget, followRequestsCount = 40
  * Maybe 5x per day (same as follow cycles).
  * Since we have a few weeks of just follow followed by several weeks of just unfollow,
  * we can simply unfollow everyone without time filtering.
+ * If you try to unfollow 40 in a short while, Instagram will FAKE the unfollow action
+ * and won't actually execute it
  */
 exports.runUnfollowStrategy = async (unfollowRequestsCount = 40) => {
   console.info(new Date().toLocaleString(), 'Executing main unfollow algorithm...');
   console.info('Target number of Unfollows:', unfollowRequestsCount);
 
-  console.info('First browsing a little...');
-  await Api.browseHomeFeed(/* durationSeconds */ Random.integerInRangeInclusive(80, 100));
-
+  const unfollowList = Data.getFutureUnfollowList();
+  if (unfollowList.length == 0) {
+    console.info('Error: Nobody to unfollow. Aborting...');
+    return;
+  }
   let accountsUnfollowed = 0;
   do {
-    const unfollowList = Data.getFutureUnfollowList();
-    console.info(`Accounts to be unfollowed: ${unfollowList.length}`);
-    if (unfollowList.length >= 0) {
-      const updatedUnfollowList =
-        await Api.unfollowUsersFromPersonalProfilePage(unfollowList, unfollowRequestsCount - accountsUnfollowed);
-      // DO NOT Update storage - Because if Instagram FAKES unfollow, then we lose track
-      // Data.storeFutureUnfollowList(updatedUnfollowList);
-      
-      let unfollowedCount = unfollowList.length - updatedUnfollowList.length;
-      if (unfollowedCount <= 0) {
-        console.log('Error: something went wrong and it did not unfollow anybody');
-        break;
-      }
-      accountsUnfollowed += unfollowedCount;
-    } else {
-      console.info('Nobody to unfollow. Aborting...');
+    console.info('First browsing a little...');
+    await Api.browseHomeFeed(/* durationSeconds */ Random.integerInRangeInclusive(80, 100));
+
+    const amountToUnfollowNext = Math.min(
+      Random.integerInRangeInclusive(15, 20),
+      unfollowRequestsCount - accountsUnfollowed
+    );
+    const unfollowedCount =
+      await Api.unfollowUsersFromPersonalProfilePage(unfollowList, amountToUnfollowNext);
+    // DO NOT Update storage - Because if Instagram FAKES unfollow, then we lose track
+    
+    if (unfollowedCount <= 0) {
+      console.log('Error: something went wrong and it did not unfollow anybody');
       break;
     }
+    accountsUnfollowed += unfollowedCount;
+    console.log('');
   } while (accountsUnfollowed < unfollowRequestsCount);
 
   await Api.browseExploreFeed(/* durationSeconds */ Random.integerInRangeInclusive(25, 35));
