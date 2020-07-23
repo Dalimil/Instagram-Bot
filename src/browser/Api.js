@@ -770,7 +770,7 @@ const Api = {
           const actionButtonText = account.querySelector('button').textContent;
           done({ username, actionButtonText });
         } else {
-          done(null)
+          done(null);
         }
       }, Selectors.accountInAccountList, Selectors.accountInLongAccountList, listIndex);
       await waiting(4000);
@@ -778,7 +778,7 @@ const Api = {
       if (!account) {
         console.info('Account in list not found');
         await browser.saveScreenshot('./error_following_list_account_index_not_found.png');
-        continue;
+        break;
       }
       const { username, actionButtonText } = account;
       // Now look at this user
