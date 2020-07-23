@@ -1,12 +1,3 @@
 {
-  "future_unfollow_by_id": [
-    {
-      "userId": "20980527976",
-      "timestamp": 1590223101481
-    },
-    {
-      "userId": "15210000700",
-      "timestamp": 1590802499219
-    }
-  ]
+  "future_unfollow_by_id": []
 }
