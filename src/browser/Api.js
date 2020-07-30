@@ -371,7 +371,8 @@ const Api = {
         await searchResult.click();
         await Api.afterNavigate(8000);
       } else {
-        console.info('Could not click search result', e);
+        console.info('Could not click search result');
+        await browser.saveScreenshot('./error_search_result_click.png');
         await Api.navigate(Url.getHashtagUrl(hashtag));
       }
     } catch (e) {
