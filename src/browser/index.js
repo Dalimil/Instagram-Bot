@@ -191,7 +191,7 @@ exports.runUnfollowStrategy = async (unfollowRequestsCount = 40) => {
     await Api.browseHomeFeed(/* durationSeconds */ Random.integerInRangeInclusive(50, 80));
 
     const amountToUnfollowNext = Math.min(
-      Random.integerInRangeInclusive(15, 20),
+      Random.integerInRangeInclusive(7, 10),
       unfollowRequestsCount - accountsUnfollowed
     );
     const unfollowedCount =
