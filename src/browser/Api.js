@@ -392,6 +392,10 @@ const Api = {
       }
     }
     console.info('Found', recentImagePosts.length, 'non video posts');
+    if (recentImagePosts.length === 0) {
+      console.info('Did not find any posts! Retrying...');
+      return Api.navigateToRecentHashtagPost(hashtag);
+    }
     const targetPost = Random.pickArrayElement(recentImagePosts);
 
     await targetPost.scrollIntoView(Random.getScrollIntoViewParams());
