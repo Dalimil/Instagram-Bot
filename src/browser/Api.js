@@ -392,11 +392,6 @@ const Api = {
       }
     }
     console.info('Found', recentImagePosts.length, 'non video posts');
-    if (recentImagePosts.length === 0) {
-      console.info('Did not find any posts! Retrying...');
-      await waiting(3000);
-      return Api.navigateToRecentHashtagPost(hashtag);
-    }
     const targetPost = Random.pickArrayElement(recentImagePosts);
 
     await targetPost.scrollIntoView(Random.getScrollIntoViewParams());
@@ -949,8 +944,8 @@ const Api = {
       //  the person but it switches back on refresh, so we need confirmation
       
       await Api.navigate(Url.getUserPageUrl(username));
-      const followButton = await browser.$(Selectors.followButton);
-      return (await followButton.isExisting());
+      const followButtonNew = await browser.$(Selectors.followButton);
+      return (await followButtonNew.isExisting());
     }
     const success = await tryUnfollow();
     if (success) {
