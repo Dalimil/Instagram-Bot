@@ -67,7 +67,7 @@ const Api = {
       const userNameField = await browser.$('[name=username]');
       await userNameField.click();
       await Api.typeKeys(credentials.username.split(''));
-      await waiting(7000);
+      await waiting(17000);
       const logInButton = await browser.$('button=Log In');
       await logInButton.click();
       await waiting(5000);
