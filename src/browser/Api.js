@@ -41,7 +41,8 @@ const Api = {
   async afterNavigate(waitTimeMs) {
     await browser.execute(() => {
       const falsifyWebdriver = () => {
-        Object.defineProperty(navigator, 'webdriver', {value: false, configurable: true});
+        delete navigator.webdriver;
+        Object.defineProperty(navigator, 'webdriver', {value: false, configurable: true, writable: true});
         Object.defineProperty(navigator, 'plugins', [1, 2, 3, 4, 5]);
       };
       falsifyWebdriver();
