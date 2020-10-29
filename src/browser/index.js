@@ -312,14 +312,17 @@ const runExperimentExample = async () => {
   }
 }
 
-exports.setUpExperiment = async () => {
-  // await Api.login(Data.getCredentials());
-  // const inputData = JSON.parse(require('fs').readFileSync('./tmp.json')).data;
-  // await exports.runBrowseList(inputData); // ['pnwisbeautiful']);
+const runExperimentVerifyLogin = async () => {
+  await Api.login(Data.getCredentials());
+  const inputData = JSON.parse(require('fs').readFileSync('./tmp.json')).data;
+  await exports.runBrowseList(inputData); // ['pnwisbeautiful']);
   // const untrackedAccounts = await exports.runGetUntrackedFutureUnfollowAccounts(
   //   inputData
   // );
   // await exports.runMassUnfollowFromList(inputData.slice(0, 30));
-  
-  await runExperimentExample();
+}
+
+exports.setUpExperiment = async () => {
+  await runExperimentVerifyLogin();
+  // await runExperimentExample();
 };
