@@ -42,7 +42,7 @@ const Api = {
     await browser.execute(() => {
       const falsifyWebdriver = () => {
         delete navigator.webdriver;
-        Object.defineProperty(navigator, 'webdriver', {value: false, configurable: true, writable: true});
+        // Object.defineProperty(navigator, 'webdriver', {value: false, configurable: true, writable: true});
         Object.defineProperty(navigator, 'plugins', [1, 2, 3, 4, 5]);
       };
       falsifyWebdriver();
@@ -115,8 +115,9 @@ const Api = {
       // persist cookies only
       console.info('Ending session...');
       const cookies = await browser.getCookies();
-      Data.storeCookieSession(cookies);
-
+      if (cookies.length > 5) {
+        Data.storeCookieSession(cookies);
+      }
       await Api.navigate('https://example.com');
     }
   },
