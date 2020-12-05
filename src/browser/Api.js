@@ -17,7 +17,7 @@ const Selectors = {
   homeScreenPromptButton: 'button=Cancel',
   searchInput: 'input[placeholder=Search]',
   storyButton: 'button.OE3OK',
-  storyCloseButton: 'button.-jHC6',
+  storyCloseButton: 'button.wpO6b',
   postHeartButton: '.fr66n:not(.FY9nT) button.wpO6b',
   commentHeartButton: ':not(.FY9nT) button.wpO6b.ZQScA',
   explorePagePostLink: 'a[href^="/p/"]',
