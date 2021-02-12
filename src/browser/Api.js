@@ -406,7 +406,7 @@ const Api = {
   /** Makes the assumption that the post page popup is already opened */
   async followAccountsFromPostLikers(numAccountsToFollow) {
     console.info('Opening list of likers - follow target count:', numAccountsToFollow);
-    const otherLikersButtonLink = await browser.$('button*=others');
+    const otherLikersButtonLink = await browser.$('a*=others');
     await otherLikersButtonLink.waitForExist({ timeout: 30000 }); // wait 30s for this if needed
     await otherLikersButtonLink.click();
     await waiting(8000);
