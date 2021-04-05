@@ -208,7 +208,7 @@ const Api = {
     timeSpent += 10;
 
     // Scroll down and like. Up to ~45s has passed at this point
-    const getPostAndCommentHearts = () => browser.$$(Selectors.postHeartButton + ',' + Selectors.commentHeartButton);
+    const getPostAndCommentHearts = () => browser.$$(Selectors.postHeartButton /*+ ',' + Selectors.commentHeartButton*/); // temp off to avoid awkward comment likes
     let heartIndex = 0; 
     do {
       const hearts = await getPostAndCommentHearts();
