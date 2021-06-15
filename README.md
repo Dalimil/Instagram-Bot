@@ -1,6 +1,6 @@
 Instagram Bot
 ============================
-*I've used my bot on and off for 3 whole years. I slowly got to 10k followers ([@dali_hiking](https://www.instagram.com/dali_hiking/)) and then got bored of constantly staying up to date with IG changes, so I've stopped. I'm sharing it as a learning resource for anyone who is looking into botting or bot mitigation.*
+*I've used my bot on and off for 3 whole years. I slowly got to 10k followers (**[@dali_hiking](https://www.instagram.com/dali_hiking/)**) and then got bored of constantly staying up to date with IG changes, so I've stopped. I'm sharing it as a learning resource for anyone who is looking into botting or bot mitigation.*
 
 Motivation
 ----------
