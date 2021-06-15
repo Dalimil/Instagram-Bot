@@ -1,52 +1,39 @@
 Instagram Bot
 ============================
-First read this, it's a MUST: https://petapixel.com/2017/04/06/spent-two-years-botting-instagram-heres-learned/
+*I've used my bot on and off for 3 whole years. I slowly got to 10k followers and then got bored of constantly staying up to date with IG changes, so I've stopped. I'm sharing it as a learning resource for anyone who is looking into botting or bot mitigation.*
 
 Motivation
 ----------
+- Required Reading: https://petapixel.com/2017/04/06/spent-two-years-botting-instagram-heres-learned/
 - Larger number of followers => more likes => reaching top trending charts on Instagram
 - Followers need to be real and engaged to produce likes and comments for you.
-- Observation: Interaction with other profiles leads to them viewing your profile, which leads to some new followers.
+- **Observation**: Interaction with other profiles leads to them viewing yours, which leads to new followers.
 
-Competition - What is out there
+What is out there
 ------------------------------
 - This has been done a few time and paid services exist that do exactly this.
 - See (~ $30/month): Gramista, Instato.io, Instamber, Instavast, Instazood, ...
 
 Requirements
 ------------
-0. You feed/account has to look good - for people to decide to follow you based on your page; Are you unique?
-1. Target audience
-	- what hashtags or accounts do these people (photographers) follow?
-	- Idea: if there is a good photographer I admire, then his/her followers could like my content too (follow me)
-2. Check instagram limits for daily follows and likes; Avoid bot & spam detectors
-3. Non-evil interactions:
-	- Limit to likes, follow, and unfollow
-	- other actions like DM, comments, reposts, could be spammy or harmful
+- You feed/account has to look good - for people to decide to follow you based on your page
+- Target audience - what hashtags or accounts do these people follow?
+- Check instagram limits for daily follows and likes; Avoid bot & spam detectors
+- Non-evil interactions: Limit to likes, follow, and unfollow. (other actions like DMs, comments!, or reposts, are spammy and harmful)
 
 Implementation
 --------------
 - We need to drive a browser instance to do this (Webdriver.IO)
-	- OR: come up with an API script-only solution (<- existing work/libraries attempted this)
-- Instagram account login
-- Algorithm (with time delays between steps)
-	- Need a list of accounts or posts to start with
-		- initialize with target hashtags OR target (really good) accounts
-		- Idea: Crawl through accounts (people) that follow these hashtags or good accounts,
-			and add them to the 'Future Follow' list (unless already processed in the past: `processed-accounts.json`)
-			- For good account there is going to be thousands of followers, so this is enough for now
-		- Keed adding to the 'Future Follow' list until it's filled with a set number of unprocessed accounts (e.g. 500)
-	- For each account on 'Future Follow' list:
-		- scrape for quality:
-			- must be public, must not be already followed and not already following me
-			- must have > 10 posts and must have at least one post in the last 14 days
-			- must have < 1000 followers and must have < 2000 following
-			- must have followers-per-post ratio below say 80 (e.g. account with 100 posts has max 5000 followers)
-			- must not have offensive or spammy words in bio, name, or username
-			- and more requirements... (see code for implementation details)
-		- if checks OK:
-			- follow this account and like maximum 1 or 2 of its posts
-			- add to the 'Future Unfollow' list with timestamp
-			- add to the `processed-accounts.json` list
-	- Go through 'Future Unfollow' list and remove people older than say 3 days
+	- OR: come up with an API script-only solution (<- much harder)
+- Pass Instagram account login gate - captcha, 2-auth, etc. can be manual just to get valid session cookies
+- Follow Algorithm (with random time delays between steps)
+	- Open home page
+		- scroll through feed, like a few posts or comments randomly
+		- browser through a few stories
+	- Search for a random hashtag from list by typing in searchbox
+	- And go to that hashtag feed
+	- Pick a post from that feed and open a list of people who most recently liked that post
+	- Follow a few of those people (~5)
+	- Go to Discover page, browse through feed and like something
+	- Repeat from start until follow target reached (say 40 people in one session)
 
