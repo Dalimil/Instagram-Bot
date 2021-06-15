@@ -6,9 +6,7 @@ Motivation
 ----------
 - How to get 'a lot of followers => lot of likes => top of trending charts' on Instagram
 - Could buy likes and followers - but these are fake and meaningless
-- Most active Instagram people are below the age of 24 - that's your Instagram audience
-- Observation: When someone likes your picture or more importantly follows you, you check their page / who they are
--> We can exploit this human behaviour
+- Observation: Interaction with other profiles leads to them viewing your profile, which leads to some new followers.
 
 Competition - What is out there
 ------------------------------
