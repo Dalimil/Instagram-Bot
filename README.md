@@ -4,8 +4,8 @@ First read this, it's a MUST: https://petapixel.com/2017/04/06/spent-two-years-b
 
 Motivation
 ----------
-- How to get 'a lot of followers => lot of likes => top of trending charts' on Instagram
-- Could buy likes and followers - but these are fake and meaningless
+- Larger number of followers => more likes => reaching top trending charts on Instagram
+- Followers need to be real and engaged to produce likes and comments for you.
 - Observation: Interaction with other profiles leads to them viewing your profile, which leads to some new followers.
 
 Competition - What is out there

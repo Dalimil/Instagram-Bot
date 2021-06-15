@@ -36,14 +36,13 @@ const Random = require('./src/shared/Random');
   const isExperimentMode = commandArg === '--experiment';
   const isCompilationTest = commandArg === '--test';
   const followNumberTarget = 
-    (process.argv.includes('--lightweight') ? 40 : 40) +
+    (process.argv.includes('--lightweight') ? 5 : 20) +
     Random.integerInRangeInclusive(-4, 4) +
     (unfollowMode ? 10 : 0); // add 10 more if we are unfollowing to account for fake unfollow
   ;
   // One could also follow posts of pages but hashtag feeds seem to have more recent posts
   const targetHashtags = [
-    'venice', 'earthoutdoors',
-    'neverstopexploring', 'sheexplores', 'neverstopexploring',
+    'earthoutdoors', 'neverstopexploring', 'sheexplores', 'neverstopexploring',
     'stayandwander', 'awesomeearth', 'beautifuldestinations', 'ourplanetdaily',
     'liveoutdoors', 'modernoutdoors', 'earthpix', 'voyaged'
   ];
