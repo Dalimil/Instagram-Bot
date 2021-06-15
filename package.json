@@ -1,7 +1,7 @@
 {
   "name": "instagram-bot",
   "version": "1.0.0",
-  "license": "MIT",
+  "license": "MPL2.0",
   "author": "Dalimil Hajek",
   "private": true,
   "main": "index.js",

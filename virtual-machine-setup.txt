@@ -8,20 +8,20 @@ curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash - && sudo apt inst
 # (first remove node_modules and other stuff from main-source)
 rm -rf main-source/node_modules/ && zip -r a.zip served/ && zip -r a.zip main-source/
 
-# Now download the zip file /home/dalimilhajek/a.zip via UI
+# Now download the zip file /home/dali/a.zip via UI
 # Upload to the new machine instance and run:
-unzip a.zip && sudo chown dalimilhajek:dalimilhajek .config && cd ./main-source/ && yarn && ./node_modules/.bin/selenium-standalone install
+unzip a.zip && sudo chown dali:dali .config && cd ./main-source/ && yarn && ./node_modules/.bin/selenium-standalone install
 
 # Test that it works
 ./start.sh
 
 # Set up Cron:
 crontab -e
-36 8,13,17,22 * * * /home/dalimilhajek/main-source/start.sh
+36 8,13,17,22 * * * /home/dali/main-source/start.sh
 
 # SERVING LOGS
 
-# Set up Nginx: (change config root to /home/dalimilhajek/served/;)
+# Set up Nginx: (change config root to /home/dali/served/;)
 sudo nano /etc/nginx/sites-available/default 
 sudo /etc/init.d/nginx start
 # ---- OR just expose ngrok
